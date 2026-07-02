@@ -1,43 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Raguife — Indicadores</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --verde:#024f2b;
-    --verde-escuro:#013a20;
-    --folha:#739630;
-    --folha-suave:#e9f0dc;
-    --cinza:#666666;
-    --bg:#f4f6f1;
-    --branco:#ffffff;
-    --linha:#e2e6dc;
-    --amber:#d99a2b;
-    --erro:#c0392b;
-    --ok:#3d7a26;
-    --radius:14px;
+    --verde:#024f2b; --verde-escuro:#013a20; --folha:#739630; --folha-suave:#e9f0dc;
+    --cinza:#666666; --bg:#f4f6f1; --branco:#ffffff; --linha:#e2e6dc;
+    --amber:#d99a2b; --erro:#c0392b; --ok:#3d7a26; --radius:14px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{background:var(--bg);color:#22301f;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;font-size:14px;}
   h1,h2,h3{font-family:'Poppins',sans-serif;margin:0;}
   button{font-family:inherit;}
+  a{color:var(--verde);}
 
-  /* ---------- LOGIN ---------- */
+  /* LOGIN */
   #login-screen{position:fixed;inset:0;display:flex;z-index:50;background:var(--bg);}
   .login-brand{flex:1;background:linear-gradient(160deg,var(--verde) 0%,var(--verde-escuro) 100%);color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px;text-align:center;}
   .login-brand .wordmark{font-family:'Poppins',sans-serif;font-weight:700;font-size:52px;letter-spacing:-0.02em;margin-top:18px;}
   .login-brand .tagline{letter-spacing:.35em;font-size:12px;color:#bcd9a6;margin-top:10px;text-transform:uppercase;}
-  .login-form-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:30px;}
-  .login-card{width:100%;max-width:380px;}
+  .login-form-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:30px;overflow-y:auto;}
+  .login-card{width:100%;max-width:390px;}
   .login-card h2{font-size:24px;color:var(--verde);margin-bottom:4px;}
   .login-card .sub{color:var(--cinza);margin-bottom:26px;font-size:13.5px;}
   .login-err{color:var(--erro);font-size:13px;font-weight:600;min-height:18px;margin-top:10px;}
+  .forgot{font-size:12.5px;margin-top:14px;display:inline-block;cursor:pointer;text-decoration:underline;background:none;border:none;color:var(--verde);padding:0;}
+  #bootstrap-card{display:none;margin-top:26px;border-top:1px dashed var(--linha);padding-top:22px;}
   @media(max-width:760px){
     #login-screen{flex-direction:column;}
     .login-brand{flex:none;padding:36px 20px;}
     .login-brand .wordmark{font-size:36px;}
   }
 
-  /* ---------- APP SHELL ---------- */
+  /* APP SHELL */
   #app{display:none;}
   .topbar{background:var(--verde);color:#fff;display:flex;align-items:center;gap:14px;padding:12px 20px;position:sticky;top:0;z-index:30;}
   .topbar .brandline{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
@@ -72,7 +72,7 @@
     .topbar .app-sub{display:none;}
   }
 
-  /* ---------- COMPONENTS ---------- */
+  /* COMPONENTS */
   .panel{background:var(--branco);border:1px solid var(--linha);border-radius:var(--radius);padding:22px;margin-bottom:18px;}
   .panel h2{font-size:16px;color:var(--verde);margin-bottom:3px;}
   .panel .desc{color:var(--cinza);font-size:12.5px;margin-bottom:16px;}
@@ -93,10 +93,12 @@
   label{display:block;font-size:12px;font-weight:600;color:#40503b;margin-bottom:5px;}
   input,select,textarea{width:100%;padding:10px 11px;border:1px solid var(--linha);border-radius:9px;font-family:'Inter',sans-serif;font-size:14px;background:#fbfcf9;color:#22301f;}
   input:focus,select:focus,textarea:focus{outline:2px solid var(--folha);outline-offset:1px;border-color:var(--folha);}
+  input:disabled{background:#eef0ea;color:#5a684f;}
   textarea{resize:vertical;min-height:60px;}
   .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:13px;}
   .btn{font-family:'Poppins',sans-serif;font-weight:600;font-size:13.5px;border:none;border-radius:10px;padding:11px 20px;cursor:pointer;transition:transform .1s;}
   .btn:active{transform:scale(.97);}
+  .btn:disabled{opacity:.6;cursor:wait;}
   .btn-primary{background:var(--verde);color:#fff;}
   .btn-primary:hover{background:var(--verde-escuro);}
   .btn-leaf{background:var(--folha);color:#fff;}
@@ -126,7 +128,7 @@
 
   .budget-bar{height:14px;border-radius:8px;background:#edf0e6;overflow:hidden;margin:10px 0 6px;}
   .budget-bar span{display:block;height:100%;border-radius:8px;transition:width .4s ease;}
-  .budget-line{display:flex;justify-content:space-between;font-size:12px;color:var(--cinza);}
+  .budget-line{display:flex;justify-content:space-between;font-size:12px;color:var(--cinza);flex-wrap:wrap;gap:6px;}
 
   .filter-bar{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;background:var(--branco);border:1px solid var(--linha);border-radius:var(--radius);padding:13px 15px;}
   .filter-bar .fld{min-width:140px;}
@@ -136,8 +138,9 @@
   .link-box{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
   .link-box input{flex:1;min-width:200px;font-size:12px;}
   .note{font-size:12px;color:#5a684f;background:var(--folha-suave);border-radius:9px;padding:10px 13px;margin-top:12px;line-height:1.5;}
+  .note code{background:#fff;border-radius:4px;padding:1px 5px;}
 
-  /* ---------- KIOSK ---------- */
+  /* KIOSK */
   #kiosk-screen{display:none;position:fixed;inset:0;background:linear-gradient(165deg,var(--verde) 0%,var(--verde-escuro) 100%);color:#fff;overflow-y:auto;z-index:60;}
   .kiosk-inner{max-width:620px;margin:0 auto;padding:44px 20px 60px;}
   .kiosk-head{text-align:center;margin-bottom:26px;}
@@ -158,17 +161,19 @@
   .kiosk-thanks{text-align:center;padding:80px 0;font-size:22px;font-family:'Poppins',sans-serif;font-weight:600;}
   .kiosk-off{text-align:center;padding:50px 0;color:#bcd9a6;font-size:15px;line-height:2;}
 
-  /* ---------- MODAL / TOAST ---------- */
+  /* MODAL / TOAST */
   #modal-bg{display:none;position:fixed;inset:0;background:rgba(15,25,12,.45);z-index:80;align-items:center;justify-content:center;padding:20px;}
   #modal-bg.open{display:flex;}
   .modal{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:400px;}
   .modal h3{font-size:17px;color:var(--verde);margin-bottom:14px;}
-  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--verde);color:#fff;padding:12px 22px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:90;opacity:0;transition:all .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.18);}
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--verde);color:#fff;padding:12px 22px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:90;opacity:0;transition:all .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.18);max-width:90vw;}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   #toast.err{background:var(--erro);}
 </style>
+</head>
+<body>
 
-<!-- ================= LOGIN ================= -->
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-brand">
     <div id="logo-big"></div>
@@ -179,17 +184,28 @@
     <div class="login-card">
       <h2>Painel de Indicadores</h2>
       <div class="sub">Restaurante, higienização e custos</div>
-      <label>Usuário</label>
-      <input type="text" id="lg-user" autocomplete="username" style="margin-bottom:13px">
+      <label>E-mail</label>
+      <input type="email" id="lg-user" autocomplete="username" style="margin-bottom:13px">
       <label>Senha</label>
       <input type="password" id="lg-pass" autocomplete="current-password">
       <div class="login-err" id="lg-err"></div>
-      <button class="btn btn-primary" style="width:100%;padding:13px" onclick="doLogin()">Entrar</button>
+      <button class="btn btn-primary" id="lg-btn" style="width:100%;padding:13px" onclick="doLogin()">Entrar</button>
+      <button class="forgot" onclick="esqueciSenha()">Esqueci minha senha</button>
+
+      <div id="bootstrap-card">
+        <h2 style="font-size:17px">Primeiro acesso</h2>
+        <div class="sub" style="margin-bottom:14px">Nenhum administrador cadastrado ainda — crie a conta principal</div>
+        <label>Nome completo</label><input type="text" id="bs-nome" style="margin-bottom:11px">
+        <label>E-mail</label><input type="email" id="bs-email" style="margin-bottom:11px">
+        <label>Senha (mín. 6 caracteres)</label><input type="password" id="bs-pass">
+        <div class="login-err" id="bs-err"></div>
+        <button class="btn btn-leaf" id="bs-btn" style="width:100%;padding:12px" onclick="criarAdminInicial()">Criar administrador</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ================= KIOSK ================= -->
+<!-- KIOSK -->
 <div id="kiosk-screen">
   <div class="kiosk-inner">
     <div class="kiosk-head">
@@ -201,7 +217,7 @@
   </div>
 </div>
 
-<!-- ================= APP ================= -->
+<!-- APP -->
 <div id="app">
   <div class="topbar">
     <div class="brandline">
@@ -248,8 +264,12 @@
         </div>
         <div class="panel" id="panel-checklist-semana" style="display:none">
           <h2>Checklists da semana</h2>
-          <div class="desc">Colaboradores que já responderam nesta semana (segunda a domingo)</div>
+          <div class="desc">Status por colaborador (segunda a domingo) · cobrança automática toda sexta-feira via EmailJS</div>
           <div id="week-status"></div>
+          <div class="btn-row">
+            <button class="btn btn-leaf" onclick="enviarCobrancas(false)">Enviar cobranças agora (EmailJS)</button>
+            <span id="cobranca-status" style="font-size:12.5px;color:var(--ok);font-weight:600"></span>
+          </div>
         </div>
         <div class="panel">
           <h2>Últimos lançamentos de desperdício</h2>
@@ -304,7 +324,7 @@
         </div>
       </div>
 
-      <!-- CUSTOS MENSAIS -->
+      <!-- CUSTOS -->
       <div class="page" id="page-custos">
         <h1 class="page-title">Custos mensais</h1>
         <div class="page-desc">Fechamento do mês: refeições validadas, mão de obra e custo por refeição</div>
@@ -399,9 +419,8 @@
           <div class="form-grid">
             <div><label>Nome completo</label><input type="text" id="u-nome"></div>
             <div><label>Setor</label><input type="text" id="u-setor"></div>
-            <div><label>E-mail</label><input type="email" id="u-email"></div>
-            <div><label>Usuário (login)</label><input type="text" id="u-user"></div>
-            <div><label>Senha inicial</label><input type="text" id="u-pass"></div>
+            <div><label>E-mail (login)</label><input type="email" id="u-email"></div>
+            <div><label>Senha inicial (mín. 6)</label><input type="text" id="u-pass"></div>
             <div><label>Perfil</label>
               <select id="u-role" onchange="toggleChecklistSel()">
                 <option value="admin">Administrador</option>
@@ -413,20 +432,22 @@
               <select id="u-check"><option value="adm">Administrativa</option><option value="hig">Higiênica</option><option value="ambos">Ambos</option></select>
             </div>
           </div>
-          <div class="btn-row"><button class="btn btn-primary" onclick="criarUsuario()">Criar usuário</button></div>
+          <div class="btn-row"><button class="btn btn-primary" id="u-btn" onclick="criarUsuario()">Criar usuário</button></div>
           <div class="note"><b>Perfis:</b> Administrador vê tudo e fecha os custos · Nutricionista lança desperdício e compras · Colaborador responde apenas os checklists atribuídos. Ninguém logado consegue lançar notas na pesquisa de satisfação.</div>
         </div>
         <div class="panel">
           <h2>Usuários cadastrados</h2>
           <div class="table-wrap" id="tbl-usuarios"></div>
+          <div class="note">"Remover" tira o acesso ao painel. Para apagar também a conta de e-mail, use o console do Firebase (Authentication).</div>
         </div>
       </div>
 
       <!-- CONFIG -->
       <div class="page" id="page-config">
-        <h1 class="page-title">Metas &amp; Orçamento</h1>
-        <div class="page-desc">Valores usados para calcular o status dos indicadores</div>
+        <h1 class="page-title">Metas &amp; Configurações</h1>
+        <div class="page-desc">Metas dos indicadores, orçamento e EmailJS</div>
         <div class="panel">
+          <h2>Metas dos indicadores</h2>
           <div class="form-grid">
             <div><label>Meta Sobra Limpa (% da produção)</label><input type="number" step="0.1" id="cfg-sobra"></div>
             <div><label>Meta Resto Ingesto (kg/pessoa)</label><input type="number" step="0.001" id="cfg-resto"></div>
@@ -434,22 +455,59 @@
             <div><label>Meta Conformidade Limpeza (nota mín. /5)</label><input type="number" step="0.1" id="cfg-conf"></div>
             <div><label>Orçamento mensal de compras (R$)</label><input type="number" step="0.01" id="cfg-orc"></div>
           </div>
-          <div class="btn-row"><button class="btn btn-primary" onclick="salvarConfig()">Salvar</button></div>
+          <div class="btn-row"><button class="btn btn-primary" onclick="salvarConfig()">Salvar metas</button></div>
         </div>
-        <div class="note">Os dados deste painel ficam armazenados de forma compartilhada entre todos os usuários com acesso ao link.</div>
+        <div class="panel">
+          <h2>EmailJS — cobrança dos checklists</h2>
+          <div class="desc">Dados da sua conta em emailjs.com, usados no disparo semanal para pendentes</div>
+          <div class="form-grid">
+            <div><label>Public Key</label><input type="text" id="ej-public"></div>
+            <div><label>Private Key (opcional)</label><input type="password" id="ej-private"></div>
+            <div><label>Service ID</label><input type="text" id="ej-service"></div>
+            <div><label>Template ID — Checklist ADM</label><input type="text" id="ej-tpl-adm"></div>
+            <div><label>Template ID — Checklist Higiênica</label><input type="text" id="ej-tpl-hig"></div>
+            <div><label>Link do painel (vai no corpo do e-mail)</label><input type="text" id="ej-link" placeholder="https://..."></div>
+          </div>
+          <div class="btn-row"><button class="btn btn-primary" onclick="salvarEmailCfg()">Salvar EmailJS</button></div>
+          <div class="note">No template do EmailJS, use as variáveis <code>{{to_email}}</code>, <code>{{to_name}}</code>, <code>{{setor}}</code>, <code>{{tipo_checklist}}</code> e <code>{{link_formulario}}</code>. O disparo automático acontece na primeira vez que um administrador abre o painel numa sexta-feira (uma vez por semana). Estes dados ficam no Firestore visíveis apenas para administradores.</div>
+        </div>
       </div>
 
     </main>
   </div>
 </div>
 
-<!-- MODAL -->
+<!-- MODAL / TOAST -->
 <div id="modal-bg" onclick="if(event.target===this)closeModal()">
   <div class="modal" id="modal-box"></div>
 </div>
 <div id="toast"></div>
 
-<script>
+<script type="module">
+/* ================= FIREBASE ================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {
+  getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut,
+  onAuthStateChanged, sendPasswordResetEmail, updatePassword,
+  EmailAuthProvider, reauthenticateWithCredential, signInAnonymously
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
+  getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs,
+  deleteDoc, onSnapshot, query, where
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBVS-UnYSOPXUUSDru0y5nEstN-3prKn-c",
+  authDomain: "facilities-aef2f.firebaseapp.com",
+  projectId: "facilities-aef2f",
+  storageBucket: "facilities-aef2f.firebasestorage.app",
+  messagingSenderId: "546452013311",
+  appId: "1:546452013311:web:a1ff4a2605dcb93209ccca"
+};
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+
 /* ================= CONSTANTES ================= */
 const ADM_QUESITOS = ['Limpeza geral','Pisos e circulação','Bancadas, mesas e superfícies','Lixeiras','Pontos críticos – sanitização','Frequência e rotina','Condição final do ambiente'];
 const HIG_QUESITOS = ['Limpeza geral do ambiente','Vasos sanitários e mictórios','Pias, torneiras e espelhos','Abastecimento de insumos','Pisos, ralos e paredes','Vestiário — armários e bancos','Chuveiros e áreas molhadas','Drenagem e segurança','Sala de descanso','Copa — geladeira e pia'];
@@ -477,63 +535,53 @@ const NAV_DEF = [
   {id:'check-hig', label:'Checklist Higiênica', ic:'✓', roles:['admin'], check:'hig'},
   {id:'pesquisa', label:'Pesquisa Satisfação', ic:'★', roles:['admin','nutricionista']},
   {id:'usuarios', label:'Usuários', ic:'👤', roles:['admin']},
-  {id:'config', label:'Metas & Orçamento', ic:'⚙', roles:['admin']},
+  {id:'config', label:'Metas & Config', ic:'⚙', roles:['admin']},
 ];
 const DEFAULT_CFG = {metaSobra:5, metaResto:0.03, metaSat:4.5, metaConf:4.5, orcamento:60000};
 
-let state = { users:[], lanc:[], sat:[], adm:[], hig:[], compras:[], custos:[], cfg:{...DEFAULT_CFG}, filterDe:'', filterAte:'' };
-let currentUser = null;
+let state = { users:[], lanc:[], sat:[], adm:[], hig:[], compras:[], custos:[], cfg:{...DEFAULT_CFG}, emailCfg:{}, filterDe:'', filterAte:'' };
+let currentUser = null;   // {uid, nome, email, setor, role, check}
 let admScores = {}, higScores = {}, kioskAnswers = {}, kioskTurno = null;
+let unsubs = [];
 const isKioskMode = new URLSearchParams(location.search).get('kiosk') === '1';
 
 /* ================= HELPERS ================= */
-const mem = {};
-async function sGet(key){
-  try{ if(window.storage){ const r = await window.storage.get(key, true); return r ? r.value : null; } }catch(e){}
-  return mem[key] ?? null;
-}
-async function sSet(key, val){
-  mem[key] = val;
-  try{ if(window.storage) await window.storage.set(key, val, true); }catch(e){ console.error(e); }
-}
-async function loadJSON(key, fallback){ const v = await sGet(key); if(!v) return fallback; try{ return JSON.parse(v); }catch(e){ return fallback; } }
-async function saveJSON(key, obj){ await sSet(key, JSON.stringify(obj)); }
-
-async function sha256(txt){
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
-  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
-}
 function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function monthISO(){ return todayISO().slice(0,7); }
 function fmtBR(d){ if(!d) return '—'; const [y,m,dd]=d.split('-'); return dd+'/'+m+'/'+y; }
-function fmtMes(m){ if(!m) return '—'; const [y,mm]=m.split('-'); const nomes=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']; return nomes[Number(mm)-1]+'/'+y; }
+function fmtMes(m){ if(!m) return '—'; const [y,mm]=m.split('-'); const n=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']; return n[Number(mm)-1]+'/'+y; }
 function brl(v){ return (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
 function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function detectMeal(){
-  const d = new Date(); const h = d.getHours()+d.getMinutes()/60;
-  for(const m of MEALS){ if(h>=m.start && h<m.end) return m; }
-  return null;
-}
+function detectMeal(){ const d=new Date(); const h=d.getHours()+d.getMinutes()/60; for(const m of MEALS){ if(h>=m.start && h<m.end) return m; } return null; }
 function mondayOf(d){ const c=new Date(d); const day=c.getDay(); c.setDate(c.getDate()+(day===0?-6:1-day)); c.setHours(0,0,0,0); return c; }
 function weekKey(d){ const m=mondayOf(d); return m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-'+String(m.getDate()).padStart(2,'0'); }
 function toast(msg, isErr){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.toggle('err', !!isErr); t.classList.add('show');
-  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'), 2600);
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'), 2800);
 }
 function tableHTML(headers, rows){
   if(!rows.length) return '<div class="empty">Sem registros ainda</div>';
   return '<table><thead><tr>'+headers.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+
     rows.map(r=>'<tr>'+r.map(c=>'<td class="num">'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
 }
-function mediaQuesitos(q){ const v=Object.values(q).filter(x=>x!=null); return v.length? v.reduce((a,b)=>a+b,0)/v.length : 0; }
+function mediaQuesitos(q){ const v=Object.values(q||{}).filter(x=>x!=null); return v.length? v.reduce((a,b)=>a+b,0)/v.length : 0; }
 function notaPill(n){
   if(!n) return '<span class="pill p-neutral">—</span>';
   const cls = n>=4.5?'p-ok':(n>=3.5?'p-warn':'p-bad');
   return '<span class="pill '+cls+'">'+n.toFixed(1)+'</span>';
 }
-
-/* ================= LOGO ================= */
+function authErrPT(e){
+  const c = e?.code || '';
+  if(c.includes('invalid-credential') || c.includes('wrong-password') || c.includes('user-not-found')) return 'E-mail ou senha incorretos.';
+  if(c.includes('invalid-email')) return 'E-mail inválido.';
+  if(c.includes('email-already-in-use')) return 'Este e-mail já está cadastrado.';
+  if(c.includes('weak-password')) return 'Senha muito curta — use pelo menos 6 caracteres.';
+  if(c.includes('too-many-requests')) return 'Muitas tentativas — aguarde alguns minutos.';
+  if(c.includes('network')) return 'Falha de conexão — verifique a internet.';
+  if(c.includes('requires-recent-login')) return 'Por segurança, saia e entre de novo antes de alterar a senha.';
+  return 'Erro: '+(e?.message||e);
+}
 function logoSVG(size){
   return `<svg width="${size}" height="${size*0.78}" viewBox="0 0 100 78" xmlns="http://www.w3.org/2000/svg">
     <rect x="4" y="4" width="92" height="70" rx="12" fill="none" stroke="#8CB43E" stroke-width="7"/>
@@ -546,40 +594,128 @@ function logoSVG(size){
 }
 
 /* ================= AUTH ================= */
-async function ensureSeed(){
-  state.users = await loadJSON('sys:users', []);
-  if(!state.users.length){
-    const hash = await sha256('raguife123');
-    state.users = [{id:Date.now(), nome:'Administrador', setor:'Gestão', email:'', username:'admin', pass:hash, role:'admin', check:''}];
-    await saveJSON('sys:users', state.users);
+async function doLogin(){
+  const email = document.getElementById('lg-user').value.trim();
+  const pass = document.getElementById('lg-pass').value;
+  const err = document.getElementById('lg-err');
+  err.textContent='';
+  if(!email || !pass){ err.textContent='Informe e-mail e senha.'; return; }
+  const btn = document.getElementById('lg-btn'); btn.disabled=true;
+  try{
+    await signInWithEmailAndPassword(auth, email, pass);
+    // onAuthStateChanged assume daqui
+  }catch(e){ err.textContent = authErrPT(e); }
+  btn.disabled=false;
+}
+async function esqueciSenha(){
+  const email = document.getElementById('lg-user').value.trim();
+  if(!email){ document.getElementById('lg-err').textContent='Digite seu e-mail no campo acima e clique de novo.'; return; }
+  try{
+    await sendPasswordResetEmail(auth, email);
+    toast('E-mail de redefinição enviado para '+email+' ✓');
+  }catch(e){ toast(authErrPT(e), true); }
+}
+async function criarAdminInicial(){
+  const nome = document.getElementById('bs-nome').value.trim();
+  const email = document.getElementById('bs-email').value.trim();
+  const pass = document.getElementById('bs-pass').value;
+  const err = document.getElementById('bs-err'); err.textContent='';
+  if(!nome || !email || !pass){ err.textContent='Preencha todos os campos.'; return; }
+  const btn = document.getElementById('bs-btn'); btn.disabled=true;
+  try{
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await setDoc(doc(db,'usuarios',cred.user.uid), {nome, email, setor:'Gestão', role:'admin', check:''});
+    await setDoc(doc(db,'config','setup'), {done:true, em:todayISO()});
+    toast('Administrador criado ✓');
+  }catch(e){ err.textContent = authErrPT(e); btn.disabled=false; }
+}
+async function logout(){
+  await signOut(auth);
+  location.reload();
+}
+
+/* ================= BOOT / SESSÃO ================= */
+async function checkBootstrap(){
+  try{
+    const s = await getDoc(doc(db,'config','setup'));
+    document.getElementById('bootstrap-card').style.display = s.exists()? 'none':'block';
+  }catch(e){ console.error(e); }
+}
+onAuthStateChanged(auth, async (user)=>{
+  if(isKioskMode) return;
+  if(!user || user.isAnonymous) return;
+  try{
+    const prof = await getDoc(doc(db,'usuarios',user.uid));
+    if(!prof.exists()){
+      document.getElementById('lg-err').textContent = 'Sua conta não tem acesso ao painel. Fale com o administrador.';
+      await signOut(auth);
+      return;
+    }
+    currentUser = {uid:user.uid, ...prof.data()};
+    await loadConfig();
+    enterApp();
+    subscribeData();
+    if(currentUser.role!=='colaborador') await loadSat();
+    if(currentUser.role==='admin') checkAutoSend();
+  }catch(e){
+    document.getElementById('lg-err').textContent = 'Erro ao carregar perfil: '+authErrPT(e);
+  }
+});
+
+/* ================= DADOS (Firestore) ================= */
+async function loadConfig(){
+  try{
+    const m = await getDoc(doc(db,'config','metas'));
+    state.cfg = m.exists()? {...DEFAULT_CFG, ...m.data()} : {...DEFAULT_CFG};
+  }catch(e){ state.cfg = {...DEFAULT_CFG}; }
+  if(currentUser.role==='admin'){
+    try{
+      const ej = await getDoc(doc(db,'config','emailjs'));
+      state.emailCfg = ej.exists()? ej.data() : {};
+    }catch(e){ state.emailCfg = {}; }
   }
 }
-async function doLogin(){
-  const u = document.getElementById('lg-user').value.trim().toLowerCase();
-  const p = document.getElementById('lg-pass').value;
-  const err = document.getElementById('lg-err');
-  err.textContent = '';
-  if(!u || !p){ err.textContent = 'Informe usuário e senha.'; return; }
-  const hash = await sha256(p);
-  const user = state.users.find(x=>x.username.toLowerCase()===u && x.pass===hash);
-  if(!user){ err.textContent = 'Usuário ou senha incorretos.'; return; }
-  currentUser = user;
-  document.getElementById('lg-pass').value='';
-  enterApp();
+function sub(colName, target, after){
+  const u = onSnapshot(collection(db,colName), snap=>{
+    state[target] = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    after && after();
+  }, e=>console.error(colName, e));
+  unsubs.push(u);
 }
-function logout(){
-  currentUser = null;
-  document.getElementById('app').style.display='none';
-  document.getElementById('login-screen').style.display='flex';
+function subscribeData(){
+  unsubs.forEach(u=>u()); unsubs=[];
+  const role = currentUser.role;
+  if(role==='colaborador'){
+    if(currentUser.check==='adm'||currentUser.check==='ambos') sub('checklists_adm','adm', renderHigTables);
+    if(currentUser.check==='hig'||currentUser.check==='ambos') sub('checklists_hig','hig', renderHigTables);
+    return;
+  }
+  sub('lancamentos','lanc', ()=>{ renderLancTables(); renderDashboard(); if(role==='admin') previewCusto(); });
+  sub('compras','compras', ()=>{ renderCompras(); renderDashboard(); if(role==='admin'){ previewCusto(); renderCustos(); } });
+  sub('checklists_adm','adm', ()=>{ renderHigTables(); renderDashboard(); });
+  sub('checklists_hig','hig', ()=>{ renderHigTables(); renderDashboard(); });
+  if(role==='admin'){
+    sub('usuarios','users', ()=>{ renderUsuarios(); renderDashboard(); });
+    sub('custos','custos', renderCustos);
+  }
+}
+async function loadSat(){
+  // busca só o período filtrado (economiza leituras)
+  try{
+    const de = state.filterDe || todayISO().slice(0,8)+'01';
+    const ate = state.filterAte || todayISO();
+    const q1 = query(collection(db,'satisfacao'), where('data','>=',de), where('data','<=',ate));
+    const snap = await getDocs(q1);
+    state.sat = snap.docs.map(d=>({id:d.id, ...d.data()}));
+    renderDashboard(); renderSatDetalhe();
+  }catch(e){ console.error(e); }
 }
 
 /* ================= NAV / SHELL ================= */
 function allowedNav(){
   return NAV_DEF.filter(n=>{
     if(n.roles.includes(currentUser.role)) return true;
-    if(currentUser.role==='colaborador' && n.check){
-      return currentUser.check==='ambos' || currentUser.check===n.check;
-    }
+    if(currentUser.role==='colaborador' && n.check) return currentUser.check==='ambos' || currentUser.check===n.check;
     return false;
   });
 }
@@ -594,12 +730,36 @@ function enterApp(){
     nav.map(n=>`<button class="navbtn" data-id="${n.id}" onclick="showPage('${n.id}')"><span class="ic">${n.ic}</span>${n.label}</button>`).join('');
   document.getElementById('adm-nome').value = currentUser.nome;
   document.getElementById('hig-nome').value = currentUser.nome;
-  if(currentUser.setor){
-    document.getElementById('adm-setor').value = currentUser.setor;
-    if(!document.getElementById('hig-setor').value) document.getElementById('hig-setor').placeholder = 'ex: Vestiário / Sanitário / Copa';
-  }
+  if(currentUser.setor) document.getElementById('adm-setor').value = currentUser.setor;
+
+  document.getElementById('r-data').value = todayISO();
+  document.getElementById('c-data').value = todayISO();
+  document.getElementById('adm-data').value = todayISO();
+  document.getElementById('hig-data').value = todayISO();
+  document.getElementById('m-mes').value = monthISO();
+  document.getElementById('f-de').value = todayISO().slice(0,8)+'01';
+  document.getElementById('f-ate').value = todayISO();
+  state.filterDe = document.getElementById('f-de').value;
+  state.filterAte = document.getElementById('f-ate').value;
+  document.getElementById('tablet-link').value = location.origin + location.pathname + '?kiosk=1';
+
+  document.getElementById('cfg-sobra').value = state.cfg.metaSobra;
+  document.getElementById('cfg-resto').value = state.cfg.metaResto;
+  document.getElementById('cfg-sat').value = state.cfg.metaSat;
+  document.getElementById('cfg-conf').value = state.cfg.metaConf;
+  document.getElementById('cfg-orc').value = state.cfg.orcamento;
+  const ej = state.emailCfg||{};
+  document.getElementById('ej-public').value = ej.publicKey||'';
+  document.getElementById('ej-private').value = ej.privateKey||'';
+  document.getElementById('ej-service').value = ej.serviceId||'';
+  document.getElementById('ej-tpl-adm').value = ej.templateAdm||'';
+  document.getElementById('ej-tpl-hig').value = ej.templateHig||'';
+  document.getElementById('ej-link').value = ej.linkApp||'';
+
+  buildQuesitos('adm-quesitos', ADM_QUESITOS, admScores);
+  buildQuesitos('hig-quesitos', HIG_QUESITOS, higScores);
+  toggleChecklistSel();
   showPage(nav[0].id);
-  renderAll();
 }
 function showPage(id){
   document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active', b.dataset.id===id));
@@ -635,70 +795,67 @@ function buildQuesitos(containerId, list, scoreObj){
   });
 }
 
-/* ================= SAVE: LANÇAMENTO ================= */
+/* ================= LANÇAMENTO ================= */
 async function salvarLancamento(){
   const refeicoes = Number(document.getElementById('r-refeicoes').value)||0;
   const producao = Number(document.getElementById('r-producao').value)||0;
   if(!refeicoes && !producao){ toast('Informe as refeições e a produção.', true); return; }
-  const entry = {
-    id: Date.now(),
-    data: document.getElementById('r-data').value || todayISO(),
-    turno: document.getElementById('r-turno').value,
-    refeicoes, producao,
-    sobra: Number(document.getElementById('r-sobra').value)||0,
-    resto: Number(document.getElementById('r-resto').value)||0,
-    autor: currentUser.nome,
-  };
-  state.lanc.push(entry);
-  await saveJSON('restaurante:lancamentos', state.lanc);
-  ['r-refeicoes','r-producao','r-sobra','r-resto'].forEach(id=>document.getElementById(id).value='');
-  toast('Lançamento salvo ✓');
-  renderLancTables();
+  try{
+    await addDoc(collection(db,'lancamentos'), {
+      data: document.getElementById('r-data').value || todayISO(),
+      turno: document.getElementById('r-turno').value,
+      refeicoes, producao,
+      sobra: Number(document.getElementById('r-sobra').value)||0,
+      resto: Number(document.getElementById('r-resto').value)||0,
+      autor: currentUser.nome, autorUid: currentUser.uid,
+    });
+    ['r-refeicoes','r-producao','r-sobra','r-resto'].forEach(id=>document.getElementById(id).value='');
+    toast('Lançamento salvo ✓');
+  }catch(e){ toast(authErrPT(e), true); }
 }
-async function delLancamento(id){
+function delLancamento(id){
   confirmModal('Excluir este lançamento?', async ()=>{
-    state.lanc = state.lanc.filter(x=>x.id!==id);
-    await saveJSON('restaurante:lancamentos', state.lanc);
-    toast('Lançamento excluído');
-    renderLancTables(); renderDashboard();
+    try{ await deleteDoc(doc(db,'lancamentos',id)); toast('Lançamento excluído'); }
+    catch(e){ toast(authErrPT(e), true); }
   });
 }
+function renderLancTables(){
+  const rows = [...state.lanc].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).slice(0,12)
+    .map(r=>[fmtBR(r.data), r.turno, r.refeicoes, (r.producao||0).toFixed(2), (r.sobra||0).toFixed(2), (r.resto||0).toFixed(2), esc(r.autor||'—'),
+      currentUser.role==='admin'? `<button class="btn btn-danger btn-mini" onclick="delLancamento('${r.id}')">Excluir</button>` : '']);
+  document.getElementById('tbl-lanc-full').innerHTML = tableHTML(['Data','Refeição','Refeições','Produção','Sobra','Resto','Por',''], rows);
+}
 
-/* ================= SAVE: COMPRAS ================= */
+/* ================= COMPRAS ================= */
 async function salvarCompra(){
   const valor = Number(document.getElementById('c-valor').value)||0;
   const desc = document.getElementById('c-desc').value.trim();
   if(!valor || !desc){ toast('Informe descrição e valor.', true); return; }
-  const entry = {
-    id: Date.now(),
-    data: document.getElementById('c-data').value || todayISO(),
-    cat: document.getElementById('c-cat').value,
-    desc, valor,
-    autor: currentUser.nome,
-  };
-  state.compras.push(entry);
-  await saveJSON('custos:compras', state.compras);
-  document.getElementById('c-desc').value=''; document.getElementById('c-valor').value='';
-  toast('Compra salva ✓');
-  renderCompras();
+  try{
+    await addDoc(collection(db,'compras'), {
+      data: document.getElementById('c-data').value || todayISO(),
+      cat: document.getElementById('c-cat').value,
+      desc, valor,
+      autor: currentUser.nome, autorUid: currentUser.uid,
+    });
+    document.getElementById('c-desc').value=''; document.getElementById('c-valor').value='';
+    toast('Compra salva ✓');
+  }catch(e){ toast(authErrPT(e), true); }
 }
-async function delCompra(id){
+function delCompra(id){
   const c = state.compras.find(x=>x.id===id);
   if(!c) return;
-  if(currentUser.role!=='admin' && c.autor!==currentUser.nome){ toast('Só o autor ou o administrador pode excluir.', true); return; }
+  if(currentUser.role!=='admin' && c.autorUid!==currentUser.uid){ toast('Só o autor ou o administrador pode excluir.', true); return; }
   confirmModal('Excluir esta compra?', async ()=>{
-    state.compras = state.compras.filter(x=>x.id!==id);
-    await saveJSON('custos:compras', state.compras);
-    toast('Compra excluída');
-    renderCompras();
+    try{ await deleteDoc(doc(db,'compras',id)); toast('Compra excluída'); }
+    catch(e){ toast(authErrPT(e), true); }
   });
 }
 function comprasDoMes(mes){ return state.compras.filter(c=>c.data && c.data.slice(0,7)===mes); }
-
 function renderCompras(){
   const mes = monthISO();
   const doMes = comprasDoMes(mes);
-  const gasto = doMes.reduce((a,c)=>a+c.valor,0);
+  const gasto = doMes.reduce((a,c)=>a+(c.valor||0),0);
   const orc = state.cfg.orcamento||0;
   const pct = orc? Math.min(100, gasto/orc*100) : 0;
   const hoje = new Date();
@@ -715,29 +872,30 @@ function renderCompras(){
       <span>Saldo: <b style="color:${saldo>=0?'var(--ok)':'var(--erro)'}">${brl(saldo)}</b>${diasRestantes>0 && saldo>0 ? ' · '+brl(saldo/Math.max(diasRestantes,1))+'/dia restante' : ''}</span>
     </div>`;
   document.getElementById('compras-mes-label').textContent = doMes.length + ' compra(s) em ' + fmtMes(mes);
-  const rows = [...doMes].sort((a,b)=>b.data.localeCompare(a.data)).map(c=>[
+  const rows = [...doMes].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).map(c=>[
     fmtBR(c.data), esc(c.cat), esc(c.desc), brl(c.valor), esc(c.autor||'—'),
-    `<button class="btn btn-danger btn-mini" onclick="delCompra(${c.id})">Excluir</button>`
+    `<button class="btn btn-danger btn-mini" onclick="delCompra('${c.id}')">Excluir</button>`
   ]);
   document.getElementById('tbl-compras').innerHTML = tableHTML(['Data','Categoria','Descrição','Valor','Lançado por',''], rows);
 }
 
-/* ================= SAVE: CUSTOS MENSAIS ================= */
+/* ================= CUSTOS MENSAIS ================= */
 function calcCusto(m){
-  const compras = comprasDoMes(m.mes).reduce((a,c)=>a+c.valor,0) + (m.ajuste||0);
+  const compras = comprasDoMes(m.mes).reduce((a,c)=>a+(c.valor||0),0) + (m.ajuste||0);
   const ref = m.ref||0;
   return {
     compras,
-    semMO: ref? (compras - (m.desc||0))/ref : 0,
-    comMO: ref? (compras + (m.mo||0) - (m.desc||0))/ref : 0,
+    semMO: ref? (compras - (m.desconto||0))/ref : 0,
+    comMO: ref? (compras + (m.mo||0) - (m.desconto||0))/ref : 0,
     semDesc: ref? (compras + (m.mo||0))/ref : 0,
   };
 }
 function previewCusto(){
-  const mes = document.getElementById('m-mes').value || monthISO();
-  document.getElementById('m-mes').value = mes;
-  const compras = comprasDoMes(mes).reduce((a,c)=>a+c.valor,0);
-  const lancadas = state.lanc.filter(l=>l.data && l.data.slice(0,7)===mes).reduce((a,l)=>a+l.refeicoes,0);
+  const mesEl = document.getElementById('m-mes');
+  const mes = mesEl.value || monthISO();
+  mesEl.value = mes;
+  const compras = comprasDoMes(mes).reduce((a,c)=>a+(c.valor||0),0);
+  const lancadas = state.lanc.filter(l=>l.data && l.data.slice(0,7)===mes).reduce((a,l)=>a+(l.refeicoes||0),0);
   const existente = state.custos.find(c=>c.mes===mes);
   if(existente){
     document.getElementById('m-ref').value = existente.ref||'';
@@ -745,7 +903,7 @@ function previewCusto(){
     document.getElementById('m-ref-almjan').value = existente.refAlmJan||'';
     document.getElementById('m-ref-ceia').value = existente.refCeia||'';
     document.getElementById('m-mo').value = existente.mo||'';
-    document.getElementById('m-desc').value = existente.desc||'';
+    document.getElementById('m-desc').value = existente.desconto||'';
     document.getElementById('m-ajuste').value = existente.ajuste||'';
   }
   document.getElementById('m-preview').innerHTML =
@@ -756,32 +914,30 @@ async function salvarCustoMes(){
   const mes = document.getElementById('m-mes').value;
   const ref = Number(document.getElementById('m-ref').value)||0;
   if(!mes || !ref){ toast('Informe o mês e as refeições validadas.', true); return; }
-  const entry = {
-    id: Date.now(), mes, ref,
-    refCafe: Number(document.getElementById('m-ref-cafe').value)||0,
-    refAlmJan: Number(document.getElementById('m-ref-almjan').value)||0,
-    refCeia: Number(document.getElementById('m-ref-ceia').value)||0,
-    mo: Number(document.getElementById('m-mo').value)||0,
-    desc: Number(document.getElementById('m-desc').value)||0,
-    ajuste: Number(document.getElementById('m-ajuste').value)||0,
-    autor: currentUser.nome,
-  };
-  state.custos = state.custos.filter(c=>c.mes!==mes);
-  state.custos.push(entry);
-  await saveJSON('custos:mensal', state.custos);
-  toast('Fechamento de '+fmtMes(mes)+' salvo ✓');
-  previewCusto(); renderCustos();
+  try{
+    await setDoc(doc(db,'custos',mes), {
+      mes, ref,
+      refCafe: Number(document.getElementById('m-ref-cafe').value)||0,
+      refAlmJan: Number(document.getElementById('m-ref-almjan').value)||0,
+      refCeia: Number(document.getElementById('m-ref-ceia').value)||0,
+      mo: Number(document.getElementById('m-mo').value)||0,
+      desconto: Number(document.getElementById('m-desc').value)||0,
+      ajuste: Number(document.getElementById('m-ajuste').value)||0,
+      autor: currentUser.nome,
+    });
+    toast('Fechamento de '+fmtMes(mes)+' salvo ✓');
+  }catch(e){ toast(authErrPT(e), true); }
 }
 function renderCustos(){
-  const rows = [...state.custos].sort((a,b)=>b.mes.localeCompare(a.mes)).map(m=>{
+  const rows = [...state.custos].sort((a,b)=>(b.mes||'').localeCompare(a.mes||'')).map(m=>{
     const c = calcCusto(m);
-    const lancadas = state.lanc.filter(l=>l.data && l.data.slice(0,7)===m.mes).reduce((a,l)=>a+l.refeicoes,0);
+    const lancadas = state.lanc.filter(l=>l.data && l.data.slice(0,7)===m.mes).reduce((a,l)=>a+(l.refeicoes||0),0);
     const dif = lancadas - m.ref;
     return [
       '<b>'+fmtMes(m.mes)+'</b>',
-      m.ref.toLocaleString('pt-BR'),
+      (m.ref||0).toLocaleString('pt-BR'),
       (dif===0?'<span class="pill p-ok">0</span>':`<span class="pill ${Math.abs(dif)>m.ref*0.05?'p-bad':'p-warn'}">${dif>0?'+':''}${dif.toLocaleString('pt-BR')}</span>`),
-      brl(c.compras), brl(m.mo), brl(m.desc),
+      brl(c.compras), brl(m.mo), brl(m.desconto),
       '<b>'+brl(c.semMO)+'</b>', '<b>'+brl(c.comMO)+'</b>', '<b>'+brl(c.semDesc)+'</b>'
     ];
   });
@@ -789,7 +945,7 @@ function renderCustos(){
     ['Mês','Refeições validadas','Dif. lançado','Compras','Mão de obra','Desc. funcionários','Unit. sem MO','Unit. com MO','Unit. sem desconto'], rows);
 }
 
-/* ================= SAVE: CHECKLISTS ================= */
+/* ================= CHECKLISTS ================= */
 async function salvarChecklist(tipo){
   const isAdm = tipo==='adm';
   const list = isAdm? ADM_QUESITOS : HIG_QUESITOS;
@@ -797,23 +953,23 @@ async function salvarChecklist(tipo){
   if(Object.keys(scores).length < list.length){ toast('Dê uma nota para todos os itens.', true); return; }
   const quesitos = {};
   list.forEach((label,i)=> quesitos[label] = scores[i]);
-  const entry = {
-    id: Date.now(),
-    data: document.getElementById(tipo+'-data').value || todayISO(),
-    setor: document.getElementById(tipo+'-setor').value.trim(),
-    nome: currentUser.nome,
-    username: currentUser.username,
-    quesitos,
-    obs: document.getElementById(tipo+'-obs').value.trim(),
-  };
-  if(isAdm){ state.adm.push(entry); await saveJSON('checklist:adm', state.adm); admScores={}; buildQuesitos('adm-quesitos', ADM_QUESITOS, admScores); }
-  else { state.hig.push(entry); await saveJSON('checklist:hig', state.hig); higScores={}; buildQuesitos('hig-quesitos', HIG_QUESITOS, higScores); }
-  document.getElementById(tipo+'-obs').value='';
-  toast('Checklist enviado — obrigado ✓');
-  renderHigTables();
+  try{
+    await addDoc(collection(db, isAdm?'checklists_adm':'checklists_hig'), {
+      data: document.getElementById(tipo+'-data').value || todayISO(),
+      setor: document.getElementById(tipo+'-setor').value.trim(),
+      nome: currentUser.nome,
+      uid: currentUser.uid,
+      quesitos,
+      obs: document.getElementById(tipo+'-obs').value.trim(),
+    });
+    if(isAdm){ admScores={}; buildQuesitos('adm-quesitos', ADM_QUESITOS, admScores); }
+    else { higScores={}; buildQuesitos('hig-quesitos', HIG_QUESITOS, higScores); }
+    document.getElementById(tipo+'-obs').value='';
+    toast('Checklist enviado — obrigado ✓');
+  }catch(e){ toast(authErrPT(e), true); }
 }
 function renderHigTables(){
-  const mk = arr => [...arr].sort((a,b)=>b.data.localeCompare(a.data)).slice(0,10)
+  const mk = arr => [...arr].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).slice(0,10)
     .map(r=>[fmtBR(r.data), esc(r.setor||'—'), esc(r.nome||'—'), notaPill(mediaQuesitos(r.quesitos)), esc((r.obs||'').slice(0,60))]);
   document.getElementById('tbl-adm-full').innerHTML = tableHTML(['Data','Setor','Avaliador','Nota média','Observações'], mk(state.adm));
   document.getElementById('tbl-hig-full').innerHTML = tableHTML(['Data','Área','Avaliador','Nota média','Observações'], mk(state.hig));
@@ -826,64 +982,54 @@ function toggleChecklistSel(){
 }
 async function criarUsuario(){
   const nome = document.getElementById('u-nome').value.trim();
-  const username = document.getElementById('u-user').value.trim().toLowerCase();
+  const email = document.getElementById('u-email').value.trim();
   const pass = document.getElementById('u-pass').value;
   const role = document.getElementById('u-role').value;
-  if(!nome || !username || !pass){ toast('Informe nome, usuário e senha.', true); return; }
-  if(state.users.some(u=>u.username.toLowerCase()===username)){ toast('Este nome de usuário já existe.', true); return; }
-  const entry = {
-    id: Date.now(), nome, username,
-    setor: document.getElementById('u-setor').value.trim(),
-    email: document.getElementById('u-email').value.trim(),
-    pass: await sha256(pass),
-    role,
-    check: role==='colaborador' ? document.getElementById('u-check').value : '',
-  };
-  state.users.push(entry);
-  await saveJSON('sys:users', state.users);
-  ['u-nome','u-setor','u-email','u-user','u-pass'].forEach(id=>document.getElementById(id).value='');
-  toast('Usuário criado ✓');
-  renderUsuarios(); renderDashboard();
+  if(!nome || !email || !pass){ toast('Informe nome, e-mail e senha inicial.', true); return; }
+  const btn = document.getElementById('u-btn'); btn.disabled=true;
+  try{
+    // app secundário: cria a conta sem derrubar a sessão do admin
+    const secApp = initializeApp(firebaseConfig, 'sec-'+Date.now());
+    const secAuth = getAuth(secApp);
+    const cred = await createUserWithEmailAndPassword(secAuth, email, pass);
+    await setDoc(doc(db,'usuarios',cred.user.uid), {
+      nome, email,
+      setor: document.getElementById('u-setor').value.trim(),
+      role,
+      check: role==='colaborador' ? document.getElementById('u-check').value : '',
+    });
+    await signOut(secAuth);
+    ['u-nome','u-setor','u-email','u-pass'].forEach(id=>document.getElementById(id).value='');
+    toast('Usuário criado ✓ — informe a senha inicial a ele');
+  }catch(e){ toast(authErrPT(e), true); }
+  btn.disabled=false;
 }
-async function removerUsuario(id){
-  if(id===currentUser.id){ toast('Você não pode remover o próprio usuário.', true); return; }
-  confirmModal('Remover este usuário? Ele perderá o acesso ao painel.', async ()=>{
-    state.users = state.users.filter(u=>u.id!==id);
-    await saveJSON('sys:users', state.users);
-    toast('Usuário removido');
-    renderUsuarios(); renderDashboard();
+function removerUsuario(uid){
+  if(uid===currentUser.uid){ toast('Você não pode remover o próprio usuário.', true); return; }
+  confirmModal('Remover o acesso deste usuário ao painel?', async ()=>{
+    try{ await deleteDoc(doc(db,'usuarios',uid)); toast('Acesso removido'); }
+    catch(e){ toast(authErrPT(e), true); }
   });
 }
-function resetSenhaModal(id){
-  const u = state.users.find(x=>x.id===id); if(!u) return;
-  openModal(`<h3>Redefinir senha — ${esc(u.nome)}</h3>
-    <label>Nova senha</label><input type="text" id="rs-pass" style="margin-bottom:14px">
-    <div class="btn-row" style="margin-top:6px">
-      <button class="btn btn-primary" onclick="confirmResetSenha(${id})">Salvar</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-    </div>`);
-}
-async function confirmResetSenha(id){
-  const p = document.getElementById('rs-pass').value;
-  if(!p){ toast('Informe a nova senha.', true); return; }
-  const u = state.users.find(x=>x.id===id);
-  u.pass = await sha256(p);
-  await saveJSON('sys:users', state.users);
-  closeModal(); toast('Senha redefinida ✓');
+async function resetSenhaUsuario(email){
+  try{
+    await sendPasswordResetEmail(auth, email);
+    toast('E-mail de redefinição enviado para '+email+' ✓');
+  }catch(e){ toast(authErrPT(e), true); }
 }
 function checkLabel(c){ return c==='ambos'?'ADM + Higiênica':(c==='adm'?'Administrativa':(c==='hig'?'Higiênica':'—')); }
 function renderUsuarios(){
   const rows = state.users.map(u=>[
-    '<b>'+esc(u.nome)+'</b>', esc(u.username), ROLES[u.role],
+    '<b>'+esc(u.nome)+'</b>', esc(u.email), ROLES[u.role]||u.role,
     u.role==='colaborador'? checkLabel(u.check) : '—',
     esc(u.setor||'—'),
-    `<button class="btn btn-ghost btn-mini" onclick="resetSenhaModal(${u.id})">Redefinir senha</button>
-     <button class="btn btn-danger btn-mini" onclick="removerUsuario(${u.id})">Remover</button>`
+    `<button class="btn btn-ghost btn-mini" onclick="resetSenhaUsuario('${esc(u.email)}')">Redefinir senha</button>
+     <button class="btn btn-danger btn-mini" onclick="removerUsuario('${u.id}')">Remover</button>`
   ]);
-  document.getElementById('tbl-usuarios').innerHTML = tableHTML(['Nome','Usuário','Perfil','Checklists','Setor',''], rows);
+  document.getElementById('tbl-usuarios').innerHTML = tableHTML(['Nome','E-mail','Perfil','Checklists','Setor',''], rows);
 }
 
-/* ================= CONFIG ================= */
+/* ================= CONFIG / EMAILJS ================= */
 async function salvarConfig(){
   state.cfg = {
     metaSobra: Number(document.getElementById('cfg-sobra').value)||DEFAULT_CFG.metaSobra,
@@ -892,16 +1038,88 @@ async function salvarConfig(){
     metaConf: Number(document.getElementById('cfg-conf').value)||DEFAULT_CFG.metaConf,
     orcamento: Number(document.getElementById('cfg-orc').value)||DEFAULT_CFG.orcamento,
   };
-  await saveJSON('config:metas', state.cfg);
-  toast('Metas salvas ✓');
-  renderDashboard(); renderCompras();
+  try{
+    await setDoc(doc(db,'config','metas'), state.cfg);
+    toast('Metas salvas ✓');
+    renderDashboard(); renderCompras();
+  }catch(e){ toast(authErrPT(e), true); }
+}
+async function salvarEmailCfg(){
+  state.emailCfg = {
+    publicKey: document.getElementById('ej-public').value.trim(),
+    privateKey: document.getElementById('ej-private').value.trim(),
+    serviceId: document.getElementById('ej-service').value.trim(),
+    templateAdm: document.getElementById('ej-tpl-adm').value.trim(),
+    templateHig: document.getElementById('ej-tpl-hig').value.trim(),
+    linkApp: document.getElementById('ej-link').value.trim() || (location.origin+location.pathname),
+  };
+  try{
+    await setDoc(doc(db,'config','emailjs'), state.emailCfg);
+    toast('Configuração do EmailJS salva ✓');
+  }catch(e){ toast(authErrPT(e), true); }
+}
+function sendEmailJS(templateId, params){
+  const cfg = state.emailCfg;
+  const body = { service_id: cfg.serviceId, template_id: templateId, user_id: cfg.publicKey, template_params: params };
+  if(cfg.privateKey) body.accessToken = cfg.privateKey;
+  return fetch('https://api.emailjs.com/api/v1.0/email/send', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+  });
+}
+function pendentesSemana(){
+  const wk = weekKey(new Date());
+  const out = [];
+  state.users.filter(u=>u.role==='colaborador').forEach(u=>{
+    const tipos = u.check==='ambos'? ['adm','hig'] : [u.check];
+    tipos.forEach(t=>{
+      if(!t) return;
+      const arr = t==='adm'? state.adm : state.hig;
+      const done = arr.some(e=>e.uid===u.id && e.data && weekKey(new Date(e.data+'T12:00:00'))===wk);
+      if(!done) out.push({...u, tipo:t});
+    });
+  });
+  return out;
+}
+async function enviarCobrancas(silent){
+  const cfg = state.emailCfg||{};
+  const st = document.getElementById('cobranca-status');
+  if(!cfg.serviceId || !cfg.publicKey || !cfg.templateAdm || !cfg.templateHig){
+    if(!silent) toast('Configure o EmailJS em Metas & Config antes de enviar.', true);
+    return;
+  }
+  const pend = pendentesSemana().filter(p=>p.email);
+  if(!pend.length){ if(st) st.textContent='Nenhum pendente esta semana ✓'; return; }
+  let ok=0, fail=0;
+  for(const p of pend){
+    try{
+      const r = await sendEmailJS(p.tipo==='adm'? cfg.templateAdm : cfg.templateHig, {
+        to_email: p.email, to_name: p.nome, setor: p.setor||'',
+        tipo_checklist: p.tipo==='adm'? 'Administrativa':'Higiênica',
+        link_formulario: cfg.linkApp || (location.origin+location.pathname),
+      });
+      if(r.ok) ok++; else fail++;
+    }catch(e){ fail++; }
+  }
+  try{ await setDoc(doc(db,'config','flags'), {ultimoEnvio: weekKey(new Date())}, {merge:true}); }catch(e){}
+  if(st) st.textContent = `Enviado: ${ok} · Falhas: ${fail}`;
+  if(!silent) toast(`Cobranças enviadas: ${ok} ✓${fail? ' · '+fail+' falha(s)':''}`, fail>0);
+}
+async function checkAutoSend(){
+  if(new Date().getDay() !== 5) return; // sexta-feira
+  try{
+    const f = await getDoc(doc(db,'config','flags'));
+    const last = f.exists()? f.data().ultimoEnvio : null;
+    if(last === weekKey(new Date())) return;
+    setTimeout(()=>enviarCobrancas(true), 4000); // espera os dados carregarem
+  }catch(e){ console.error(e); }
 }
 
 /* ================= DASHBOARD ================= */
 function applyFilter(){
   state.filterDe = document.getElementById('f-de').value;
   state.filterAte = document.getElementById('f-ate').value;
-  renderDashboard(); renderSatDetalhe();
+  loadSat(); // refaz a busca de satisfação no novo período
+  renderDashboard();
 }
 function setPreset(p){
   let de, ate = todayISO();
@@ -948,10 +1166,10 @@ function renderDashboard(){
   const higF = state.hig.filter(r=>inRange(r.data));
   const cfg = state.cfg;
 
-  const producao = lancF.reduce((a,r)=>a+r.producao,0);
-  const sobra = lancF.reduce((a,r)=>a+r.sobra,0);
-  const resto = lancF.reduce((a,r)=>a+r.resto,0);
-  const refeicoes = lancF.reduce((a,r)=>a+r.refeicoes,0);
+  const producao = lancF.reduce((a,r)=>a+(r.producao||0),0);
+  const sobra = lancF.reduce((a,r)=>a+(r.sobra||0),0);
+  const resto = lancF.reduce((a,r)=>a+(r.resto||0),0);
+  const refeicoes = lancF.reduce((a,r)=>a+(r.refeicoes||0),0);
   const pctSobra = producao? sobra/producao*100 : 0;
   const kgResto = refeicoes? resto/refeicoes : 0;
   const satM = mediaSat(satF);
@@ -959,7 +1177,7 @@ function renderDashboard(){
   const higM = mediaLista(higF);
 
   const mes = monthISO();
-  const gastoMes = comprasDoMes(mes).reduce((a,c)=>a+c.valor,0);
+  const gastoMes = comprasDoMes(mes).reduce((a,c)=>a+(c.valor||0),0);
 
   document.getElementById('kpi-grid').innerHTML = [
     kpiCard('Sobra Limpa', pctSobra.toFixed(1)+'%', 'Meta: até '+cfg.metaSobra+'%', pctSobra<=cfg.metaSobra, pctSobra, cfg.metaSobra*1.6, producao>0),
@@ -973,51 +1191,43 @@ function renderDashboard(){
   const mealRows = MEALS.map(m=>{
     const l = lancF.filter(r=>r.turno===m.name);
     const s = satF.filter(r=>r.turno===m.name);
-    const prod = l.reduce((a,r)=>a+r.producao,0);
-    const sob = l.reduce((a,r)=>a+r.sobra,0);
-    const res = l.reduce((a,r)=>a+r.resto,0);
-    const ref = l.reduce((a,r)=>a+r.refeicoes,0);
+    const prod = l.reduce((a,r)=>a+(r.producao||0),0);
+    const sob = l.reduce((a,r)=>a+(r.sobra||0),0);
+    const res = l.reduce((a,r)=>a+(r.resto||0),0);
+    const ref = l.reduce((a,r)=>a+(r.refeicoes||0),0);
     const sM = mediaSat(s);
     return [m.name, prod? (sob/prod*100).toFixed(1)+'%':'—', ref? (res/ref).toFixed(3):'—', sM? sM.toFixed(2)+' ('+s.length+')':'—'];
   });
   mealRows.push(['<b>Geral</b>', producao? pctSobra.toFixed(1)+'%':'—', refeicoes? kgResto.toFixed(3):'—', satM? satM.toFixed(2)+' ('+satF.length+')':'—']);
   document.getElementById('tbl-meal').innerHTML = tableHTML(['Refeição','Sobra Limpa','Resto Ingesto (kg/pessoa)','Satisfação'], mealRows);
 
-  const rowsL = [...lancF].sort((a,b)=>b.data.localeCompare(a.data)).slice(0,8)
-    .map(r=>[fmtBR(r.data), r.turno, r.refeicoes, r.producao.toFixed(2), r.sobra.toFixed(2), r.resto.toFixed(2)]);
+  const rowsL = [...lancF].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).slice(0,8)
+    .map(r=>[fmtBR(r.data), r.turno, r.refeicoes, (r.producao||0).toFixed(2), (r.sobra||0).toFixed(2), (r.resto||0).toFixed(2)]);
   document.getElementById('tbl-lanc-dash').innerHTML = tableHTML(['Data','Refeição','Refeições','Produção (kg)','Sobra (kg)','Resto (kg)'], rowsL);
 
   const panel = document.getElementById('panel-checklist-semana');
-  if(currentUser.role==='admin'){
-    panel.style.display='block';
-    renderWeekStatus();
-  } else panel.style.display='none';
+  if(currentUser.role==='admin'){ panel.style.display='block'; renderWeekStatus(); }
+  else panel.style.display='none';
 }
 function renderWeekStatus(){
   const wk = weekKey(new Date());
   const colabs = state.users.filter(u=>u.role==='colaborador');
   if(!colabs.length){ document.getElementById('week-status').innerHTML='<div class="empty">Nenhum colaborador cadastrado — crie usuários com perfil Colaborador</div>'; return; }
-  const rows = []; const pendentesEmail = [];
+  const rows = [];
   colabs.forEach(u=>{
     const tipos = u.check==='ambos'? ['adm','hig'] : [u.check];
     tipos.forEach(t=>{
+      if(!t) return;
       const arr = t==='adm'? state.adm : state.hig;
-      const done = arr.some(e=>e.username===u.username && e.data && weekKey(new Date(e.data+'T12:00:00'))===wk);
-      if(!done && u.email) pendentesEmail.push(u.email);
+      const done = arr.some(e=>e.uid===u.id && e.data && weekKey(new Date(e.data+'T12:00:00'))===wk);
       rows.push([esc(u.nome), t==='adm'?'Administrativa':'Higiênica', esc(u.setor||'—'),
         done? '<span class="pill p-ok">Respondido</span>' : '<span class="pill p-bad">Pendente</span>']);
     });
   });
-  let html = tableHTML(['Colaborador','Checklist','Setor','Status'], rows);
-  if(pendentesEmail.length){
-    const subject = encodeURIComponent('Checklist de limpeza — preencher até sexta-feira');
-    const body = encodeURIComponent('Olá! Pedimos que preencha o checklist de conformidade de limpeza desta semana no painel. Obrigado.');
-    html += `<div class="btn-row"><a class="btn btn-leaf" style="text-decoration:none" href="mailto:${[...new Set(pendentesEmail)].join(',')}?subject=${subject}&body=${body}">Cobrar pendentes por e-mail</a></div>`;
-  }
-  document.getElementById('week-status').innerHTML = html;
+  document.getElementById('week-status').innerHTML = tableHTML(['Colaborador','Checklist','Setor','Status'], rows);
 }
 
-/* ================= PESQUISA (detalhe + link) ================= */
+/* ================= PESQUISA ================= */
 function renderSatDetalhe(){
   const satF = state.sat.filter(r=>inRange(r.data));
   const turnos = ['Café da Manhã','Almoço','Jantar','Ceia'];
@@ -1037,12 +1247,6 @@ function copyTabletLink(){
   try{ navigator.clipboard && navigator.clipboard.writeText(url); }catch(e){}
   try{ document.execCommand('copy'); }catch(e){}
   toast('Link copiado ✓');
-}
-function renderLancTables(){
-  const rows = [...state.lanc].sort((a,b)=>b.data.localeCompare(a.data) || b.id-a.id).slice(0,12)
-    .map(r=>[fmtBR(r.data), r.turno, r.refeicoes, r.producao.toFixed(2), r.sobra.toFixed(2), r.resto.toFixed(2), esc(r.autor||'—'),
-      currentUser.role==='admin'? `<button class="btn btn-danger btn-mini" onclick="delLancamento(${r.id})">Excluir</button>` : '']);
-  document.getElementById('tbl-lanc-full').innerHTML = tableHTML(['Data','Refeição','Refeições','Produção','Sobra','Resto','Por',''], rows);
 }
 
 /* ================= KIOSK ================= */
@@ -1084,13 +1288,17 @@ async function enviarSatisfacao(){
     toast('Toque uma carinha em todos os itens 🙂', true); return;
   }
   const now = new Date();
-  const entry = { id:Date.now(), data:todayISO(), hora:String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'), turno:kioskTurno, ...kioskAnswers };
-  state.sat.push(entry);
-  await saveJSON('restaurante:satisfacao', state.sat);
-  document.getElementById('kiosk-questions').innerHTML = '<div class="kiosk-thanks">Obrigado pela avaliação! 🙌</div>';
-  document.getElementById('kiosk-body-wrap').innerHTML = '';
-  kioskTurno = null; kioskAnswers = {};
-  setTimeout(renderKiosk, 2400);
+  try{
+    await addDoc(collection(db,'satisfacao'), {
+      data: todayISO(),
+      hora: String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'),
+      turno: kioskTurno, ...kioskAnswers
+    });
+    document.getElementById('kiosk-questions').innerHTML = '<div class="kiosk-thanks">Obrigado pela avaliação! 🙌</div>';
+    document.getElementById('kiosk-body-wrap').innerHTML = '';
+    kioskTurno = null; kioskAnswers = {};
+    setTimeout(renderKiosk, 2400);
+  }catch(e){ toast('Falha ao enviar — verifique a internet.', true); }
 }
 
 /* ================= MODAL ================= */
@@ -1101,80 +1309,66 @@ function confirmModal(msg, fn){
   _confirmFn = fn;
   openModal(`<h3>Confirmar</h3><p style="font-size:14px;color:#40503b;margin:0 0 16px">${msg}</p>
     <div class="btn-row" style="margin-top:0">
-      <button class="btn btn-primary" onclick="_confirmFn&&_confirmFn();closeModal()">Confirmar</button>
+      <button class="btn btn-primary" onclick="_runConfirm()">Confirmar</button>
       <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
     </div>`);
 }
+function _runConfirm(){ const f=_confirmFn; closeModal(); f && f(); }
 function openModalSenha(){
   openModal(`<h3>Alterar minha senha</h3>
     <label>Senha atual</label><input type="password" id="cs-old" style="margin-bottom:12px">
-    <label>Nova senha</label><input type="password" id="cs-new">
+    <label>Nova senha (mín. 6)</label><input type="password" id="cs-new">
     <div class="btn-row"><button class="btn btn-primary" onclick="salvarNovaSenha()">Salvar</button>
     <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button></div>`);
 }
 async function salvarNovaSenha(){
   const oldP = document.getElementById('cs-old').value;
   const newP = document.getElementById('cs-new').value;
-  if(!newP){ toast('Informe a nova senha.', true); return; }
-  if(await sha256(oldP) !== currentUser.pass){ toast('Senha atual incorreta.', true); return; }
-  currentUser.pass = await sha256(newP);
-  const u = state.users.find(x=>x.id===currentUser.id);
-  if(u) u.pass = currentUser.pass;
-  await saveJSON('sys:users', state.users);
-  closeModal(); toast('Senha alterada ✓');
+  if(!oldP || !newP){ toast('Preencha as duas senhas.', true); return; }
+  try{
+    const cred = EmailAuthProvider.credential(currentUser.email, oldP);
+    await reauthenticateWithCredential(auth.currentUser, cred);
+    await updatePassword(auth.currentUser, newP);
+    closeModal(); toast('Senha alterada ✓');
+  }catch(e){ toast(authErrPT(e), true); }
 }
 
 /* ================= INIT ================= */
-function renderAll(){
-  renderLancTables(); renderHigTables(); renderCompras();
-  if(currentUser.role==='admin'){ renderUsuarios(); renderCustos(); previewCusto(); }
-  renderDashboard(); renderSatDetalhe();
-}
 async function init(){
   document.getElementById('logo-big').innerHTML = logoSVG(96);
   document.getElementById('logo-small').innerHTML = logoSVG(34);
   document.getElementById('logo-kiosk').innerHTML = logoSVG(64);
 
-  state.cfg = await loadJSON('config:metas', {...DEFAULT_CFG});
-  state.lanc = await loadJSON('restaurante:lancamentos', []);
-  state.sat = await loadJSON('restaurante:satisfacao', []);
-  state.adm = await loadJSON('checklist:adm', []);
-  state.hig = await loadJSON('checklist:hig', []);
-  state.compras = await loadJSON('custos:compras', []);
-  state.custos = await loadJSON('custos:mensal', []);
-
   if(isKioskMode){
     document.getElementById('login-screen').style.display='none';
     document.getElementById('kiosk-screen').style.display='block';
+    try{ await signInAnonymously(auth); }
+    catch(e){
+      document.getElementById('kiosk-questions').innerHTML =
+        '<div class="kiosk-off">Não foi possível conectar.<br>Habilite o login "Anônimo" no Firebase Authentication.</div>';
+      return;
+    }
     renderKiosk();
     setInterval(renderKiosk, 20000);
     return;
   }
-
-  await ensureSeed();
-
-  document.getElementById('r-data').value = todayISO();
-  document.getElementById('c-data').value = todayISO();
-  document.getElementById('adm-data').value = todayISO();
-  document.getElementById('hig-data').value = todayISO();
-  document.getElementById('m-mes').value = monthISO();
-  document.getElementById('m-mes').addEventListener('change', previewCusto);
-  document.getElementById('f-de').value = todayISO().slice(0,8)+'01';
-  document.getElementById('f-ate').value = todayISO();
-  state.filterDe = document.getElementById('f-de').value;
-  state.filterAte = document.getElementById('f-ate').value;
-  document.getElementById('tablet-link').value = location.origin + location.pathname + '?kiosk=1';
-  document.getElementById('cfg-sobra').value = state.cfg.metaSobra;
-  document.getElementById('cfg-resto').value = state.cfg.metaResto;
-  document.getElementById('cfg-sat').value = state.cfg.metaSat;
-  document.getElementById('cfg-conf').value = state.cfg.metaConf;
-  document.getElementById('cfg-orc').value = state.cfg.orcamento;
-
-  buildQuesitos('adm-quesitos', ADM_QUESITOS, admScores);
-  buildQuesitos('hig-quesitos', HIG_QUESITOS, higScores);
-  toggleChecklistSel();
-
+  checkBootstrap();
   document.getElementById('lg-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+  const mMes = document.getElementById('m-mes');
+  if(mMes) mMes.addEventListener('change', previewCusto);
 }
+
+/* expõe handlers usados nos onclick do HTML */
+Object.assign(window, {
+  doLogin, esqueciSenha, criarAdminInicial, logout, showPage,
+  salvarLancamento, delLancamento, salvarCompra, delCompra,
+  previewCusto, salvarCustoMes, salvarChecklist,
+  criarUsuario, removerUsuario, resetSenhaUsuario, toggleChecklistSel,
+  salvarConfig, salvarEmailCfg, enviarCobrancas,
+  applyFilter, setPreset, copyTabletLink, enviarSatisfacao,
+  openModal, closeModal, confirmModal, _runConfirm, openModalSenha, salvarNovaSenha,
+});
 init();
 </script>
+</body>
+</html>

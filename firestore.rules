@@ -1,0 +1,77 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function notAnon() { return signedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous'; }
+    function prof() { return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data; }
+    function isAdmin() { return notAnon() && prof().role == 'admin'; }
+    function isStaff() { return notAnon() && prof().role in ['admin', 'nutricionista']; }
+
+    // Marcador de primeiro acesso (permite criar o 1º admin uma única vez)
+    match /config/setup {
+      allow read: if true;
+      allow create: if signedIn();
+      allow update, delete: if false;
+    }
+    match /config/metas {
+      allow read: if notAnon();
+      allow write: if isAdmin();
+    }
+    match /config/emailjs {
+      allow read, write: if isAdmin();
+    }
+    match /config/flags {
+      allow read, write: if isAdmin();
+    }
+
+    // Perfis de usuário (papel de cada conta)
+    match /usuarios/{uid} {
+      allow read: if notAnon();
+      allow create: if (request.auth.uid == uid
+                        && !exists(/databases/$(database)/documents/config/setup))
+                    || isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    // Desperdício (sobra limpa / resto ingesto)
+    match /lancamentos/{id} {
+      allow read, create: if isStaff();
+      allow delete: if isAdmin();
+      allow update: if false;
+    }
+
+    // Compras
+    match /compras/{id} {
+      allow read, create: if isStaff();
+      allow delete: if isAdmin()
+                    || (isStaff() && resource.data.autorUid == request.auth.uid);
+      allow update: if false;
+    }
+
+    // Fechamento mensal de custos
+    match /custos/{id} {
+      allow read: if isStaff();
+      allow write: if isAdmin();
+    }
+
+    // Checklists (colaboradores logados; registro sempre no próprio nome)
+    match /checklists_adm/{id} {
+      allow read: if notAnon();
+      allow create: if notAnon() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+    match /checklists_hig/{id} {
+      allow read: if notAnon();
+      allow create: if notAnon() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Pesquisa de satisfação (kiosk anônimo só cria; ninguém edita)
+    match /satisfacao/{id} {
+      allow create: if signedIn();
+      allow read: if isStaff();
+      allow update, delete: if false;
+    }
+  }
+}
