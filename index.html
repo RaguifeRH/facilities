@@ -169,6 +169,28 @@
   #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--verde);color:#fff;padding:12px 22px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:90;opacity:0;transition:all .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.18);max-width:90vw;}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   #toast.err{background:var(--erro);}
+
+  /* RELATÓRIO PDF */
+  #print-area{display:none;}
+  @media print{
+    body > *{display:none !important;}
+    body #print-area{display:block !important;}
+    body{background:#fff;}
+  }
+  #print-area{font-family:'Inter',sans-serif;color:#22301f;padding:24px;}
+  #print-area .rp-head{display:flex;align-items:center;gap:14px;border-bottom:3px solid var(--verde);padding-bottom:14px;margin-bottom:6px;}
+  #print-area .rp-head h1{font-size:20px;color:var(--verde);}
+  #print-area .rp-head .wordmark{font-family:'Poppins',sans-serif;font-weight:700;font-size:22px;color:var(--verde);}
+  #print-area .rp-sub{color:var(--cinza);font-size:12px;margin-bottom:18px;}
+  #print-area .rp-cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
+  #print-area .rp-card{border:1px solid var(--linha);border-radius:10px;padding:10px 14px;min-width:130px;}
+  #print-area .rp-card .t{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--cinza);font-weight:700;}
+  #print-area .rp-card .v{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;margin-top:2px;}
+  #print-area table{width:100%;border-collapse:collapse;font-size:10.5px;}
+  #print-area th{background:var(--verde);color:#fff;padding:7px 8px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.04em;}
+  #print-area td{padding:6px 8px;border-bottom:1px solid #e5e8e0;}
+  #print-area tr:nth-child(even) td{background:#f6f8f3;}
+  #print-area .rp-foot{margin-top:22px;font-size:10px;color:var(--cinza);border-top:1px solid var(--linha);padding-top:10px;display:flex;justify-content:space-between;}
 </style>
 </head>
 <body>
@@ -410,6 +432,24 @@
         </div>
       </div>
 
+      <!-- HISTORICO -->
+      <div class="page" id="page-historico">
+        <h1 class="page-title">Histórico de resultados</h1>
+        <div class="page-desc">Consolidado mês a mês de todos os indicadores</div>
+        <div class="filter-bar">
+          <div class="fld"><label>De (mês)</label><input type="month" id="h-de"></div>
+          <div class="fld"><label>Até (mês)</label><input type="month" id="h-ate"></div>
+          <button class="btn btn-leaf" onclick="renderHistorico()">Aplicar</button>
+          <button class="btn btn-primary" onclick="gerarPDF()">Gerar PDF</button>
+        </div>
+        <div class="panel">
+          <h2>Indicadores por mês</h2>
+          <div class="desc" id="h-label"></div>
+          <div class="table-wrap" id="tbl-historico"></div>
+          <div class="note">Custo/refeição usa o fechamento mensal (com mão de obra, descontado dos funcionários). Meses sem fechamento aparecem com "—". Para o PDF, clique em "Gerar PDF" e escolha "Salvar como PDF" na janela de impressão.</div>
+        </div>
+      </div>
+
       <!-- USUARIOS -->
       <div class="page" id="page-usuarios">
         <h1 class="page-title">Usuários</h1>
@@ -477,6 +517,9 @@
   </div>
 </div>
 
+<!-- RELATÓRIO PARA IMPRESSÃO/PDF -->
+<div id="print-area"></div>
+
 <!-- MODAL / TOAST -->
 <div id="modal-bg" onclick="if(event.target===this)closeModal()">
   <div class="modal" id="modal-box"></div>
@@ -534,6 +577,7 @@ const NAV_DEF = [
   {id:'check-adm', label:'Checklist ADM', ic:'✓', roles:['admin'], check:'adm'},
   {id:'check-hig', label:'Checklist Higiênica', ic:'✓', roles:['admin'], check:'hig'},
   {id:'pesquisa', label:'Pesquisa Satisfação', ic:'★', roles:['admin','nutricionista']},
+  {id:'historico', label:'Histórico', ic:'📈', roles:['admin','nutricionista']},
   {id:'usuarios', label:'Usuários', ic:'👤', roles:['admin']},
   {id:'config', label:'Metas & Config', ic:'⚙', roles:['admin']},
 ];
@@ -694,9 +738,9 @@ function subscribeData(){
   sub('compras','compras', ()=>{ renderCompras(); renderDashboard(); if(role==='admin'){ previewCusto(); renderCustos(); } });
   sub('checklists_adm','adm', ()=>{ renderHigTables(); renderDashboard(); });
   sub('checklists_hig','hig', ()=>{ renderHigTables(); renderDashboard(); });
+  sub('custos','custos', ()=>{ if(role==='admin') renderCustos(); });
   if(role==='admin'){
     sub('usuarios','users', ()=>{ renderUsuarios(); renderDashboard(); });
-    sub('custos','custos', renderCustos);
   }
 }
 async function loadSat(){
@@ -768,6 +812,13 @@ function showPage(id){
   if(id==='compras') renderCompras();
   if(id==='custos'){ previewCusto(); renderCustos(); }
   if(id==='pesquisa') renderSatDetalhe();
+  if(id==='historico'){
+    if(!document.getElementById('h-de').value){
+      document.getElementById('h-de').value = todayISO().slice(0,4)+'-01';
+      document.getElementById('h-ate').value = monthISO();
+    }
+    renderHistorico();
+  }
 }
 
 /* ================= RATING WIDGETS ================= */
@@ -1224,7 +1275,15 @@ function renderWeekStatus(){
         done? '<span class="pill p-ok">Respondido</span>' : '<span class="pill p-bad">Pendente</span>']);
     });
   });
-  document.getElementById('week-status').innerHTML = tableHTML(['Colaborador','Checklist','Setor','Status'], rows);
+  let html = tableHTML(['Colaborador','Checklist','Setor','Status'], rows);
+  const pend = pendentesSemana().filter(p=>p.email);
+  if(pend.length){
+    const emails = [...new Set(pend.map(p=>p.email))].join(';');
+    const subject = encodeURIComponent('Checklist de limpeza — preencher até sexta-feira');
+    const body = encodeURIComponent('Olá!\n\nAinda não recebemos o seu checklist de conformidade de limpeza desta semana.\n\nPedimos que preencha até sexta-feira pelo painel:\nhttps://raguiferh.github.io/facilities/\n\nObrigado!\nRaguife — Confiança que Inspira');
+    html += `<div class="btn-row"><a class="btn btn-primary" style="text-decoration:none" href="mailto:${emails}?subject=${subject}&body=${body}">✉ Cobrar pendentes por e-mail (abre o Outlook)</a><span style="font-size:12px;color:var(--cinza)">${pend.length} cobrança(s) pendente(s)</span></div>`;
+  }
+  document.getElementById('week-status').innerHTML = html;
 }
 
 /* ================= PESQUISA ================= */
@@ -1240,6 +1299,126 @@ function renderSatDetalhe(){
   document.getElementById('tbl-sat-detalhe').innerHTML = tableHTML(
     ['Refeição','Qualidade','Variedade','Limpeza','Atendimento','Fila','<b>Geral</b>','Respostas'], rows);
 }
+/* ================= HISTÓRICO / PDF ================= */
+let satHist = [];   // satisfação carregada para o período do histórico
+let histRows = [];  // linhas calculadas (para o PDF)
+let histPeriodo = '';
+
+function monthsBetween(de, ate){
+  const out = [];
+  let [y,m] = de.split('-').map(Number);
+  const [y2,m2] = ate.split('-').map(Number);
+  while(y<y2 || (y===y2 && m<=m2)){
+    out.push(y+'-'+String(m).padStart(2,'0'));
+    m++; if(m>12){ m=1; y++; }
+  }
+  return out.slice(0,24); // no máx. 2 anos por vez
+}
+async function loadSatHist(de, ate){
+  try{
+    const q1 = query(collection(db,'satisfacao'), where('data','>=',de+'-01'), where('data','<=',ate+'-31'));
+    const snap = await getDocs(q1);
+    satHist = snap.docs.map(d=>d.data());
+  }catch(e){ console.error(e); satHist=[]; }
+}
+function aggMes(mes){
+  const inMes = d => d && d.slice(0,7)===mes;
+  const l = state.lanc.filter(r=>inMes(r.data));
+  const s = satHist.filter(r=>inMes(r.data));
+  const a = state.adm.filter(r=>inMes(r.data));
+  const h = state.hig.filter(r=>inMes(r.data));
+  const compras = comprasDoMes(mes).reduce((x,c)=>x+(c.valor||0),0);
+  const prod = l.reduce((x,r)=>x+(r.producao||0),0);
+  const sob = l.reduce((x,r)=>x+(r.sobra||0),0);
+  const res = l.reduce((x,r)=>x+(r.resto||0),0);
+  const ref = l.reduce((x,r)=>x+(r.refeicoes||0),0);
+  const cst = state.custos.find(c=>c.mes===mes);
+  const custoUnit = cst? calcCusto(cst).comMO : 0;
+  return {
+    mes, ref,
+    sobra: prod? sob/prod*100 : null,
+    resto: ref? res/ref : null,
+    sat: s.length? mediaSat(s) : null,
+    nSat: s.length,
+    adm: a.length? mediaLista(a) : null,
+    hig: h.length? mediaLista(h) : null,
+    compras,
+    custoUnit: custoUnit||null,
+    temDados: !!(l.length || s.length || a.length || h.length || compras),
+  };
+}
+function fmtInd(v, fn){ return v==null? '—' : fn(v); }
+function metaCls(v, meta, menorMelhor){
+  if(v==null) return '';
+  const ok = menorMelhor? v<=meta : v>=meta;
+  return ok? 'p-ok' : 'p-bad';
+}
+async function renderHistorico(){
+  const de = document.getElementById('h-de').value || (todayISO().slice(0,4)+'-01');
+  const ate = document.getElementById('h-ate').value || monthISO();
+  document.getElementById('h-de').value = de;
+  document.getElementById('h-ate').value = ate;
+  await loadSatHist(de, ate);
+  const cfg = state.cfg;
+  const meses = monthsBetween(de, ate);
+  histRows = meses.map(aggMes).filter(r=>r.temDados);
+  histPeriodo = fmtMes(de)+' a '+fmtMes(ate);
+  document.getElementById('h-label').textContent = histRows.length+' mês(es) com dados · '+histPeriodo;
+  const rows = histRows.map(r=>[
+    '<b>'+fmtMes(r.mes)+'</b>',
+    r.ref? r.ref.toLocaleString('pt-BR') : '—',
+    `<span class="pill ${metaCls(r.sobra, cfg.metaSobra, true)}">${fmtInd(r.sobra, v=>v.toFixed(1)+'%')}</span>`,
+    `<span class="pill ${metaCls(r.resto, cfg.metaResto, true)}">${fmtInd(r.resto, v=>v.toFixed(3))}</span>`,
+    `<span class="pill ${metaCls(r.sat, cfg.metaSat, false)}">${fmtInd(r.sat, v=>v.toFixed(2))}</span>`+(r.nSat? ' <span style="color:var(--cinza);font-size:10px">('+r.nSat+')</span>':''),
+    `<span class="pill ${metaCls(r.adm, cfg.metaConf, false)}">${fmtInd(r.adm, v=>v.toFixed(2))}</span>`,
+    `<span class="pill ${metaCls(r.hig, cfg.metaConf, false)}">${fmtInd(r.hig, v=>v.toFixed(2))}</span>`,
+    r.compras? brl(r.compras) : '—',
+    r.custoUnit? '<b>'+brl(r.custoUnit)+'</b>' : '—',
+  ]);
+  document.getElementById('tbl-historico').innerHTML = tableHTML(
+    ['Mês','Refeições','Sobra Limpa','Resto (kg/p)','Satisfação','Conf. ADM','Conf. Hig.','Compras','Custo/refeição'], rows);
+}
+function gerarPDF(){
+  if(!histRows.length){ toast('Aplique um período com dados antes de gerar o PDF.', true); return; }
+  const cfg = state.cfg;
+  const media = (k)=>{ const v=histRows.map(r=>r[k]).filter(x=>x!=null); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null; };
+  const totCompras = histRows.reduce((a,r)=>a+(r.compras||0),0);
+  const totRef = histRows.reduce((a,r)=>a+(r.ref||0),0);
+  const cards = [
+    ['Refeições no período', totRef? totRef.toLocaleString('pt-BR'):'—'],
+    ['Sobra Limpa (média)', fmtInd(media('sobra'), v=>v.toFixed(1)+'%')],
+    ['Resto Ingesto (média)', fmtInd(media('resto'), v=>v.toFixed(3)+' kg/p')],
+    ['Satisfação (média)', fmtInd(media('sat'), v=>v.toFixed(2)+' / 5')],
+    ['Conf. ADM (média)', fmtInd(media('adm'), v=>v.toFixed(2)+' / 5')],
+    ['Conf. Higiênica (média)', fmtInd(media('hig'), v=>v.toFixed(2)+' / 5')],
+    ['Compras no período', brl(totCompras)],
+    ['Custo/refeição (média)', fmtInd(media('custoUnit'), v=>brl(v))],
+  ];
+  const linhas = histRows.map(r=>`<tr>
+    <td><b>${fmtMes(r.mes)}</b></td>
+    <td>${r.ref? r.ref.toLocaleString('pt-BR'):'—'}</td>
+    <td>${fmtInd(r.sobra, v=>v.toFixed(1)+'%')}</td>
+    <td>${fmtInd(r.resto, v=>v.toFixed(3))}</td>
+    <td>${fmtInd(r.sat, v=>v.toFixed(2))}${r.nSat? ' ('+r.nSat+')':''}</td>
+    <td>${fmtInd(r.adm, v=>v.toFixed(2))}</td>
+    <td>${fmtInd(r.hig, v=>v.toFixed(2))}</td>
+    <td>${r.compras? brl(r.compras):'—'}</td>
+    <td>${r.custoUnit? brl(r.custoUnit):'—'}</td>
+  </tr>`).join('');
+  document.getElementById('print-area').innerHTML = `
+    <div class="rp-head">${logoSVG(48)}<div>
+      <span class="wordmark">raguife</span>
+      <h1>Relatório de Indicadores — Restaurante &amp; Higienização</h1>
+    </div></div>
+    <div class="rp-sub">Período: <b>${histPeriodo}</b> · Emitido em ${fmtBR(todayISO())} por ${esc(currentUser.nome)} ·
+      Metas: Sobra ≤ ${cfg.metaSobra}% · Resto ≤ ${cfg.metaResto} kg/p · Satisfação ≥ ${cfg.metaSat} · Conformidade ≥ ${cfg.metaConf}</div>
+    <div class="rp-cards">${cards.map(c=>`<div class="rp-card"><div class="t">${c[0]}</div><div class="v">${c[1]}</div></div>`).join('')}</div>
+    <table><thead><tr><th>Mês</th><th>Refeições</th><th>Sobra Limpa</th><th>Resto (kg/p)</th><th>Satisfação</th><th>Conf. ADM</th><th>Conf. Hig.</th><th>Compras</th><th>Custo/refeição</th></tr></thead>
+    <tbody>${linhas}</tbody></table>
+    <div class="rp-foot"><span>Raguife — Confiança que Inspira</span><span>raguiferh.github.io/facilities</span></div>`;
+  window.print();
+}
+
 function copyTabletLink(){
   const url = location.origin + location.pathname + '?kiosk=1';
   const inp = document.getElementById('tablet-link');
@@ -1366,6 +1545,7 @@ Object.assign(window, {
   criarUsuario, removerUsuario, resetSenhaUsuario, toggleChecklistSel,
   salvarConfig, salvarEmailCfg, enviarCobrancas,
   applyFilter, setPreset, copyTabletLink, enviarSatisfacao,
+  renderHistorico, gerarPDF,
   openModal, closeModal, confirmModal, _runConfirm, openModalSenha, salvarNovaSenha,
 });
 init();
