@@ -1,0 +1,1180 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --verde:#024f2b;
+    --verde-escuro:#013a20;
+    --folha:#739630;
+    --folha-suave:#e9f0dc;
+    --cinza:#666666;
+    --bg:#f4f6f1;
+    --branco:#ffffff;
+    --linha:#e2e6dc;
+    --amber:#d99a2b;
+    --erro:#c0392b;
+    --ok:#3d7a26;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:#22301f;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;font-size:14px;}
+  h1,h2,h3{font-family:'Poppins',sans-serif;margin:0;}
+  button{font-family:inherit;}
+
+  /* ---------- LOGIN ---------- */
+  #login-screen{position:fixed;inset:0;display:flex;z-index:50;background:var(--bg);}
+  .login-brand{flex:1;background:linear-gradient(160deg,var(--verde) 0%,var(--verde-escuro) 100%);color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px;text-align:center;}
+  .login-brand .wordmark{font-family:'Poppins',sans-serif;font-weight:700;font-size:52px;letter-spacing:-0.02em;margin-top:18px;}
+  .login-brand .tagline{letter-spacing:.35em;font-size:12px;color:#bcd9a6;margin-top:10px;text-transform:uppercase;}
+  .login-form-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:30px;}
+  .login-card{width:100%;max-width:380px;}
+  .login-card h2{font-size:24px;color:var(--verde);margin-bottom:4px;}
+  .login-card .sub{color:var(--cinza);margin-bottom:26px;font-size:13.5px;}
+  .login-err{color:var(--erro);font-size:13px;font-weight:600;min-height:18px;margin-top:10px;}
+  @media(max-width:760px){
+    #login-screen{flex-direction:column;}
+    .login-brand{flex:none;padding:36px 20px;}
+    .login-brand .wordmark{font-size:36px;}
+  }
+
+  /* ---------- APP SHELL ---------- */
+  #app{display:none;}
+  .topbar{background:var(--verde);color:#fff;display:flex;align-items:center;gap:14px;padding:12px 20px;position:sticky;top:0;z-index:30;}
+  .topbar .brandline{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+  .topbar .wordmark{font-family:'Poppins',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.02em;}
+  .topbar .app-sub{font-size:11px;color:#a9c98f;display:block;margin-top:-3px;}
+  .userchip{display:flex;align-items:center;gap:10px;font-size:12.5px;}
+  .userchip .uname{font-weight:600;}
+  .userchip .urole{color:#a9c98f;font-size:11px;display:block;}
+  .btn-top{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;}
+  .btn-top:hover{background:rgba(255,255,255,.22);}
+
+  .layout{display:flex;min-height:calc(100vh - 58px);}
+  nav.side{width:225px;background:var(--branco);border-right:1px solid var(--linha);padding:18px 12px;flex:none;}
+  nav.side .navlbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza);font-weight:700;margin:14px 10px 6px;}
+  .navbtn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;border-radius:10px;padding:10px 12px;font-size:13.5px;font-weight:500;color:#3c4a38;cursor:pointer;margin-bottom:2px;}
+  .navbtn:hover{background:var(--folha-suave);}
+  .navbtn.active{background:var(--verde);color:#fff;font-weight:600;}
+  .navbtn .ic{width:20px;text-align:center;flex:none;}
+  main{flex:1;padding:26px 26px 80px;min-width:0;}
+  .page{display:none;max-width:1100px;margin:0 auto;}
+  .page.active{display:block;animation:fade .22s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+  .page-title{font-size:22px;color:var(--verde);margin-bottom:2px;}
+  .page-desc{color:var(--cinza);font-size:13px;margin-bottom:20px;}
+
+  @media(max-width:880px){
+    .layout{flex-direction:column;}
+    nav.side{width:100%;display:flex;overflow-x:auto;padding:8px 10px;gap:4px;border-right:none;border-bottom:1px solid var(--linha);}
+    nav.side .navlbl{display:none;}
+    .navbtn{width:auto;white-space:nowrap;padding:9px 13px;}
+    main{padding:18px 14px 70px;}
+    .topbar .app-sub{display:none;}
+  }
+
+  /* ---------- COMPONENTS ---------- */
+  .panel{background:var(--branco);border:1px solid var(--linha);border-radius:var(--radius);padding:22px;margin-bottom:18px;}
+  .panel h2{font-size:16px;color:var(--verde);margin-bottom:3px;}
+  .panel .desc{color:var(--cinza);font-size:12.5px;margin-bottom:16px;}
+  .grid-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:13px;margin-bottom:20px;}
+  .kpi{background:var(--branco);border:1px solid var(--linha);border-radius:var(--radius);padding:16px;position:relative;}
+  .kpi .eyebrow{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--cinza);font-weight:700;margin-bottom:7px;}
+  .kpi .val{font-family:'Poppins',sans-serif;font-size:26px;font-weight:700;color:#1d2b1a;letter-spacing:-0.02em;}
+  .kpi .meta{font-size:11.5px;color:var(--cinza);margin-top:3px;}
+  .kpi .bar{margin-top:11px;height:6px;border-radius:4px;background:#edf0e6;overflow:hidden;}
+  .kpi .bar span{display:block;height:100%;border-radius:4px;}
+  .pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;letter-spacing:.02em;display:inline-block;}
+  .pill.abs{position:absolute;top:14px;right:14px;}
+  .p-ok{background:#e5f1db;color:var(--ok);}
+  .p-bad{background:#f7e3df;color:var(--erro);}
+  .p-warn{background:#f9efd9;color:#996c14;}
+  .p-neutral{background:#eef0ea;color:var(--cinza);}
+
+  label{display:block;font-size:12px;font-weight:600;color:#40503b;margin-bottom:5px;}
+  input,select,textarea{width:100%;padding:10px 11px;border:1px solid var(--linha);border-radius:9px;font-family:'Inter',sans-serif;font-size:14px;background:#fbfcf9;color:#22301f;}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--folha);outline-offset:1px;border-color:var(--folha);}
+  textarea{resize:vertical;min-height:60px;}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:13px;}
+  .btn{font-family:'Poppins',sans-serif;font-weight:600;font-size:13.5px;border:none;border-radius:10px;padding:11px 20px;cursor:pointer;transition:transform .1s;}
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--verde);color:#fff;}
+  .btn-primary:hover{background:var(--verde-escuro);}
+  .btn-leaf{background:var(--folha);color:#fff;}
+  .btn-leaf:hover{background:#647f2b;}
+  .btn-ghost{background:transparent;color:var(--verde);border:1px solid var(--linha);}
+  .btn-ghost:hover{background:var(--folha-suave);}
+  .btn-mini{padding:5px 10px;font-size:11px;border-radius:7px;}
+  .btn-danger{background:transparent;color:var(--erro);border:1px solid #ecd3cf;}
+  .btn-row{margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th{text-align:left;color:var(--cinza);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--linha);}
+  td{padding:9px 10px;border-bottom:1px solid #eef0e8;}
+  tr:last-child td{border-bottom:none;}
+  td.num{font-variant-numeric:tabular-nums;font-weight:500;}
+  .table-wrap{overflow-x:auto;margin-top:6px;}
+  .empty{color:var(--cinza);font-size:13px;padding:22px 0;text-align:center;}
+
+  .quesito{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #eef0e8;gap:14px;flex-wrap:wrap;}
+  .quesito:last-child{border-bottom:none;}
+  .quesito .q-label{font-size:13.5px;flex:1;min-width:180px;}
+  .scale{display:flex;gap:6px;}
+  .scale button{width:36px;height:36px;border-radius:10px;border:1px solid var(--linha);background:#fbfcf9;font-weight:600;font-size:13.5px;color:var(--cinza);cursor:pointer;}
+  .scale button.sel{background:var(--folha);color:#fff;border-color:var(--folha);}
+  .scale button.sel.low{background:var(--erro);border-color:var(--erro);}
+  .scale button.sel.mid{background:var(--amber);border-color:var(--amber);}
+
+  .budget-bar{height:14px;border-radius:8px;background:#edf0e6;overflow:hidden;margin:10px 0 6px;}
+  .budget-bar span{display:block;height:100%;border-radius:8px;transition:width .4s ease;}
+  .budget-line{display:flex;justify-content:space-between;font-size:12px;color:var(--cinza);}
+
+  .filter-bar{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;background:var(--branco);border:1px solid var(--linha);border-radius:var(--radius);padding:13px 15px;}
+  .filter-bar .fld{min-width:140px;}
+  .presets{display:flex;gap:6px;flex-wrap:wrap;}
+  .presets .btn{padding:8px 12px;font-size:11.5px;}
+
+  .link-box{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .link-box input{flex:1;min-width:200px;font-size:12px;}
+  .note{font-size:12px;color:#5a684f;background:var(--folha-suave);border-radius:9px;padding:10px 13px;margin-top:12px;line-height:1.5;}
+
+  /* ---------- KIOSK ---------- */
+  #kiosk-screen{display:none;position:fixed;inset:0;background:linear-gradient(165deg,var(--verde) 0%,var(--verde-escuro) 100%);color:#fff;overflow-y:auto;z-index:60;}
+  .kiosk-inner{max-width:620px;margin:0 auto;padding:44px 20px 60px;}
+  .kiosk-head{text-align:center;margin-bottom:26px;}
+  .kiosk-head .wordmark{font-family:'Poppins',sans-serif;font-weight:700;font-size:26px;}
+  .kiosk-head h1{font-size:26px;margin-top:18px;}
+  .kiosk-head .sub{color:#bcd9a6;font-size:13.5px;margin-top:6px;}
+  .qblock{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:18px;margin-bottom:13px;}
+  .qblock .qtitle{font-family:'Poppins',sans-serif;font-weight:600;font-size:15.5px;margin-bottom:13px;}
+  .emoji-scale{display:flex;gap:8px;}
+  .emoji-scale button{flex:1;border-radius:13px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.05);color:#fff;cursor:pointer;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform .1s;}
+  .emoji-scale button:active{transform:scale(.94);}
+  .emoji-scale .em{font-size:26px;line-height:1;}
+  .emoji-scale .n{font-size:11px;color:#bcd9a6;font-weight:600;}
+  .emoji-scale button.sel{background:var(--folha);border-color:var(--folha);}
+  .emoji-scale button.sel .n{color:#fff;}
+  .kiosk-send{width:100%;background:var(--folha);color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:17px;border:none;border-radius:15px;padding:17px;margin-top:12px;cursor:pointer;}
+  .kiosk-send:hover{background:#85ad3a;}
+  .kiosk-thanks{text-align:center;padding:80px 0;font-size:22px;font-family:'Poppins',sans-serif;font-weight:600;}
+  .kiosk-off{text-align:center;padding:50px 0;color:#bcd9a6;font-size:15px;line-height:2;}
+
+  /* ---------- MODAL / TOAST ---------- */
+  #modal-bg{display:none;position:fixed;inset:0;background:rgba(15,25,12,.45);z-index:80;align-items:center;justify-content:center;padding:20px;}
+  #modal-bg.open{display:flex;}
+  .modal{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:400px;}
+  .modal h3{font-size:17px;color:var(--verde);margin-bottom:14px;}
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--verde);color:#fff;padding:12px 22px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:90;opacity:0;transition:all .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.18);}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #toast.err{background:var(--erro);}
+</style>
+
+<!-- ================= LOGIN ================= -->
+<div id="login-screen">
+  <div class="login-brand">
+    <div id="logo-big"></div>
+    <div class="wordmark">raguife</div>
+    <div class="tagline">Confiança que inspira</div>
+  </div>
+  <div class="login-form-wrap">
+    <div class="login-card">
+      <h2>Painel de Indicadores</h2>
+      <div class="sub">Restaurante, higienização e custos</div>
+      <label>Usuário</label>
+      <input type="text" id="lg-user" autocomplete="username" style="margin-bottom:13px">
+      <label>Senha</label>
+      <input type="password" id="lg-pass" autocomplete="current-password">
+      <div class="login-err" id="lg-err"></div>
+      <button class="btn btn-primary" style="width:100%;padding:13px" onclick="doLogin()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= KIOSK ================= -->
+<div id="kiosk-screen">
+  <div class="kiosk-inner">
+    <div class="kiosk-head">
+      <div id="logo-kiosk"></div>
+      <div class="wordmark">raguife</div>
+      <div id="kiosk-body-wrap"></div>
+    </div>
+    <div id="kiosk-questions"></div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app">
+  <div class="topbar">
+    <div class="brandline">
+      <div id="logo-small"></div>
+      <div>
+        <span class="wordmark">raguife</span>
+        <span class="app-sub">Painel de Indicadores — Restaurante &amp; Higienização</span>
+      </div>
+    </div>
+    <div class="userchip">
+      <div style="text-align:right">
+        <span class="uname" id="chip-nome"></span>
+        <span class="urole" id="chip-role"></span>
+      </div>
+      <button class="btn-top" onclick="openModalSenha()">Alterar senha</button>
+      <button class="btn-top" onclick="logout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <nav class="side" id="sidenav"></nav>
+    <main>
+
+      <!-- DASHBOARD -->
+      <div class="page" id="page-dashboard">
+        <h1 class="page-title">Dashboard</h1>
+        <div class="page-desc">Visão geral dos indicadores no período selecionado</div>
+        <div class="filter-bar">
+          <div class="fld"><label>De</label><input type="date" id="f-de"></div>
+          <div class="fld"><label>Até</label><input type="date" id="f-ate"></div>
+          <div class="presets">
+            <button class="btn btn-ghost" onclick="setPreset('hoje')">Hoje</button>
+            <button class="btn btn-ghost" onclick="setPreset('7d')">7 dias</button>
+            <button class="btn btn-ghost" onclick="setPreset('mes')">Este mês</button>
+            <button class="btn btn-ghost" onclick="setPreset('ano')">Este ano</button>
+          </div>
+          <button class="btn btn-leaf" onclick="applyFilter()">Aplicar</button>
+        </div>
+        <div class="grid-kpi" id="kpi-grid"></div>
+        <div class="panel">
+          <h2>Indicadores por refeição</h2>
+          <div class="desc">Dentro do período filtrado</div>
+          <div class="table-wrap" id="tbl-meal"></div>
+        </div>
+        <div class="panel" id="panel-checklist-semana" style="display:none">
+          <h2>Checklists da semana</h2>
+          <div class="desc">Colaboradores que já responderam nesta semana (segunda a domingo)</div>
+          <div id="week-status"></div>
+        </div>
+        <div class="panel">
+          <h2>Últimos lançamentos de desperdício</h2>
+          <div class="table-wrap" id="tbl-lanc-dash"></div>
+        </div>
+      </div>
+
+      <!-- LANCAMENTO -->
+      <div class="page" id="page-lancamento">
+        <h1 class="page-title">Lançamento diário — Desperdício</h1>
+        <div class="page-desc">Sobra limpa e resto ingesto por refeição</div>
+        <div class="panel">
+          <div class="form-grid">
+            <div><label>Data</label><input type="date" id="r-data"></div>
+            <div><label>Refeição</label>
+              <select id="r-turno"><option>Café da Manhã</option><option>Almoço</option><option>Jantar</option><option>Ceia</option></select>
+            </div>
+            <div><label>Refeições realizadas</label><input type="number" id="r-refeicoes" min="0"></div>
+            <div><label>Produção (kg)</label><input type="number" step="0.01" id="r-producao" min="0"></div>
+            <div><label>Sobra limpa (kg)</label><input type="number" step="0.01" id="r-sobra" min="0"></div>
+            <div><label>Resto ingesto (kg)</label><input type="number" step="0.01" id="r-resto" min="0"></div>
+          </div>
+          <div class="btn-row"><button class="btn btn-primary" onclick="salvarLancamento()">Salvar lançamento</button></div>
+        </div>
+        <div class="panel">
+          <h2>Histórico recente</h2>
+          <div class="table-wrap" id="tbl-lanc-full"></div>
+        </div>
+      </div>
+
+      <!-- COMPRAS -->
+      <div class="page" id="page-compras">
+        <h1 class="page-title">Compras</h1>
+        <div class="page-desc">Lançamento diário de compras e acompanhamento do orçamento mensal</div>
+        <div class="panel" id="panel-orcamento"></div>
+        <div class="panel">
+          <h2>Nova compra</h2>
+          <div class="form-grid">
+            <div><label>Data</label><input type="date" id="c-data"></div>
+            <div><label>Categoria</label>
+              <select id="c-cat"><option>Hortifrúti</option><option>Proteínas</option><option>Mercearia</option><option>Laticínios / Frios</option><option>Padaria</option><option>Descartáveis / Limpeza</option><option>Gás</option><option>Outros</option></select>
+            </div>
+            <div style="grid-column:span 2"><label>Descrição</label><input type="text" id="c-desc" placeholder="ex: Compra semanal de hortifrúti — Fornecedor X"></div>
+            <div><label>Valor (R$)</label><input type="number" step="0.01" id="c-valor" min="0"></div>
+          </div>
+          <div class="btn-row"><button class="btn btn-primary" onclick="salvarCompra()">Salvar compra</button></div>
+        </div>
+        <div class="panel">
+          <h2>Compras do mês</h2>
+          <div class="desc" id="compras-mes-label"></div>
+          <div class="table-wrap" id="tbl-compras"></div>
+        </div>
+      </div>
+
+      <!-- CUSTOS MENSAIS -->
+      <div class="page" id="page-custos">
+        <h1 class="page-title">Custos mensais</h1>
+        <div class="page-desc">Fechamento do mês: refeições validadas, mão de obra e custo por refeição</div>
+        <div class="panel">
+          <h2>Fechamento do mês</h2>
+          <div class="desc">O custo de compras é somado automaticamente dos lançamentos da equipe</div>
+          <div class="form-grid">
+            <div><label>Mês</label><input type="month" id="m-mes"></div>
+            <div><label>Refeições validadas (total)</label><input type="number" id="m-ref" min="0"></div>
+            <div><label>— Café da manhã</label><input type="number" id="m-ref-cafe" min="0"></div>
+            <div><label>— Almoço / Jantar</label><input type="number" id="m-ref-almjan" min="0"></div>
+            <div><label>— Ceia</label><input type="number" id="m-ref-ceia" min="0"></div>
+            <div><label>Custo de mão de obra (R$)</label><input type="number" step="0.01" id="m-mo" min="0"></div>
+            <div><label>Desconto dos funcionários (R$)</label><input type="number" step="0.01" id="m-desc" min="0"></div>
+            <div><label>Ajuste de compras (R$, opcional)</label><input type="number" step="0.01" id="m-ajuste" placeholder="+ ou -"></div>
+          </div>
+          <div class="note" id="m-preview"></div>
+          <div class="btn-row"><button class="btn btn-primary" onclick="salvarCustoMes()">Salvar fechamento</button></div>
+        </div>
+        <div class="panel">
+          <h2>Histórico de custos</h2>
+          <div class="table-wrap" id="tbl-custos"></div>
+        </div>
+      </div>
+
+      <!-- CHECKLIST ADM -->
+      <div class="page" id="page-check-adm">
+        <h1 class="page-title">Checklist — Limpeza Administrativa</h1>
+        <div class="page-desc">Avaliação semanal por setor · notas de 1 (péssimo) a 5 (excelente)</div>
+        <div class="panel">
+          <div class="form-grid" style="margin-bottom:14px">
+            <div><label>Data</label><input type="date" id="adm-data"></div>
+            <div><label>Avaliador</label><input type="text" id="adm-nome" disabled></div>
+            <div><label>Setor</label><input type="text" id="adm-setor" placeholder="ex: RH / Financeiro"></div>
+          </div>
+          <div id="adm-quesitos"></div>
+          <div style="margin-top:14px"><label>Observações adicionais</label><textarea id="adm-obs" placeholder="Ex: necessidade de aumentar dias de limpeza..."></textarea></div>
+          <div class="btn-row"><button class="btn btn-primary" onclick="salvarChecklist('adm')">Enviar checklist</button></div>
+        </div>
+        <div class="panel">
+          <h2>Últimos envios</h2>
+          <div class="table-wrap" id="tbl-adm-full"></div>
+        </div>
+      </div>
+
+      <!-- CHECKLIST HIG -->
+      <div class="page" id="page-check-hig">
+        <h1 class="page-title">Checklist — Limpeza Higiênica</h1>
+        <div class="page-desc">Barreiras sanitárias, vestiários e áreas de descanso · notas de 1 a 5</div>
+        <div class="panel">
+          <div class="form-grid" style="margin-bottom:14px">
+            <div><label>Data</label><input type="date" id="hig-data"></div>
+            <div><label>Avaliador</label><input type="text" id="hig-nome" disabled></div>
+            <div><label>Área avaliada</label><input type="text" id="hig-setor" placeholder="ex: Vestiário / Sanitário / Copa"></div>
+          </div>
+          <div id="hig-quesitos"></div>
+          <div style="margin-top:14px"><label>Observações adicionais</label><textarea id="hig-obs"></textarea></div>
+          <div class="btn-row"><button class="btn btn-primary" onclick="salvarChecklist('hig')">Enviar checklist</button></div>
+        </div>
+        <div class="panel">
+          <h2>Últimos envios</h2>
+          <div class="table-wrap" id="tbl-hig-full"></div>
+        </div>
+      </div>
+
+      <!-- PESQUISA -->
+      <div class="page" id="page-pesquisa">
+        <h1 class="page-title">Pesquisa de Satisfação</h1>
+        <div class="page-desc">Respondida pelos colaboradores no tablet do refeitório, sem login</div>
+        <div class="panel">
+          <h2>Link do tablet</h2>
+          <div class="desc">Deixe este link aberto no tablet — a tela mostra apenas a pesquisa e identifica a refeição pelo horário</div>
+          <div class="link-box">
+            <input type="text" id="tablet-link" readonly>
+            <button class="btn btn-ghost" onclick="copyTabletLink()">Copiar link</button>
+          </div>
+          <div class="note">Café da Manhã 04:30–07:30 · Almoço 10:00–13:00 · Jantar 17:00–19:00 · Ceia 00:00–03:00. As respostas são anônimas e só podem ser registradas por essa tela — usuários do painel não conseguem lançar notas.</div>
+        </div>
+        <div class="panel">
+          <h2>Resultados por refeição</h2>
+          <div class="desc">Médias por pergunta no período do dashboard</div>
+          <div class="table-wrap" id="tbl-sat-detalhe"></div>
+        </div>
+      </div>
+
+      <!-- USUARIOS -->
+      <div class="page" id="page-usuarios">
+        <h1 class="page-title">Usuários</h1>
+        <div class="page-desc">Controle de acesso ao painel por perfil</div>
+        <div class="panel">
+          <h2>Novo usuário</h2>
+          <div class="form-grid">
+            <div><label>Nome completo</label><input type="text" id="u-nome"></div>
+            <div><label>Setor</label><input type="text" id="u-setor"></div>
+            <div><label>E-mail</label><input type="email" id="u-email"></div>
+            <div><label>Usuário (login)</label><input type="text" id="u-user"></div>
+            <div><label>Senha inicial</label><input type="text" id="u-pass"></div>
+            <div><label>Perfil</label>
+              <select id="u-role" onchange="toggleChecklistSel()">
+                <option value="admin">Administrador</option>
+                <option value="nutricionista">Nutricionista</option>
+                <option value="colaborador" selected>Colaborador (checklists)</option>
+              </select>
+            </div>
+            <div id="u-check-wrap"><label>Checklists atribuídos</label>
+              <select id="u-check"><option value="adm">Administrativa</option><option value="hig">Higiênica</option><option value="ambos">Ambos</option></select>
+            </div>
+          </div>
+          <div class="btn-row"><button class="btn btn-primary" onclick="criarUsuario()">Criar usuário</button></div>
+          <div class="note"><b>Perfis:</b> Administrador vê tudo e fecha os custos · Nutricionista lança desperdício e compras · Colaborador responde apenas os checklists atribuídos. Ninguém logado consegue lançar notas na pesquisa de satisfação.</div>
+        </div>
+        <div class="panel">
+          <h2>Usuários cadastrados</h2>
+          <div class="table-wrap" id="tbl-usuarios"></div>
+        </div>
+      </div>
+
+      <!-- CONFIG -->
+      <div class="page" id="page-config">
+        <h1 class="page-title">Metas &amp; Orçamento</h1>
+        <div class="page-desc">Valores usados para calcular o status dos indicadores</div>
+        <div class="panel">
+          <div class="form-grid">
+            <div><label>Meta Sobra Limpa (% da produção)</label><input type="number" step="0.1" id="cfg-sobra"></div>
+            <div><label>Meta Resto Ingesto (kg/pessoa)</label><input type="number" step="0.001" id="cfg-resto"></div>
+            <div><label>Meta Satisfação (nota mín. /5)</label><input type="number" step="0.1" id="cfg-sat"></div>
+            <div><label>Meta Conformidade Limpeza (nota mín. /5)</label><input type="number" step="0.1" id="cfg-conf"></div>
+            <div><label>Orçamento mensal de compras (R$)</label><input type="number" step="0.01" id="cfg-orc"></div>
+          </div>
+          <div class="btn-row"><button class="btn btn-primary" onclick="salvarConfig()">Salvar</button></div>
+        </div>
+        <div class="note">Os dados deste painel ficam armazenados de forma compartilhada entre todos os usuários com acesso ao link.</div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-box"></div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* ================= CONSTANTES ================= */
+const ADM_QUESITOS = ['Limpeza geral','Pisos e circulação','Bancadas, mesas e superfícies','Lixeiras','Pontos críticos – sanitização','Frequência e rotina','Condição final do ambiente'];
+const HIG_QUESITOS = ['Limpeza geral do ambiente','Vasos sanitários e mictórios','Pias, torneiras e espelhos','Abastecimento de insumos','Pisos, ralos e paredes','Vestiário — armários e bancos','Chuveiros e áreas molhadas','Drenagem e segurança','Sala de descanso','Copa — geladeira e pia'];
+const SAT_QUESTOES = [
+  {k:'q1', t:'Qualidade da refeição'},
+  {k:'q2', t:'Variedade do cardápio'},
+  {k:'q3', t:'Limpeza do ambiente'},
+  {k:'q4', t:'Atendimento da equipe'},
+  {k:'q5', t:'Tempo de fila'},
+];
+const EMOJIS = ['😠','🙁','😐','🙂','😄'];
+const MEALS = [
+  {name:'Café da Manhã', start:4.5, end:7.5, label:'04:30–07:30'},
+  {name:'Almoço', start:10, end:13, label:'10:00–13:00'},
+  {name:'Jantar', start:17, end:19, label:'17:00–19:00'},
+  {name:'Ceia', start:0, end:3, label:'00:00–03:00'},
+];
+const ROLES = {admin:'Administrador', nutricionista:'Nutricionista', colaborador:'Colaborador'};
+const NAV_DEF = [
+  {id:'dashboard', label:'Dashboard', ic:'▦', roles:['admin','nutricionista']},
+  {id:'lancamento', label:'Desperdício', ic:'⚖', roles:['admin','nutricionista']},
+  {id:'compras', label:'Compras', ic:'🛒', roles:['admin','nutricionista']},
+  {id:'custos', label:'Custos mensais', ic:'💰', roles:['admin']},
+  {id:'check-adm', label:'Checklist ADM', ic:'✓', roles:['admin'], check:'adm'},
+  {id:'check-hig', label:'Checklist Higiênica', ic:'✓', roles:['admin'], check:'hig'},
+  {id:'pesquisa', label:'Pesquisa Satisfação', ic:'★', roles:['admin','nutricionista']},
+  {id:'usuarios', label:'Usuários', ic:'👤', roles:['admin']},
+  {id:'config', label:'Metas & Orçamento', ic:'⚙', roles:['admin']},
+];
+const DEFAULT_CFG = {metaSobra:5, metaResto:0.03, metaSat:4.5, metaConf:4.5, orcamento:60000};
+
+let state = { users:[], lanc:[], sat:[], adm:[], hig:[], compras:[], custos:[], cfg:{...DEFAULT_CFG}, filterDe:'', filterAte:'' };
+let currentUser = null;
+let admScores = {}, higScores = {}, kioskAnswers = {}, kioskTurno = null;
+const isKioskMode = new URLSearchParams(location.search).get('kiosk') === '1';
+
+/* ================= HELPERS ================= */
+const mem = {};
+async function sGet(key){
+  try{ if(window.storage){ const r = await window.storage.get(key, true); return r ? r.value : null; } }catch(e){}
+  return mem[key] ?? null;
+}
+async function sSet(key, val){
+  mem[key] = val;
+  try{ if(window.storage) await window.storage.set(key, val, true); }catch(e){ console.error(e); }
+}
+async function loadJSON(key, fallback){ const v = await sGet(key); if(!v) return fallback; try{ return JSON.parse(v); }catch(e){ return fallback; } }
+async function saveJSON(key, obj){ await sSet(key, JSON.stringify(obj)); }
+
+async function sha256(txt){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function monthISO(){ return todayISO().slice(0,7); }
+function fmtBR(d){ if(!d) return '—'; const [y,m,dd]=d.split('-'); return dd+'/'+m+'/'+y; }
+function fmtMes(m){ if(!m) return '—'; const [y,mm]=m.split('-'); const nomes=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']; return nomes[Number(mm)-1]+'/'+y; }
+function brl(v){ return (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function detectMeal(){
+  const d = new Date(); const h = d.getHours()+d.getMinutes()/60;
+  for(const m of MEALS){ if(h>=m.start && h<m.end) return m; }
+  return null;
+}
+function mondayOf(d){ const c=new Date(d); const day=c.getDay(); c.setDate(c.getDate()+(day===0?-6:1-day)); c.setHours(0,0,0,0); return c; }
+function weekKey(d){ const m=mondayOf(d); return m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-'+String(m.getDate()).padStart(2,'0'); }
+function toast(msg, isErr){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.toggle('err', !!isErr); t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function tableHTML(headers, rows){
+  if(!rows.length) return '<div class="empty">Sem registros ainda</div>';
+  return '<table><thead><tr>'+headers.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+
+    rows.map(r=>'<tr>'+r.map(c=>'<td class="num">'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
+}
+function mediaQuesitos(q){ const v=Object.values(q).filter(x=>x!=null); return v.length? v.reduce((a,b)=>a+b,0)/v.length : 0; }
+function notaPill(n){
+  if(!n) return '<span class="pill p-neutral">—</span>';
+  const cls = n>=4.5?'p-ok':(n>=3.5?'p-warn':'p-bad');
+  return '<span class="pill '+cls+'">'+n.toFixed(1)+'</span>';
+}
+
+/* ================= LOGO ================= */
+function logoSVG(size){
+  return `<svg width="${size}" height="${size*0.78}" viewBox="0 0 100 78" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="4" width="92" height="70" rx="12" fill="none" stroke="#8CB43E" stroke-width="7"/>
+    <circle cx="30" cy="27" r="6.5" fill="#8CB43E"/>
+    <circle cx="50" cy="23" r="6.5" fill="#8CB43E"/>
+    <circle cx="70" cy="27" r="6.5" fill="#8CB43E"/>
+    <path d="M27 40 v9 a11.5 11.5 0 0 0 23 0 v-9" fill="none" stroke="#8CB43E" stroke-width="9" stroke-linecap="round"/>
+    <path d="M50 40 v9 a11.5 11.5 0 0 0 23 0 v-9" fill="none" stroke="#8CB43E" stroke-width="9" stroke-linecap="round"/>
+  </svg>`;
+}
+
+/* ================= AUTH ================= */
+async function ensureSeed(){
+  state.users = await loadJSON('sys:users', []);
+  if(!state.users.length){
+    const hash = await sha256('raguife123');
+    state.users = [{id:Date.now(), nome:'Administrador', setor:'Gestão', email:'', username:'admin', pass:hash, role:'admin', check:''}];
+    await saveJSON('sys:users', state.users);
+  }
+}
+async function doLogin(){
+  const u = document.getElementById('lg-user').value.trim().toLowerCase();
+  const p = document.getElementById('lg-pass').value;
+  const err = document.getElementById('lg-err');
+  err.textContent = '';
+  if(!u || !p){ err.textContent = 'Informe usuário e senha.'; return; }
+  const hash = await sha256(p);
+  const user = state.users.find(x=>x.username.toLowerCase()===u && x.pass===hash);
+  if(!user){ err.textContent = 'Usuário ou senha incorretos.'; return; }
+  currentUser = user;
+  document.getElementById('lg-pass').value='';
+  enterApp();
+}
+function logout(){
+  currentUser = null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+}
+
+/* ================= NAV / SHELL ================= */
+function allowedNav(){
+  return NAV_DEF.filter(n=>{
+    if(n.roles.includes(currentUser.role)) return true;
+    if(currentUser.role==='colaborador' && n.check){
+      return currentUser.check==='ambos' || currentUser.check===n.check;
+    }
+    return false;
+  });
+}
+function enterApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('chip-nome').textContent = currentUser.nome;
+  document.getElementById('chip-role').textContent = ROLES[currentUser.role] + (currentUser.setor? ' · '+currentUser.setor : '');
+  const nav = allowedNav();
+  document.getElementById('sidenav').innerHTML =
+    '<div class="navlbl">Menu</div>' +
+    nav.map(n=>`<button class="navbtn" data-id="${n.id}" onclick="showPage('${n.id}')"><span class="ic">${n.ic}</span>${n.label}</button>`).join('');
+  document.getElementById('adm-nome').value = currentUser.nome;
+  document.getElementById('hig-nome').value = currentUser.nome;
+  if(currentUser.setor){
+    document.getElementById('adm-setor').value = currentUser.setor;
+    if(!document.getElementById('hig-setor').value) document.getElementById('hig-setor').placeholder = 'ex: Vestiário / Sanitário / Copa';
+  }
+  showPage(nav[0].id);
+  renderAll();
+}
+function showPage(id){
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active', b.dataset.id===id));
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id==='page-'+id));
+  if(id==='dashboard') renderDashboard();
+  if(id==='compras') renderCompras();
+  if(id==='custos'){ previewCusto(); renderCustos(); }
+  if(id==='pesquisa') renderSatDetalhe();
+}
+
+/* ================= RATING WIDGETS ================= */
+function buildQuesitos(containerId, list, scoreObj){
+  const el = document.getElementById(containerId);
+  el.innerHTML = list.map((label,i)=>`
+    <div class="quesito">
+      <div class="q-label">${label}</div>
+      <div class="scale" data-idx="${i}">
+        ${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}">${n}</button>`).join('')}
+      </div>
+    </div>`).join('');
+  el.querySelectorAll('.scale').forEach(sc=>{
+    const idx = sc.dataset.idx;
+    sc.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const n = Number(btn.dataset.n);
+        scoreObj[idx] = n;
+        sc.querySelectorAll('button').forEach(b=>{
+          b.classList.remove('sel','low','mid');
+          if(b===btn){ b.classList.add('sel'); if(n<=2) b.classList.add('low'); else if(n===3) b.classList.add('mid'); }
+        });
+      });
+    });
+  });
+}
+
+/* ================= SAVE: LANÇAMENTO ================= */
+async function salvarLancamento(){
+  const refeicoes = Number(document.getElementById('r-refeicoes').value)||0;
+  const producao = Number(document.getElementById('r-producao').value)||0;
+  if(!refeicoes && !producao){ toast('Informe as refeições e a produção.', true); return; }
+  const entry = {
+    id: Date.now(),
+    data: document.getElementById('r-data').value || todayISO(),
+    turno: document.getElementById('r-turno').value,
+    refeicoes, producao,
+    sobra: Number(document.getElementById('r-sobra').value)||0,
+    resto: Number(document.getElementById('r-resto').value)||0,
+    autor: currentUser.nome,
+  };
+  state.lanc.push(entry);
+  await saveJSON('restaurante:lancamentos', state.lanc);
+  ['r-refeicoes','r-producao','r-sobra','r-resto'].forEach(id=>document.getElementById(id).value='');
+  toast('Lançamento salvo ✓');
+  renderLancTables();
+}
+async function delLancamento(id){
+  confirmModal('Excluir este lançamento?', async ()=>{
+    state.lanc = state.lanc.filter(x=>x.id!==id);
+    await saveJSON('restaurante:lancamentos', state.lanc);
+    toast('Lançamento excluído');
+    renderLancTables(); renderDashboard();
+  });
+}
+
+/* ================= SAVE: COMPRAS ================= */
+async function salvarCompra(){
+  const valor = Number(document.getElementById('c-valor').value)||0;
+  const desc = document.getElementById('c-desc').value.trim();
+  if(!valor || !desc){ toast('Informe descrição e valor.', true); return; }
+  const entry = {
+    id: Date.now(),
+    data: document.getElementById('c-data').value || todayISO(),
+    cat: document.getElementById('c-cat').value,
+    desc, valor,
+    autor: currentUser.nome,
+  };
+  state.compras.push(entry);
+  await saveJSON('custos:compras', state.compras);
+  document.getElementById('c-desc').value=''; document.getElementById('c-valor').value='';
+  toast('Compra salva ✓');
+  renderCompras();
+}
+async function delCompra(id){
+  const c = state.compras.find(x=>x.id===id);
+  if(!c) return;
+  if(currentUser.role!=='admin' && c.autor!==currentUser.nome){ toast('Só o autor ou o administrador pode excluir.', true); return; }
+  confirmModal('Excluir esta compra?', async ()=>{
+    state.compras = state.compras.filter(x=>x.id!==id);
+    await saveJSON('custos:compras', state.compras);
+    toast('Compra excluída');
+    renderCompras();
+  });
+}
+function comprasDoMes(mes){ return state.compras.filter(c=>c.data && c.data.slice(0,7)===mes); }
+
+function renderCompras(){
+  const mes = monthISO();
+  const doMes = comprasDoMes(mes);
+  const gasto = doMes.reduce((a,c)=>a+c.valor,0);
+  const orc = state.cfg.orcamento||0;
+  const pct = orc? Math.min(100, gasto/orc*100) : 0;
+  const hoje = new Date();
+  const diasNoMes = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0).getDate();
+  const diasRestantes = diasNoMes - hoje.getDate();
+  const saldo = orc - gasto;
+  const cor = pct<75? 'var(--folha)' : (pct<95? 'var(--amber)' : 'var(--erro)');
+  document.getElementById('panel-orcamento').innerHTML = `
+    <h2>Orçamento de ${fmtMes(mes)}</h2>
+    <div class="desc">${brl(orc)} estipulado para o mês</div>
+    <div class="budget-bar"><span style="width:${pct}%;background:${cor}"></span></div>
+    <div class="budget-line">
+      <span><b>${brl(gasto)}</b> gasto (${pct.toFixed(0)}%)</span>
+      <span>Saldo: <b style="color:${saldo>=0?'var(--ok)':'var(--erro)'}">${brl(saldo)}</b>${diasRestantes>0 && saldo>0 ? ' · '+brl(saldo/Math.max(diasRestantes,1))+'/dia restante' : ''}</span>
+    </div>`;
+  document.getElementById('compras-mes-label').textContent = doMes.length + ' compra(s) em ' + fmtMes(mes);
+  const rows = [...doMes].sort((a,b)=>b.data.localeCompare(a.data)).map(c=>[
+    fmtBR(c.data), esc(c.cat), esc(c.desc), brl(c.valor), esc(c.autor||'—'),
+    `<button class="btn btn-danger btn-mini" onclick="delCompra(${c.id})">Excluir</button>`
+  ]);
+  document.getElementById('tbl-compras').innerHTML = tableHTML(['Data','Categoria','Descrição','Valor','Lançado por',''], rows);
+}
+
+/* ================= SAVE: CUSTOS MENSAIS ================= */
+function calcCusto(m){
+  const compras = comprasDoMes(m.mes).reduce((a,c)=>a+c.valor,0) + (m.ajuste||0);
+  const ref = m.ref||0;
+  return {
+    compras,
+    semMO: ref? (compras - (m.desc||0))/ref : 0,
+    comMO: ref? (compras + (m.mo||0) - (m.desc||0))/ref : 0,
+    semDesc: ref? (compras + (m.mo||0))/ref : 0,
+  };
+}
+function previewCusto(){
+  const mes = document.getElementById('m-mes').value || monthISO();
+  document.getElementById('m-mes').value = mes;
+  const compras = comprasDoMes(mes).reduce((a,c)=>a+c.valor,0);
+  const lancadas = state.lanc.filter(l=>l.data && l.data.slice(0,7)===mes).reduce((a,l)=>a+l.refeicoes,0);
+  const existente = state.custos.find(c=>c.mes===mes);
+  if(existente){
+    document.getElementById('m-ref').value = existente.ref||'';
+    document.getElementById('m-ref-cafe').value = existente.refCafe||'';
+    document.getElementById('m-ref-almjan').value = existente.refAlmJan||'';
+    document.getElementById('m-ref-ceia').value = existente.refCeia||'';
+    document.getElementById('m-mo').value = existente.mo||'';
+    document.getElementById('m-desc').value = existente.desc||'';
+    document.getElementById('m-ajuste').value = existente.ajuste||'';
+  }
+  document.getElementById('m-preview').innerHTML =
+    `Compras lançadas em <b>${fmtMes(mes)}</b>: <b>${brl(compras)}</b> · Refeições lançadas no desperdício: <b>${lancadas.toLocaleString('pt-BR')}</b>` +
+    (existente? ' · <span class="pill p-warn">Mês já fechado — salvar substitui</span>' : '');
+}
+async function salvarCustoMes(){
+  const mes = document.getElementById('m-mes').value;
+  const ref = Number(document.getElementById('m-ref').value)||0;
+  if(!mes || !ref){ toast('Informe o mês e as refeições validadas.', true); return; }
+  const entry = {
+    id: Date.now(), mes, ref,
+    refCafe: Number(document.getElementById('m-ref-cafe').value)||0,
+    refAlmJan: Number(document.getElementById('m-ref-almjan').value)||0,
+    refCeia: Number(document.getElementById('m-ref-ceia').value)||0,
+    mo: Number(document.getElementById('m-mo').value)||0,
+    desc: Number(document.getElementById('m-desc').value)||0,
+    ajuste: Number(document.getElementById('m-ajuste').value)||0,
+    autor: currentUser.nome,
+  };
+  state.custos = state.custos.filter(c=>c.mes!==mes);
+  state.custos.push(entry);
+  await saveJSON('custos:mensal', state.custos);
+  toast('Fechamento de '+fmtMes(mes)+' salvo ✓');
+  previewCusto(); renderCustos();
+}
+function renderCustos(){
+  const rows = [...state.custos].sort((a,b)=>b.mes.localeCompare(a.mes)).map(m=>{
+    const c = calcCusto(m);
+    const lancadas = state.lanc.filter(l=>l.data && l.data.slice(0,7)===m.mes).reduce((a,l)=>a+l.refeicoes,0);
+    const dif = lancadas - m.ref;
+    return [
+      '<b>'+fmtMes(m.mes)+'</b>',
+      m.ref.toLocaleString('pt-BR'),
+      (dif===0?'<span class="pill p-ok">0</span>':`<span class="pill ${Math.abs(dif)>m.ref*0.05?'p-bad':'p-warn'}">${dif>0?'+':''}${dif.toLocaleString('pt-BR')}</span>`),
+      brl(c.compras), brl(m.mo), brl(m.desc),
+      '<b>'+brl(c.semMO)+'</b>', '<b>'+brl(c.comMO)+'</b>', '<b>'+brl(c.semDesc)+'</b>'
+    ];
+  });
+  document.getElementById('tbl-custos').innerHTML = tableHTML(
+    ['Mês','Refeições validadas','Dif. lançado','Compras','Mão de obra','Desc. funcionários','Unit. sem MO','Unit. com MO','Unit. sem desconto'], rows);
+}
+
+/* ================= SAVE: CHECKLISTS ================= */
+async function salvarChecklist(tipo){
+  const isAdm = tipo==='adm';
+  const list = isAdm? ADM_QUESITOS : HIG_QUESITOS;
+  const scores = isAdm? admScores : higScores;
+  if(Object.keys(scores).length < list.length){ toast('Dê uma nota para todos os itens.', true); return; }
+  const quesitos = {};
+  list.forEach((label,i)=> quesitos[label] = scores[i]);
+  const entry = {
+    id: Date.now(),
+    data: document.getElementById(tipo+'-data').value || todayISO(),
+    setor: document.getElementById(tipo+'-setor').value.trim(),
+    nome: currentUser.nome,
+    username: currentUser.username,
+    quesitos,
+    obs: document.getElementById(tipo+'-obs').value.trim(),
+  };
+  if(isAdm){ state.adm.push(entry); await saveJSON('checklist:adm', state.adm); admScores={}; buildQuesitos('adm-quesitos', ADM_QUESITOS, admScores); }
+  else { state.hig.push(entry); await saveJSON('checklist:hig', state.hig); higScores={}; buildQuesitos('hig-quesitos', HIG_QUESITOS, higScores); }
+  document.getElementById(tipo+'-obs').value='';
+  toast('Checklist enviado — obrigado ✓');
+  renderHigTables();
+}
+function renderHigTables(){
+  const mk = arr => [...arr].sort((a,b)=>b.data.localeCompare(a.data)).slice(0,10)
+    .map(r=>[fmtBR(r.data), esc(r.setor||'—'), esc(r.nome||'—'), notaPill(mediaQuesitos(r.quesitos)), esc((r.obs||'').slice(0,60))]);
+  document.getElementById('tbl-adm-full').innerHTML = tableHTML(['Data','Setor','Avaliador','Nota média','Observações'], mk(state.adm));
+  document.getElementById('tbl-hig-full').innerHTML = tableHTML(['Data','Área','Avaliador','Nota média','Observações'], mk(state.hig));
+}
+
+/* ================= USUÁRIOS ================= */
+function toggleChecklistSel(){
+  document.getElementById('u-check-wrap').style.display =
+    document.getElementById('u-role').value==='colaborador' ? 'block' : 'none';
+}
+async function criarUsuario(){
+  const nome = document.getElementById('u-nome').value.trim();
+  const username = document.getElementById('u-user').value.trim().toLowerCase();
+  const pass = document.getElementById('u-pass').value;
+  const role = document.getElementById('u-role').value;
+  if(!nome || !username || !pass){ toast('Informe nome, usuário e senha.', true); return; }
+  if(state.users.some(u=>u.username.toLowerCase()===username)){ toast('Este nome de usuário já existe.', true); return; }
+  const entry = {
+    id: Date.now(), nome, username,
+    setor: document.getElementById('u-setor').value.trim(),
+    email: document.getElementById('u-email').value.trim(),
+    pass: await sha256(pass),
+    role,
+    check: role==='colaborador' ? document.getElementById('u-check').value : '',
+  };
+  state.users.push(entry);
+  await saveJSON('sys:users', state.users);
+  ['u-nome','u-setor','u-email','u-user','u-pass'].forEach(id=>document.getElementById(id).value='');
+  toast('Usuário criado ✓');
+  renderUsuarios(); renderDashboard();
+}
+async function removerUsuario(id){
+  if(id===currentUser.id){ toast('Você não pode remover o próprio usuário.', true); return; }
+  confirmModal('Remover este usuário? Ele perderá o acesso ao painel.', async ()=>{
+    state.users = state.users.filter(u=>u.id!==id);
+    await saveJSON('sys:users', state.users);
+    toast('Usuário removido');
+    renderUsuarios(); renderDashboard();
+  });
+}
+function resetSenhaModal(id){
+  const u = state.users.find(x=>x.id===id); if(!u) return;
+  openModal(`<h3>Redefinir senha — ${esc(u.nome)}</h3>
+    <label>Nova senha</label><input type="text" id="rs-pass" style="margin-bottom:14px">
+    <div class="btn-row" style="margin-top:6px">
+      <button class="btn btn-primary" onclick="confirmResetSenha(${id})">Salvar</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+    </div>`);
+}
+async function confirmResetSenha(id){
+  const p = document.getElementById('rs-pass').value;
+  if(!p){ toast('Informe a nova senha.', true); return; }
+  const u = state.users.find(x=>x.id===id);
+  u.pass = await sha256(p);
+  await saveJSON('sys:users', state.users);
+  closeModal(); toast('Senha redefinida ✓');
+}
+function checkLabel(c){ return c==='ambos'?'ADM + Higiênica':(c==='adm'?'Administrativa':(c==='hig'?'Higiênica':'—')); }
+function renderUsuarios(){
+  const rows = state.users.map(u=>[
+    '<b>'+esc(u.nome)+'</b>', esc(u.username), ROLES[u.role],
+    u.role==='colaborador'? checkLabel(u.check) : '—',
+    esc(u.setor||'—'),
+    `<button class="btn btn-ghost btn-mini" onclick="resetSenhaModal(${u.id})">Redefinir senha</button>
+     <button class="btn btn-danger btn-mini" onclick="removerUsuario(${u.id})">Remover</button>`
+  ]);
+  document.getElementById('tbl-usuarios').innerHTML = tableHTML(['Nome','Usuário','Perfil','Checklists','Setor',''], rows);
+}
+
+/* ================= CONFIG ================= */
+async function salvarConfig(){
+  state.cfg = {
+    metaSobra: Number(document.getElementById('cfg-sobra').value)||DEFAULT_CFG.metaSobra,
+    metaResto: Number(document.getElementById('cfg-resto').value)||DEFAULT_CFG.metaResto,
+    metaSat: Number(document.getElementById('cfg-sat').value)||DEFAULT_CFG.metaSat,
+    metaConf: Number(document.getElementById('cfg-conf').value)||DEFAULT_CFG.metaConf,
+    orcamento: Number(document.getElementById('cfg-orc').value)||DEFAULT_CFG.orcamento,
+  };
+  await saveJSON('config:metas', state.cfg);
+  toast('Metas salvas ✓');
+  renderDashboard(); renderCompras();
+}
+
+/* ================= DASHBOARD ================= */
+function applyFilter(){
+  state.filterDe = document.getElementById('f-de').value;
+  state.filterAte = document.getElementById('f-ate').value;
+  renderDashboard(); renderSatDetalhe();
+}
+function setPreset(p){
+  let de, ate = todayISO();
+  if(p==='hoje') de = todayISO();
+  else if(p==='7d'){ const d=new Date(); d.setDate(d.getDate()-6); de=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  else if(p==='mes') de = todayISO().slice(0,8)+'01';
+  else de = todayISO().slice(0,4)+'-01-01';
+  document.getElementById('f-de').value = de;
+  document.getElementById('f-ate').value = ate;
+  applyFilter();
+}
+function inRange(d){
+  if(!d) return false;
+  if(state.filterDe && d<state.filterDe) return false;
+  if(state.filterAte && d>state.filterAte) return false;
+  return true;
+}
+function mediaSat(rows){
+  let sum=0,n=0;
+  rows.forEach(r=>SAT_QUESTOES.forEach(q=>{ if(r[q.k]!=null){ sum+=r[q.k]; n++; } }));
+  return n? sum/n : 0;
+}
+function mediaLista(rows){
+  const m = rows.map(r=>mediaQuesitos(r.quesitos)).filter(v=>v>0);
+  return m.length? m.reduce((a,b)=>a+b,0)/m.length : 0;
+}
+function kpiCard(title, value, metaText, ok, val, max, hasData){
+  const pct = Math.max(0, Math.min(100, max? (val/max)*100 : 0));
+  const pill = !hasData? '<span class="pill p-neutral abs">Sem dados</span>' :
+    (ok? '<span class="pill p-ok abs">Dentro da meta</span>' : '<span class="pill p-bad abs">Fora da meta</span>');
+  const cor = !hasData? '#cdd4c4' : (ok? 'var(--folha)' : 'var(--erro)');
+  return `<div class="kpi">${pill}
+    <div class="eyebrow">${title}</div>
+    <div class="val">${value}</div>
+    <div class="meta">${metaText}</div>
+    <div class="bar"><span style="width:${pct}%;background:${cor}"></span></div>
+  </div>`;
+}
+function renderDashboard(){
+  if(!currentUser || currentUser.role==='colaborador') return;
+  const lancF = state.lanc.filter(r=>inRange(r.data));
+  const satF = state.sat.filter(r=>inRange(r.data));
+  const admF = state.adm.filter(r=>inRange(r.data));
+  const higF = state.hig.filter(r=>inRange(r.data));
+  const cfg = state.cfg;
+
+  const producao = lancF.reduce((a,r)=>a+r.producao,0);
+  const sobra = lancF.reduce((a,r)=>a+r.sobra,0);
+  const resto = lancF.reduce((a,r)=>a+r.resto,0);
+  const refeicoes = lancF.reduce((a,r)=>a+r.refeicoes,0);
+  const pctSobra = producao? sobra/producao*100 : 0;
+  const kgResto = refeicoes? resto/refeicoes : 0;
+  const satM = mediaSat(satF);
+  const admM = mediaLista(admF);
+  const higM = mediaLista(higF);
+
+  const mes = monthISO();
+  const gastoMes = comprasDoMes(mes).reduce((a,c)=>a+c.valor,0);
+
+  document.getElementById('kpi-grid').innerHTML = [
+    kpiCard('Sobra Limpa', pctSobra.toFixed(1)+'%', 'Meta: até '+cfg.metaSobra+'%', pctSobra<=cfg.metaSobra, pctSobra, cfg.metaSobra*1.6, producao>0),
+    kpiCard('Resto Ingesto', kgResto.toFixed(3)+' kg/pessoa', 'Meta: até '+cfg.metaResto+' kg', kgResto<=cfg.metaResto, kgResto, cfg.metaResto*1.6, refeicoes>0),
+    kpiCard('Satisfação', satM? satM.toFixed(2)+' / 5':'—', 'Meta: ≥ '+cfg.metaSat+' · '+satF.length+' respostas', satM>=cfg.metaSat, satM, 5, satF.length>0),
+    kpiCard('Conformidade ADM', admM? admM.toFixed(2)+' / 5':'—', 'Meta: ≥ '+cfg.metaConf+' · '+admF.length+' checklists', admM>=cfg.metaConf, admM, 5, admF.length>0),
+    kpiCard('Conformidade Higiênica', higM? higM.toFixed(2)+' / 5':'—', 'Meta: ≥ '+cfg.metaConf+' · '+higF.length+' checklists', higM>=cfg.metaConf, higM, 5, higF.length>0),
+    kpiCard('Compras · '+fmtMes(mes), brl(gastoMes), 'Orçamento: '+brl(cfg.orcamento), gastoMes<=cfg.orcamento, gastoMes, cfg.orcamento, true),
+  ].join('');
+
+  const mealRows = MEALS.map(m=>{
+    const l = lancF.filter(r=>r.turno===m.name);
+    const s = satF.filter(r=>r.turno===m.name);
+    const prod = l.reduce((a,r)=>a+r.producao,0);
+    const sob = l.reduce((a,r)=>a+r.sobra,0);
+    const res = l.reduce((a,r)=>a+r.resto,0);
+    const ref = l.reduce((a,r)=>a+r.refeicoes,0);
+    const sM = mediaSat(s);
+    return [m.name, prod? (sob/prod*100).toFixed(1)+'%':'—', ref? (res/ref).toFixed(3):'—', sM? sM.toFixed(2)+' ('+s.length+')':'—'];
+  });
+  mealRows.push(['<b>Geral</b>', producao? pctSobra.toFixed(1)+'%':'—', refeicoes? kgResto.toFixed(3):'—', satM? satM.toFixed(2)+' ('+satF.length+')':'—']);
+  document.getElementById('tbl-meal').innerHTML = tableHTML(['Refeição','Sobra Limpa','Resto Ingesto (kg/pessoa)','Satisfação'], mealRows);
+
+  const rowsL = [...lancF].sort((a,b)=>b.data.localeCompare(a.data)).slice(0,8)
+    .map(r=>[fmtBR(r.data), r.turno, r.refeicoes, r.producao.toFixed(2), r.sobra.toFixed(2), r.resto.toFixed(2)]);
+  document.getElementById('tbl-lanc-dash').innerHTML = tableHTML(['Data','Refeição','Refeições','Produção (kg)','Sobra (kg)','Resto (kg)'], rowsL);
+
+  const panel = document.getElementById('panel-checklist-semana');
+  if(currentUser.role==='admin'){
+    panel.style.display='block';
+    renderWeekStatus();
+  } else panel.style.display='none';
+}
+function renderWeekStatus(){
+  const wk = weekKey(new Date());
+  const colabs = state.users.filter(u=>u.role==='colaborador');
+  if(!colabs.length){ document.getElementById('week-status').innerHTML='<div class="empty">Nenhum colaborador cadastrado — crie usuários com perfil Colaborador</div>'; return; }
+  const rows = []; const pendentesEmail = [];
+  colabs.forEach(u=>{
+    const tipos = u.check==='ambos'? ['adm','hig'] : [u.check];
+    tipos.forEach(t=>{
+      const arr = t==='adm'? state.adm : state.hig;
+      const done = arr.some(e=>e.username===u.username && e.data && weekKey(new Date(e.data+'T12:00:00'))===wk);
+      if(!done && u.email) pendentesEmail.push(u.email);
+      rows.push([esc(u.nome), t==='adm'?'Administrativa':'Higiênica', esc(u.setor||'—'),
+        done? '<span class="pill p-ok">Respondido</span>' : '<span class="pill p-bad">Pendente</span>']);
+    });
+  });
+  let html = tableHTML(['Colaborador','Checklist','Setor','Status'], rows);
+  if(pendentesEmail.length){
+    const subject = encodeURIComponent('Checklist de limpeza — preencher até sexta-feira');
+    const body = encodeURIComponent('Olá! Pedimos que preencha o checklist de conformidade de limpeza desta semana no painel. Obrigado.');
+    html += `<div class="btn-row"><a class="btn btn-leaf" style="text-decoration:none" href="mailto:${[...new Set(pendentesEmail)].join(',')}?subject=${subject}&body=${body}">Cobrar pendentes por e-mail</a></div>`;
+  }
+  document.getElementById('week-status').innerHTML = html;
+}
+
+/* ================= PESQUISA (detalhe + link) ================= */
+function renderSatDetalhe(){
+  const satF = state.sat.filter(r=>inRange(r.data));
+  const turnos = ['Café da Manhã','Almoço','Jantar','Ceia'];
+  const rows = turnos.map(t=>{
+    const s = satF.filter(r=>r.turno===t);
+    if(!s.length) return [t,'—','—','—','—','—','—','0'];
+    const med = k => { const v=s.map(r=>r[k]).filter(x=>x!=null); return v.length? (v.reduce((a,b)=>a+b,0)/v.length).toFixed(2) : '—'; };
+    return [t, med('q1'), med('q2'), med('q3'), med('q4'), med('q5'), mediaSat(s).toFixed(2), String(s.length)];
+  });
+  document.getElementById('tbl-sat-detalhe').innerHTML = tableHTML(
+    ['Refeição','Qualidade','Variedade','Limpeza','Atendimento','Fila','<b>Geral</b>','Respostas'], rows);
+}
+function copyTabletLink(){
+  const url = location.origin + location.pathname + '?kiosk=1';
+  const inp = document.getElementById('tablet-link');
+  inp.value = url; inp.select();
+  try{ navigator.clipboard && navigator.clipboard.writeText(url); }catch(e){}
+  try{ document.execCommand('copy'); }catch(e){}
+  toast('Link copiado ✓');
+}
+function renderLancTables(){
+  const rows = [...state.lanc].sort((a,b)=>b.data.localeCompare(a.data) || b.id-a.id).slice(0,12)
+    .map(r=>[fmtBR(r.data), r.turno, r.refeicoes, r.producao.toFixed(2), r.sobra.toFixed(2), r.resto.toFixed(2), esc(r.autor||'—'),
+      currentUser.role==='admin'? `<button class="btn btn-danger btn-mini" onclick="delLancamento(${r.id})">Excluir</button>` : '']);
+  document.getElementById('tbl-lanc-full').innerHTML = tableHTML(['Data','Refeição','Refeições','Produção','Sobra','Resto','Por',''], rows);
+}
+
+/* ================= KIOSK ================= */
+function renderKiosk(){
+  const wrap = document.getElementById('kiosk-body-wrap');
+  const qs = document.getElementById('kiosk-questions');
+  const meal = detectMeal();
+  if(!meal){
+    kioskTurno = null;
+    wrap.innerHTML = '<h1>Pesquisa de Satisfação</h1><div class="sub">Fora do horário de refeição no momento</div>';
+    qs.innerHTML = '<div class="kiosk-off">Café da Manhã 04:30–07:30<br>Almoço 10:00–13:00<br>Jantar 17:00–19:00<br>Ceia 00:00–03:00</div>';
+    return;
+  }
+  if(meal.name === kioskTurno) return;
+  kioskTurno = meal.name; kioskAnswers = {};
+  wrap.innerHTML = `<h1>Como foi ${meal.name==='Café da Manhã'?'o café da manhã':(meal.name==='Ceia'?'a ceia':'o '+meal.name.toLowerCase())} hoje?</h1>
+    <div class="sub">Toque uma carinha para cada item · ${meal.label}</div>`;
+  qs.innerHTML = SAT_QUESTOES.map(q=>`
+    <div class="qblock">
+      <div class="qtitle">${q.t}</div>
+      <div class="emoji-scale" data-k="${q.k}">
+        ${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}"><span class="em">${EMOJIS[n-1]}</span><span class="n">${n}</span></button>`).join('')}
+      </div>
+    </div>`).join('') +
+    '<button class="kiosk-send" onclick="enviarSatisfacao()">Enviar avaliação</button>';
+  qs.querySelectorAll('.emoji-scale').forEach(sc=>{
+    const k = sc.dataset.k;
+    sc.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        kioskAnswers[k] = Number(btn.dataset.n);
+        sc.querySelectorAll('button').forEach(b=>b.classList.toggle('sel', b===btn));
+      });
+    });
+  });
+}
+async function enviarSatisfacao(){
+  if(!kioskTurno) return;
+  if(Object.keys(kioskAnswers).length < SAT_QUESTOES.length){
+    toast('Toque uma carinha em todos os itens 🙂', true); return;
+  }
+  const now = new Date();
+  const entry = { id:Date.now(), data:todayISO(), hora:String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'), turno:kioskTurno, ...kioskAnswers };
+  state.sat.push(entry);
+  await saveJSON('restaurante:satisfacao', state.sat);
+  document.getElementById('kiosk-questions').innerHTML = '<div class="kiosk-thanks">Obrigado pela avaliação! 🙌</div>';
+  document.getElementById('kiosk-body-wrap').innerHTML = '';
+  kioskTurno = null; kioskAnswers = {};
+  setTimeout(renderKiosk, 2400);
+}
+
+/* ================= MODAL ================= */
+function openModal(html){ document.getElementById('modal-box').innerHTML = html; document.getElementById('modal-bg').classList.add('open'); }
+function closeModal(){ document.getElementById('modal-bg').classList.remove('open'); }
+let _confirmFn = null;
+function confirmModal(msg, fn){
+  _confirmFn = fn;
+  openModal(`<h3>Confirmar</h3><p style="font-size:14px;color:#40503b;margin:0 0 16px">${msg}</p>
+    <div class="btn-row" style="margin-top:0">
+      <button class="btn btn-primary" onclick="_confirmFn&&_confirmFn();closeModal()">Confirmar</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+    </div>`);
+}
+function openModalSenha(){
+  openModal(`<h3>Alterar minha senha</h3>
+    <label>Senha atual</label><input type="password" id="cs-old" style="margin-bottom:12px">
+    <label>Nova senha</label><input type="password" id="cs-new">
+    <div class="btn-row"><button class="btn btn-primary" onclick="salvarNovaSenha()">Salvar</button>
+    <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button></div>`);
+}
+async function salvarNovaSenha(){
+  const oldP = document.getElementById('cs-old').value;
+  const newP = document.getElementById('cs-new').value;
+  if(!newP){ toast('Informe a nova senha.', true); return; }
+  if(await sha256(oldP) !== currentUser.pass){ toast('Senha atual incorreta.', true); return; }
+  currentUser.pass = await sha256(newP);
+  const u = state.users.find(x=>x.id===currentUser.id);
+  if(u) u.pass = currentUser.pass;
+  await saveJSON('sys:users', state.users);
+  closeModal(); toast('Senha alterada ✓');
+}
+
+/* ================= INIT ================= */
+function renderAll(){
+  renderLancTables(); renderHigTables(); renderCompras();
+  if(currentUser.role==='admin'){ renderUsuarios(); renderCustos(); previewCusto(); }
+  renderDashboard(); renderSatDetalhe();
+}
+async function init(){
+  document.getElementById('logo-big').innerHTML = logoSVG(96);
+  document.getElementById('logo-small').innerHTML = logoSVG(34);
+  document.getElementById('logo-kiosk').innerHTML = logoSVG(64);
+
+  state.cfg = await loadJSON('config:metas', {...DEFAULT_CFG});
+  state.lanc = await loadJSON('restaurante:lancamentos', []);
+  state.sat = await loadJSON('restaurante:satisfacao', []);
+  state.adm = await loadJSON('checklist:adm', []);
+  state.hig = await loadJSON('checklist:hig', []);
+  state.compras = await loadJSON('custos:compras', []);
+  state.custos = await loadJSON('custos:mensal', []);
+
+  if(isKioskMode){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('kiosk-screen').style.display='block';
+    renderKiosk();
+    setInterval(renderKiosk, 20000);
+    return;
+  }
+
+  await ensureSeed();
+
+  document.getElementById('r-data').value = todayISO();
+  document.getElementById('c-data').value = todayISO();
+  document.getElementById('adm-data').value = todayISO();
+  document.getElementById('hig-data').value = todayISO();
+  document.getElementById('m-mes').value = monthISO();
+  document.getElementById('m-mes').addEventListener('change', previewCusto);
+  document.getElementById('f-de').value = todayISO().slice(0,8)+'01';
+  document.getElementById('f-ate').value = todayISO();
+  state.filterDe = document.getElementById('f-de').value;
+  state.filterAte = document.getElementById('f-ate').value;
+  document.getElementById('tablet-link').value = location.origin + location.pathname + '?kiosk=1';
+  document.getElementById('cfg-sobra').value = state.cfg.metaSobra;
+  document.getElementById('cfg-resto').value = state.cfg.metaResto;
+  document.getElementById('cfg-sat').value = state.cfg.metaSat;
+  document.getElementById('cfg-conf').value = state.cfg.metaConf;
+  document.getElementById('cfg-orc').value = state.cfg.orcamento;
+
+  buildQuesitos('adm-quesitos', ADM_QUESITOS, admScores);
+  buildQuesitos('hig-quesitos', HIG_QUESITOS, higScores);
+  toggleChecklistSel();
+
+  document.getElementById('lg-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+}
+init();
+</script>
