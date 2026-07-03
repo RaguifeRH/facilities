@@ -335,13 +335,22 @@
           <h2>Nova compra</h2>
           <div class="form-grid">
             <div><label>Data</label><input type="date" id="c-data"></div>
-            <div><label>Categoria</label>
-              <select id="c-cat"><option>Hortifrúti</option><option>Proteínas</option><option>Mercearia</option><option>Laticínios / Frios</option><option>Padaria</option><option>Descartáveis / Limpeza</option><option>Gás</option><option>Outros</option></select>
-            </div>
+            <div><label>Categoria</label><select id="c-cat"></select></div>
             <div style="grid-column:span 2"><label>Descrição</label><input type="text" id="c-desc" placeholder="ex: Compra semanal de hortifrúti — Fornecedor X"></div>
+            <div><label>Nota Fiscal</label><input type="text" id="c-nf" placeholder="nº da NF"></div>
+            <div><label>Nº Pedido Totvs</label><input type="text" id="c-pedido" placeholder="nº do pedido"></div>
             <div><label>Valor (R$)</label><input type="number" step="0.01" id="c-valor" min="0"></div>
           </div>
           <div class="btn-row"><button class="btn btn-primary" onclick="salvarCompra()">Salvar compra</button></div>
+        </div>
+        <div class="panel" id="panel-categorias" style="display:none">
+          <h2>Categorias de compra</h2>
+          <div class="desc">Somente administradores podem alterar</div>
+          <div class="resp-form" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+            <div style="flex:1;min-width:180px"><label>Nova categoria</label><input type="text" id="cat-nova" placeholder="ex: Bebidas"></div>
+            <button class="btn btn-leaf" onclick="addCategoria()">Adicionar</button>
+          </div>
+          <div class="table-wrap" id="tbl-categorias"></div>
         </div>
         <div class="panel">
           <h2>Compras do mês</h2>
@@ -586,8 +595,9 @@ const NAV_DEF = [
   {id:'config', label:'Metas & Config', ic:'⚙', roles:['admin']},
 ];
 const DEFAULT_CFG = {metaSobra:5, metaResto:0.03, metaSat:4.5, metaConf:4.5, orcamento:60000};
+const DEFAULT_CATS = ['Hortifrúti','Proteínas','Mercearia','Laticínios / Frios','Padaria','Descartáveis / Limpeza','Gás','Outros'];
 
-let state = { users:[], lanc:[], sat:[], adm:[], hig:[], compras:[], custos:[], cfg:{...DEFAULT_CFG}, emailCfg:{}, filterDe:'', filterAte:'' };
+let state = { users:[], lanc:[], sat:[], adm:[], hig:[], compras:[], custos:[], cfg:{...DEFAULT_CFG}, emailCfg:{}, categorias:[...DEFAULT_CATS], filterDe:'', filterAte:'' };
 let currentUser = null;   // {uid, nome, email, setor, role, check}
 let admScores = {}, higScores = {}, kioskAnswers = {}, kioskTurno = null;
 let unsubs = [];
@@ -716,6 +726,10 @@ async function loadConfig(){
     const m = await getDoc(doc(db,'config','metas'));
     state.cfg = m.exists()? {...DEFAULT_CFG, ...m.data()} : {...DEFAULT_CFG};
   }catch(e){ state.cfg = {...DEFAULT_CFG}; }
+  try{
+    const c = await getDoc(doc(db,'config','categorias'));
+    state.categorias = (c.exists() && Array.isArray(c.data().lista) && c.data().lista.length)? c.data().lista : [...DEFAULT_CATS];
+  }catch(e){ state.categorias = [...DEFAULT_CATS]; }
   if(currentUser.role==='admin'){
     try{
       const ej = await getDoc(doc(db,'config','emailjs'));
@@ -806,6 +820,7 @@ function enterApp(){
 
   buildQuesitos('adm-quesitos', ADM_QUESITOS, admScores);
   buildQuesitos('hig-quesitos', HIG_QUESITOS, higScores);
+  renderCategorias();
   toggleChecklistSel();
   showPage(nav[0].id);
 }
@@ -891,11 +906,48 @@ async function salvarCompra(){
       data: document.getElementById('c-data').value || todayISO(),
       cat: document.getElementById('c-cat').value,
       desc, valor,
+      nf: document.getElementById('c-nf').value.trim(),
+      pedido: document.getElementById('c-pedido').value.trim(),
       autor: currentUser.nome, autorUid: currentUser.uid,
     });
-    document.getElementById('c-desc').value=''; document.getElementById('c-valor').value='';
+    ['c-desc','c-valor','c-nf','c-pedido'].forEach(id=>document.getElementById(id).value='');
     toast('Compra salva ✓');
   }catch(e){ toast(authErrPT(e), true); }
+}
+function renderCategorias(){
+  const sel = document.getElementById('c-cat');
+  const atual = sel.value;
+  sel.innerHTML = state.categorias.map(c=>`<option>${esc(c)}</option>`).join('');
+  if(state.categorias.includes(atual)) sel.value = atual;
+  if(currentUser && currentUser.role==='admin'){
+    document.getElementById('panel-categorias').style.display='block';
+    const rows = state.categorias.map((c,i)=>[esc(c),
+      `<button class="btn btn-danger btn-mini" onclick="removeCategoria(${i})">Remover</button>`]);
+    document.getElementById('tbl-categorias').innerHTML = tableHTML(['Categoria',''], rows);
+  }
+}
+async function salvarCategorias(){
+  try{
+    await setDoc(doc(db,'config','categorias'), {lista: state.categorias});
+    renderCategorias();
+  }catch(e){ toast(authErrPT(e), true); }
+}
+async function addCategoria(){
+  const v = document.getElementById('cat-nova').value.trim();
+  if(!v){ toast('Digite o nome da categoria.', true); return; }
+  if(state.categorias.some(c=>c.toLowerCase()===v.toLowerCase())){ toast('Essa categoria já existe.', true); return; }
+  state.categorias.push(v);
+  document.getElementById('cat-nova').value='';
+  await salvarCategorias();
+  toast('Categoria adicionada ✓');
+}
+function removeCategoria(i){
+  const nome = state.categorias[i];
+  confirmModal(`Remover a categoria "${esc(nome)}"? Compras já lançadas não mudam.`, async ()=>{
+    state.categorias.splice(i,1);
+    await salvarCategorias();
+    toast('Categoria removida');
+  });
 }
 function delCompra(id){
   const c = state.compras.find(x=>x.id===id);
@@ -928,10 +980,10 @@ function renderCompras(){
     </div>`;
   document.getElementById('compras-mes-label').textContent = doMes.length + ' compra(s) em ' + fmtMes(mes);
   const rows = [...doMes].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).map(c=>[
-    fmtBR(c.data), esc(c.cat), esc(c.desc), brl(c.valor), esc(c.autor||'—'),
+    fmtBR(c.data), esc(c.cat), esc(c.desc), esc(c.nf||'—'), esc(c.pedido||'—'), brl(c.valor), esc(c.autor||'—'),
     `<button class="btn btn-danger btn-mini" onclick="delCompra('${c.id}')">Excluir</button>`
   ]);
-  document.getElementById('tbl-compras').innerHTML = tableHTML(['Data','Categoria','Descrição','Valor','Lançado por',''], rows);
+  document.getElementById('tbl-compras').innerHTML = tableHTML(['Data','Categoria','Descrição','NF','Pedido Totvs','Valor','Lançado por',''], rows);
 }
 
 /* ================= CUSTOS MENSAIS ================= */
@@ -1546,6 +1598,7 @@ async function init(){
 Object.assign(window, {
   doLogin, esqueciSenha, criarAdminInicial, logout, showPage,
   salvarLancamento, delLancamento, salvarCompra, delCompra,
+  addCategoria, removeCategoria,
   previewCusto, salvarCustoMes, salvarChecklist,
   criarUsuario, removerUsuario, resetSenhaUsuario, toggleChecklistSel,
   salvarConfig, salvarEmailCfg, enviarCobrancas,
