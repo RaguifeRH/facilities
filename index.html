@@ -286,9 +286,9 @@
         </div>
         <div class="panel" id="panel-checklist-semana" style="display:none">
           <h2>Checklists da semana</h2>
-          <div class="desc">Status por colaborador (segunda a domingo) · cobrança automática toda sexta-feira via EmailJS</div>
+          <div class="desc">Status por colaborador (segunda a domingo)</div>
           <div id="week-status"></div>
-          <div class="btn-row">
+          <div class="btn-row" style="display:none">
             <button class="btn btn-leaf" onclick="enviarCobrancas(false)">Enviar cobranças agora (EmailJS)</button>
             <span id="cobranca-status" style="font-size:12.5px;color:var(--ok);font-weight:600"></span>
           </div>
@@ -1281,7 +1281,8 @@ function renderWeekStatus(){
     const emails = [...new Set(pend.map(p=>p.email))].join(';');
     const subject = encodeURIComponent('Checklist de limpeza — preencher até sexta-feira');
     const body = encodeURIComponent('Olá!\n\nAinda não recebemos o seu checklist de conformidade de limpeza desta semana.\n\nPedimos que preencha até sexta-feira pelo painel:\nhttps://raguiferh.github.io/facilities/\n\nObrigado!\nRaguife — Confiança que Inspira');
-    html += `<div class="btn-row"><a class="btn btn-primary" style="text-decoration:none" href="mailto:${emails}?subject=${subject}&body=${body}">✉ Cobrar pendentes por e-mail (abre o Outlook)</a><span style="font-size:12px;color:var(--cinza)">${pend.length} cobrança(s) pendente(s)</span></div>`;
+    const owa = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(emails)}&subject=${subject}&body=${body}`;
+    html += `<div class="btn-row"><a class="btn btn-primary" style="text-decoration:none" href="${owa}" target="_blank" rel="noopener">✉ Cobrar pendentes (Outlook Web)</a><span style="font-size:12px;color:var(--cinza)">${pend.length} cobrança(s) pendente(s)</span></div>`;
   }
   document.getElementById('week-status').innerHTML = html;
 }
