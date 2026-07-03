@@ -130,6 +130,20 @@
   .scale button.sel.low{background:var(--erro);border-color:var(--erro);}
   .scale button.sel.mid{background:var(--amber);border-color:var(--amber);}
 
+  .prog{background:var(--folha-suave);border:1px solid #d5e1bd;border-radius:11px;padding:12px 15px;margin-bottom:16px;font-size:13.5px;}
+  .prog b{color:var(--verde);}
+  .prog .prog-bar{height:8px;border-radius:5px;background:#fff;overflow:hidden;margin-top:8px;}
+  .prog .prog-bar span{display:block;height:100%;background:var(--folha);border-radius:5px;transition:width .3s;}
+
+  @media(max-width:560px){
+    .quesito{flex-direction:column;align-items:stretch;gap:8px;padding:14px 0;}
+    .quesito .q-label{min-width:0;font-weight:600;}
+    .scale{width:100%;}
+    .scale button{flex:1;width:auto;height:48px;font-size:16px;border-radius:12px;}
+    #page-check-adm .btn-primary, #page-check-hig .btn-primary{width:100%;padding:15px;font-size:15px;}
+    .panel{padding:16px;}
+  }
+
   .budget-bar{height:14px;border-radius:8px;background:#edf0e6;overflow:hidden;margin:10px 0 6px;}
   .budget-bar span{display:block;height:100%;border-radius:8px;transition:width .4s ease;}
   .budget-line{display:flex;justify-content:space-between;font-size:12px;color:var(--cinza);flex-wrap:wrap;gap:6px;}
@@ -390,6 +404,7 @@
         <h1 class="page-title">Checklist — Limpeza Administrativa</h1>
         <div class="page-desc">Avaliação semanal por setor · notas de 1 (péssimo) a 5 (excelente)</div>
         <div class="panel">
+          <div class="prog" id="adm-progress" style="display:none"></div>
           <div class="form-grid" style="margin-bottom:14px">
             <div><label>Data</label><input type="date" id="adm-data"></div>
             <div><label>Avaliador</label><input type="text" id="adm-nome" disabled></div>
@@ -410,6 +425,7 @@
         <h1 class="page-title">Checklist — Limpeza Higiênica</h1>
         <div class="page-desc">Barreiras sanitárias, vestiários e áreas de descanso · notas de 1 a 5</div>
         <div class="panel">
+          <div class="prog" id="hig-progress" style="display:none"></div>
           <div class="form-grid" style="margin-bottom:14px">
             <div><label>Data</label><input type="date" id="hig-data"></div>
             <div><label>Avaliador</label><input type="text" id="hig-nome" disabled></div>
@@ -482,8 +498,10 @@
               </select>
             </div>
             <div id="u-check-wrap"><label>Checklists atribuídos</label>
-              <select id="u-check"><option value="adm">Administrativa</option><option value="hig">Higiênica</option><option value="ambos">Ambos</option></select>
+              <select id="u-check" onchange="toggleChecklistSel()"><option value="adm">Administrativa</option><option value="hig">Higiênica</option><option value="ambos">Ambos</option></select>
             </div>
+            <div id="u-areas-adm-wrap" style="grid-column:1/-1"><label>Setores ADM que ele avalia (separados por vírgula)</label><input type="text" id="u-areas-adm" placeholder="ex: RH, Financeiro, Recepção"></div>
+            <div id="u-areas-hig-wrap" style="grid-column:1/-1"><label>Áreas Higiênicas que ele avalia (separadas por vírgula)</label><input type="text" id="u-areas-hig" placeholder="ex: Vestiário, Sanitário, Copa"></div>
           </div>
           <div class="btn-row"><button class="btn btn-primary" id="u-btn" onclick="criarUsuario()">Criar usuário</button></div>
           <div class="note"><b>Perfis:</b> Administrador vê tudo e fecha os custos · Nutricionista lança desperdício e compras · Colaborador responde apenas os checklists atribuídos. Ninguém logado consegue lançar notas na pesquisa de satisfação.</div>
@@ -509,6 +527,22 @@
             <div><label>Orçamento mensal de compras (R$)</label><input type="number" step="0.01" id="cfg-orc"></div>
           </div>
           <div class="btn-row"><button class="btn btn-primary" onclick="salvarConfig()">Salvar metas</button></div>
+        </div>
+        <div class="panel">
+          <h2>Horários da pesquisa de satisfação</h2>
+          <div class="desc">Janelas em que o tablet aceita respostas, por refeição</div>
+          <div class="form-grid">
+            <div><label>Café da Manhã — início</label><input type="time" id="hr-cafe-ini"></div>
+            <div><label>Café da Manhã — fim</label><input type="time" id="hr-cafe-fim"></div>
+            <div><label>Almoço — início</label><input type="time" id="hr-almoco-ini"></div>
+            <div><label>Almoço — fim</label><input type="time" id="hr-almoco-fim"></div>
+            <div><label>Jantar — início</label><input type="time" id="hr-jantar-ini"></div>
+            <div><label>Jantar — fim</label><input type="time" id="hr-jantar-fim"></div>
+            <div><label>Ceia — início</label><input type="time" id="hr-ceia-ini"></div>
+            <div><label>Ceia — fim</label><input type="time" id="hr-ceia-fim"></div>
+          </div>
+          <div class="btn-row"><button class="btn btn-primary" onclick="salvarHorarios()">Salvar horários</button></div>
+          <div class="note">Faixas que cruzam a meia-noite funcionam (ex: Ceia 23:00–02:00). O tablet aplica os novos horários quando a página recarrega — o Fully Kiosk já faz isso no reload diário, ou recarregue manualmente.</div>
         </div>
         <div class="panel">
           <h2>EmailJS — cobrança dos checklists</h2>
@@ -575,12 +609,23 @@ const SAT_QUESTOES = [
   {k:'q5', t:'Tempo de fila'},
 ];
 const EMOJIS = ['😠','🙁','😐','🙂','😄'];
-const MEALS = [
-  {name:'Café da Manhã', start:4.5, end:7.5, label:'04:30–07:30'},
-  {name:'Almoço', start:10, end:13, label:'10:00–13:00'},
-  {name:'Jantar', start:17, end:19, label:'17:00–19:00'},
-  {name:'Ceia', start:0, end:3, label:'00:00–03:00'},
+const DEFAULT_HORARIOS = {
+  cafe:{ini:'04:30',fim:'07:30'}, almoco:{ini:'10:00',fim:'13:00'},
+  jantar:{ini:'17:00',fim:'19:00'}, ceia:{ini:'00:00',fim:'03:00'},
+};
+const TURNO_DEFS = [
+  {key:'cafe', name:'Café da Manhã'},
+  {key:'almoco', name:'Almoço'},
+  {key:'jantar', name:'Jantar'},
+  {key:'ceia', name:'Ceia'},
 ];
+function hm2dec(hm){ const [h,m]=(hm||'0:0').split(':').map(Number); return h + (m||0)/60; }
+function getMeals(){
+  return TURNO_DEFS.map(t=>{
+    const h = (state.horarios && state.horarios[t.key]) || DEFAULT_HORARIOS[t.key];
+    return {name:t.name, start:hm2dec(h.ini), end:hm2dec(h.fim), label:h.ini+'–'+h.fim};
+  });
+}
 const ROLES = {admin:'Administrador', nutricionista:'Nutricionista', colaborador:'Colaborador'};
 const NAV_DEF = [
   {id:'dashboard', label:'Dashboard', ic:'▦', roles:['admin','nutricionista']},
@@ -610,7 +655,7 @@ function fmtBR(d){ if(!d) return '—'; const [y,m,dd]=d.split('-'); return dd+'
 function fmtMes(m){ if(!m) return '—'; const [y,mm]=m.split('-'); const n=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']; return n[Number(mm)-1]+'/'+y; }
 function brl(v){ return (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
 function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function detectMeal(){ const d=new Date(); const h=d.getHours()+d.getMinutes()/60; for(const m of MEALS){ if(h>=m.start && h<m.end) return m; } return null; }
+function detectMeal(){ const d=new Date(); const h=d.getHours()+d.getMinutes()/60; for(const m of getMeals()){ const cruza = m.end < m.start; if(cruza ? (h>=m.start || h<m.end) : (h>=m.start && h<m.end)) return m; } return null; }
 function mondayOf(d){ const c=new Date(d); const day=c.getDay(); c.setDate(c.getDate()+(day===0?-6:1-day)); c.setHours(0,0,0,0); return c; }
 function weekKey(d){ const m=mondayOf(d); return m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-'+String(m.getDate()).padStart(2,'0'); }
 function toast(msg, isErr){
@@ -730,6 +775,7 @@ async function loadConfig(){
     const c = await getDoc(doc(db,'config','categorias'));
     state.categorias = (c.exists() && Array.isArray(c.data().lista) && c.data().lista.length)? c.data().lista : [...DEFAULT_CATS];
   }catch(e){ state.categorias = [...DEFAULT_CATS]; }
+  await loadHorarios();
   if(currentUser.role==='admin'){
     try{
       const ej = await getDoc(doc(db,'config','emailjs'));
@@ -810,6 +856,11 @@ function enterApp(){
   document.getElementById('cfg-sat').value = state.cfg.metaSat;
   document.getElementById('cfg-conf').value = state.cfg.metaConf;
   document.getElementById('cfg-orc').value = state.cfg.orcamento;
+  for(const t of TURNO_DEFS){
+    const h = state.horarios[t.key] || DEFAULT_HORARIOS[t.key];
+    document.getElementById('hr-'+t.key+'-ini').value = h.ini;
+    document.getElementById('hr-'+t.key+'-fim').value = h.fim;
+  }
   const ej = state.emailCfg||{};
   document.getElementById('ej-public').value = ej.publicKey||'';
   document.getElementById('ej-private').value = ej.privateKey||'';
@@ -1072,7 +1123,13 @@ async function salvarChecklist(tipo){
     if(isAdm){ admScores={}; buildQuesitos('adm-quesitos', ADM_QUESITOS, admScores); }
     else { higScores={}; buildQuesitos('hig-quesitos', HIG_QUESITOS, higScores); }
     document.getElementById(tipo+'-obs').value='';
-    toast('Checklist enviado — obrigado ✓');
+    const areas = areasDoUsuario(currentUser, tipo);
+    if(areas.length){
+      toast('Checklist enviado ✓ — carregando a próxima área...');
+      window.scrollTo({top:0, behavior:'smooth'});
+    } else {
+      toast('Checklist enviado — obrigado ✓');
+    }
   }catch(e){ toast(authErrPT(e), true); }
 }
 function renderHigTables(){
@@ -1080,13 +1137,49 @@ function renderHigTables(){
     .map(r=>[fmtBR(r.data), esc(r.setor||'—'), esc(r.nome||'—'), notaPill(mediaQuesitos(r.quesitos)), esc((r.obs||'').slice(0,60))]);
   document.getElementById('tbl-adm-full').innerHTML = tableHTML(['Data','Setor','Avaliador','Nota média','Observações'], mk(state.adm));
   document.getElementById('tbl-hig-full').innerHTML = tableHTML(['Data','Área','Avaliador','Nota média','Observações'], mk(state.hig));
+  renderChecklistProgress('adm');
+  renderChecklistProgress('hig');
+}
+function areasDoUsuario(u, tipo){ return (tipo==='adm'? u.areasAdm : u.areasHig) || []; }
+function areasRespondidasSemana(uid, tipo){
+  const wk = weekKey(new Date());
+  const arr = tipo==='adm'? state.adm : state.hig;
+  return arr.filter(e=>e.uid===uid && e.data && weekKey(new Date(e.data+'T12:00:00'))===wk)
+    .map(e=>(e.setor||'').trim().toLowerCase());
+}
+function renderChecklistProgress(tipo){
+  const box = document.getElementById(tipo+'-progress');
+  const setorEl = document.getElementById(tipo+'-setor');
+  if(!currentUser || !box) return;
+  const areas = areasDoUsuario(currentUser, tipo);
+  if(!areas.length){ box.style.display='none'; setorEl.readOnly=false; return; }
+  const feitas = areasRespondidasSemana(currentUser.uid, tipo);
+  const pendentes = areas.filter(a=>!feitas.includes(a.trim().toLowerCase()));
+  const total = areas.length, done = total - pendentes.length;
+  box.style.display='block';
+  if(pendentes.length){
+    setorEl.value = pendentes[0];
+    setorEl.readOnly = true;
+    box.innerHTML = `Avaliando agora: <b>${esc(pendentes[0])}</b> · ${done} de ${total} áreas respondidas nesta semana
+      ${pendentes.length>1? ' · próximas: '+esc(pendentes.slice(1).join(', ')) : ''}
+      <div class="prog-bar"><span style="width:${(done/total*100).toFixed(0)}%"></span></div>`;
+  } else {
+    setorEl.value=''; setorEl.readOnly=false;
+    box.innerHTML = `✅ <b>Todas as ${total} áreas desta semana foram respondidas.</b> Obrigado!
+      <div class="prog-bar"><span style="width:100%"></span></div>`;
+  }
 }
 
 /* ================= USUÁRIOS ================= */
 function toggleChecklistSel(){
-  document.getElementById('u-check-wrap').style.display =
-    document.getElementById('u-role').value==='colaborador' ? 'block' : 'none';
+  const role = document.getElementById('u-role').value;
+  const isColab = role==='colaborador';
+  document.getElementById('u-check-wrap').style.display = isColab? 'block':'none';
+  const check = document.getElementById('u-check').value;
+  document.getElementById('u-areas-adm-wrap').style.display = (isColab && (check==='adm'||check==='ambos'))? 'block':'none';
+  document.getElementById('u-areas-hig-wrap').style.display = (isColab && (check==='hig'||check==='ambos'))? 'block':'none';
 }
+function parseAreas(txt){ return (txt||'').split(',').map(s=>s.trim()).filter(Boolean); }
 async function criarUsuario(){
   const nome = document.getElementById('u-nome').value.trim();
   const email = document.getElementById('u-email').value.trim();
@@ -1104,12 +1197,33 @@ async function criarUsuario(){
       setor: document.getElementById('u-setor').value.trim(),
       role,
       check: role==='colaborador' ? document.getElementById('u-check').value : '',
+      areasAdm: role==='colaborador' ? parseAreas(document.getElementById('u-areas-adm').value) : [],
+      areasHig: role==='colaborador' ? parseAreas(document.getElementById('u-areas-hig').value) : [],
     });
     await signOut(secAuth);
-    ['u-nome','u-setor','u-email','u-pass'].forEach(id=>document.getElementById(id).value='');
+    ['u-nome','u-setor','u-email','u-pass','u-areas-adm','u-areas-hig'].forEach(id=>document.getElementById(id).value='');
     toast('Usuário criado ✓ — informe a senha inicial a ele');
   }catch(e){ toast(authErrPT(e), true); }
   btn.disabled=false;
+}
+function modalAreas(uid){
+  const u = state.users.find(x=>x.id===uid); if(!u) return;
+  openModal(`<h3>Áreas de ${esc(u.nome)}</h3>
+    <label>Setores ADM (separados por vírgula)</label>
+    <input type="text" id="ma-adm" value="${esc((u.areasAdm||[]).join(', '))}" style="margin-bottom:12px">
+    <label>Áreas Higiênicas (separadas por vírgula)</label>
+    <input type="text" id="ma-hig" value="${esc((u.areasHig||[]).join(', '))}">
+    <div class="btn-row"><button class="btn btn-primary" onclick="salvarAreas('${uid}')">Salvar</button>
+    <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button></div>`);
+}
+async function salvarAreas(uid){
+  try{
+    await setDoc(doc(db,'usuarios',uid), {
+      areasAdm: parseAreas(document.getElementById('ma-adm').value),
+      areasHig: parseAreas(document.getElementById('ma-hig').value),
+    }, {merge:true});
+    closeModal(); toast('Áreas salvas ✓');
+  }catch(e){ toast(authErrPT(e), true); }
 }
 function removerUsuario(uid){
   if(uid===currentUser.uid){ toast('Você não pode remover o próprio usuário.', true); return; }
@@ -1126,17 +1240,40 @@ async function resetSenhaUsuario(email){
 }
 function checkLabel(c){ return c==='ambos'?'ADM + Higiênica':(c==='adm'?'Administrativa':(c==='hig'?'Higiênica':'—')); }
 function renderUsuarios(){
-  const rows = state.users.map(u=>[
+  const rows = state.users.map(u=>{
+    const areas = [...(u.areasAdm||[]), ...(u.areasHig||[])];
+    return [
     '<b>'+esc(u.nome)+'</b>', esc(u.email), ROLES[u.role]||u.role,
     u.role==='colaborador'? checkLabel(u.check) : '—',
-    esc(u.setor||'—'),
-    `<button class="btn btn-ghost btn-mini" onclick="resetSenhaUsuario('${esc(u.email)}')">Redefinir senha</button>
+    u.role==='colaborador'? (areas.length? esc(areas.join(', ')) : '<span style="color:var(--cinza)">livre</span>') : '—',
+    `${u.role==='colaborador'? `<button class="btn btn-ghost btn-mini" onclick="modalAreas('${u.id}')">Áreas</button> `:''}<button class="btn btn-ghost btn-mini" onclick="resetSenhaUsuario('${esc(u.email)}')">Redefinir senha</button>
      <button class="btn btn-danger btn-mini" onclick="removerUsuario('${u.id}')">Remover</button>`
-  ]);
-  document.getElementById('tbl-usuarios').innerHTML = tableHTML(['Nome','E-mail','Perfil','Checklists','Setor',''], rows);
+  ];});
+  document.getElementById('tbl-usuarios').innerHTML = tableHTML(['Nome','E-mail','Perfil','Checklists','Áreas/Setores',''], rows);
 }
 
 /* ================= CONFIG / EMAILJS ================= */
+async function loadHorarios(){
+  try{
+    const h = await getDoc(doc(db,'config','horarios'));
+    state.horarios = h.exists()? {...DEFAULT_HORARIOS, ...h.data()} : {...DEFAULT_HORARIOS};
+  }catch(e){ state.horarios = {...DEFAULT_HORARIOS}; }
+}
+async function salvarHorarios(){
+  const novo = {};
+  for(const t of TURNO_DEFS){
+    const ini = document.getElementById('hr-'+t.key+'-ini').value;
+    const fim = document.getElementById('hr-'+t.key+'-fim').value;
+    if(!ini || !fim){ toast('Preencha início e fim de todas as refeições.', true); return; }
+    novo[t.key] = {ini, fim};
+  }
+  try{
+    await setDoc(doc(db,'config','horarios'), novo);
+    state.horarios = novo;
+    toast('Horários salvos ✓ — o tablet aplica ao recarregar');
+    renderDashboard();
+  }catch(e){ toast(authErrPT(e), true); }
+}
 async function salvarConfig(){
   state.cfg = {
     metaSobra: Number(document.getElementById('cfg-sobra').value)||DEFAULT_CFG.metaSobra,
@@ -1174,16 +1311,11 @@ function sendEmailJS(templateId, params){
   });
 }
 function pendentesSemana(){
-  const wk = weekKey(new Date());
   const out = [];
   state.users.filter(u=>u.role==='colaborador').forEach(u=>{
     const tipos = u.check==='ambos'? ['adm','hig'] : [u.check];
-    tipos.forEach(t=>{
-      if(!t) return;
-      const arr = t==='adm'? state.adm : state.hig;
-      const done = arr.some(e=>e.uid===u.id && e.data && weekKey(new Date(e.data+'T12:00:00'))===wk);
-      if(!done) out.push({...u, tipo:t});
-    });
+    const temPendencia = tipos.some(t=> t && !statusColab(u, t).done);
+    if(temPendencia) out.push(u); // 1 entrada por pessoa = 1 e-mail só
   });
   return out;
 }
@@ -1199,9 +1331,10 @@ async function enviarCobrancas(silent){
   let ok=0, fail=0;
   for(const p of pend){
     try{
-      const r = await sendEmailJS(p.tipo==='adm'? cfg.templateAdm : cfg.templateHig, {
+      const tipos = (p.check==='ambos'? ['adm','hig'] : [p.check]).filter(t=>t && !statusColab(p,t).done);
+      const r = await sendEmailJS(cfg.templateAdm, {
         to_email: p.email, to_name: p.nome, setor: p.setor||'',
-        tipo_checklist: p.tipo==='adm'? 'Administrativa':'Higiênica',
+        tipo_checklist: tipos.map(t=>t==='adm'?'Administrativa':'Higiênica').join(' e '),
         link_formulario: cfg.linkApp || (location.origin+location.pathname),
       });
       if(r.ok) ok++; else fail++;
@@ -1295,7 +1428,7 @@ function renderDashboard(){
     kpiCard('Compras · '+fmtMes(mes), brl(gastoMes), 'Orçamento: '+brl(cfg.orcamento), gastoMes<=cfg.orcamento, gastoMes, cfg.orcamento, true),
   ].join('');
 
-  const mealRows = MEALS.map(m=>{
+  const mealRows = getMeals().map(m=>{
     const l = lancF.filter(r=>r.turno===m.name);
     const s = satF.filter(r=>r.turno===m.name);
     const prod = l.reduce((a,r)=>a+(r.producao||0),0);
@@ -1316,8 +1449,17 @@ function renderDashboard(){
   if(currentUser.role==='admin'){ panel.style.display='block'; renderWeekStatus(); }
   else panel.style.display='none';
 }
+function statusColab(u, tipo){
+  const areas = areasDoUsuario(u, tipo);
+  const feitas = areasRespondidasSemana(u.id, tipo);
+  if(!areas.length){
+    // sem áreas atribuídas: basta 1 envio na semana
+    return {done: feitas.length>0, label: feitas.length? 'Respondido' : 'Pendente', total:1, count: feitas.length?1:0};
+  }
+  const count = areas.filter(a=>feitas.includes(a.trim().toLowerCase())).length;
+  return {done: count>=areas.length, label: count+'/'+areas.length+' áreas', total:areas.length, count};
+}
 function renderWeekStatus(){
-  const wk = weekKey(new Date());
   const colabs = state.users.filter(u=>u.role==='colaborador');
   if(!colabs.length){ document.getElementById('week-status').innerHTML='<div class="empty">Nenhum colaborador cadastrado — crie usuários com perfil Colaborador</div>'; return; }
   const rows = [];
@@ -1325,10 +1467,9 @@ function renderWeekStatus(){
     const tipos = u.check==='ambos'? ['adm','hig'] : [u.check];
     tipos.forEach(t=>{
       if(!t) return;
-      const arr = t==='adm'? state.adm : state.hig;
-      const done = arr.some(e=>e.uid===u.id && e.data && weekKey(new Date(e.data+'T12:00:00'))===wk);
+      const st = statusColab(u, t);
       rows.push([esc(u.nome), t==='adm'?'Administrativa':'Higiênica', esc(u.setor||'—'),
-        done? '<span class="pill p-ok">Respondido</span>' : '<span class="pill p-bad">Pendente</span>']);
+        st.done? '<span class="pill p-ok">'+st.label+'</span>' : '<span class="pill '+(st.count>0?'p-warn':'p-bad')+'">'+st.label+'</span>']);
     });
   });
   let html = tableHTML(['Colaborador','Checklist','Setor','Status'], rows);
@@ -1391,17 +1532,19 @@ function aggMes(mes){
   const ref = l.reduce((x,r)=>x+(r.refeicoes||0),0);
   const cst = state.custos.find(c=>c.mes===mes);
   const custoUnit = cst? calcCusto(cst).comMO : 0;
+  const comprasTotal = compras + (cst? (cst.ajuste||0) : 0);
   return {
-    mes, ref,
+    mes,
+    ref: ref || (cst? cst.ref : 0),
     sobra: prod? sob/prod*100 : null,
     resto: ref? res/ref : null,
     sat: s.length? mediaSat(s) : null,
     nSat: s.length,
     adm: a.length? mediaLista(a) : null,
     hig: h.length? mediaLista(h) : null,
-    compras,
+    compras: comprasTotal,
     custoUnit: custoUnit||null,
-    temDados: !!(l.length || s.length || a.length || h.length || compras),
+    temDados: !!(l.length || s.length || a.length || h.length || compras || cst),
   };
 }
 function fmtInd(v, fn){ return v==null? '—' : fn(v); }
@@ -1493,7 +1636,7 @@ function renderKiosk(){
   if(!meal){
     kioskTurno = null;
     wrap.innerHTML = '<h1>Pesquisa de Satisfação</h1><div class="sub">Fora do horário de refeição no momento</div>';
-    qs.innerHTML = '<div class="kiosk-off">Café da Manhã 04:30–07:30<br>Almoço 10:00–13:00<br>Jantar 17:00–19:00<br>Ceia 00:00–03:00</div>';
+    qs.innerHTML = '<div class="kiosk-off">' + getMeals().map(m=>m.name+' '+m.label).join('<br>') + '</div>';
     return;
   }
   if(meal.name === kioskTurno) return;
@@ -1584,6 +1727,8 @@ async function init(){
         '<div class="kiosk-off">Não foi possível conectar.<br>Habilite o login "Anônimo" no Firebase Authentication.</div>';
       return;
     }
+    await loadHorarios();
+    setInterval(loadHorarios, 30*60*1000); // reaplica horários a cada 30 min
     renderKiosk();
     setInterval(renderKiosk, 20000);
     return;
@@ -1601,7 +1746,8 @@ Object.assign(window, {
   addCategoria, removeCategoria,
   previewCusto, salvarCustoMes, salvarChecklist,
   criarUsuario, removerUsuario, resetSenhaUsuario, toggleChecklistSel,
-  salvarConfig, salvarEmailCfg, enviarCobrancas,
+  salvarConfig, salvarEmailCfg, enviarCobrancas, salvarHorarios,
+  modalAreas, salvarAreas,
   applyFilter, setPreset, copyTabletLink, enviarSatisfacao,
   renderHistorico, gerarPDF,
   openModal, closeModal, confirmModal, _runConfirm, openModalSenha, salvarNovaSenha,
