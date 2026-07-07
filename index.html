@@ -1,604 +1,356 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel Raguife — Indicadores</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#024f2b">
-<link rel="icon" type="image/png" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --verde:#024f2b; --verde-escuro:#013a20; --folha:#739630; --folha-suave:#e9f0dc;
-    --cinza:#666666; --bg:#f4f6f1; --branco:#ffffff; --linha:#e2e6dc;
-    --amber:#d99a2b; --erro:#c0392b; --ok:#3d7a26; --radius:14px;
+    --graphite:#1F2933;
+    --graphite-soft:#3A4750;
+    --teal:#0F5C5C;
+    --teal-deep:#0A4444;
+    --cream:#F7F5F0;
+    --paper:#FFFFFF;
+    --amber:#E8A33D;
+    --green:#2F8A5C;
+    --clay:#C6533F;
+    --line:#E4DFD3;
+    --muted:#7C8790;
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{background:var(--bg);color:#22301f;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;font-size:14px;}
-  h1,h2,h3{font-family:'Poppins',sans-serif;margin:0;}
-  button{font-family:inherit;}
-  a{color:var(--verde);}
+  body{margin:0;background:var(--cream);color:var(--graphite);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  .app{max-width:1180px;margin:0 auto;padding:28px 20px 80px;}
 
-  /* LOGIN */
-  #login-screen{position:fixed;inset:0;display:flex;z-index:50;background:var(--bg);}
-  .login-brand{flex:1;background:linear-gradient(160deg,var(--verde) 0%,var(--verde-escuro) 100%);color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px;text-align:center;}
-  .login-brand .wordmark{font-family:'Poppins',sans-serif;font-weight:700;font-size:52px;letter-spacing:-0.02em;margin-top:18px;}
-  .login-brand .tagline{letter-spacing:.35em;font-size:12px;color:#bcd9a6;margin-top:10px;text-transform:uppercase;}
-  .login-form-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:30px;overflow-y:auto;}
-  .login-card{width:100%;max-width:390px;}
-  .login-card h2{font-size:24px;color:var(--verde);margin-bottom:4px;}
-  .login-card .sub{color:var(--cinza);margin-bottom:26px;font-size:13.5px;}
-  .login-err{color:var(--erro);font-size:13px;font-weight:600;min-height:18px;margin-top:10px;}
-  .forgot{font-size:12.5px;margin-top:14px;display:inline-block;cursor:pointer;text-decoration:underline;background:none;border:none;color:var(--verde);padding:0;}
-  #bootstrap-card{display:none;margin-top:26px;border-top:1px dashed var(--linha);padding-top:22px;}
-  @media(max-width:760px){
-    #login-screen{flex-direction:column;}
-    .login-brand{flex:none;padding:36px 20px;}
-    .login-brand .wordmark{font-size:36px;}
-  }
+  .hdr{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
+  .hdr h1{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;margin:0 0 4px;letter-spacing:-0.01em;}
+  .hdr .sub{color:var(--muted);font-size:13.5px;}
+  .hdr .brand{display:flex;align-items:center;gap:10px;}
+  .brand .mark{width:38px;height:38px;border-radius:9px;background:var(--teal);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px;flex:none;}
 
-  /* APP SHELL */
-  #app{display:none;}
-  .topbar{background:var(--verde);color:#fff;display:flex;align-items:center;gap:14px;padding:12px 20px;position:sticky;top:0;z-index:30;}
-  .topbar .brandline{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
-  .topbar .wordmark{font-family:'Poppins',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.02em;}
-  .topbar .app-sub{font-size:11px;color:#a9c98f;display:block;margin-top:-3px;}
-  .userchip{display:flex;align-items:center;gap:10px;font-size:12.5px;}
-  .userchip .uname{font-weight:600;}
-  .userchip .urole{color:#a9c98f;font-size:11px;display:block;}
-  .btn-top{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;}
-  .btn-top:hover{background:rgba(255,255,255,.22);}
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:26px;overflow-x:auto;}
+  .tab{font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:600;color:var(--muted);background:none;border:none;padding:12px 16px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s;}
+  .tab:hover{color:var(--graphite);}
+  .tab.active{color:var(--teal-deep);border-bottom-color:var(--teal);}
 
-  .layout{display:flex;min-height:calc(100vh - 58px);}
-  nav.side{width:225px;background:var(--branco);border-right:1px solid var(--linha);padding:18px 12px;flex:none;}
-  nav.side .navlbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza);font-weight:700;margin:14px 10px 6px;}
-  .navbtn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;border-radius:10px;padding:10px 12px;font-size:13.5px;font-weight:500;color:#3c4a38;cursor:pointer;margin-bottom:2px;}
-  .navbtn:hover{background:var(--folha-suave);}
-  .navbtn.active{background:var(--verde);color:#fff;font-weight:600;}
-  .navbtn .ic{width:20px;text-align:center;flex:none;}
-  main{flex:1;padding:26px 26px 80px;min-width:0;}
-  .page{display:none;max-width:1100px;margin:0 auto;}
-  .page.active{display:block;animation:fade .22s ease;}
+  section{display:none;}
+  section.active{display:block;animation:fade .25s ease;}
   @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
-  .page-title{font-size:22px;color:var(--verde);margin-bottom:2px;}
-  .page-desc{color:var(--cinza);font-size:13px;margin-bottom:20px;}
 
-  @media(max-width:880px){
-    .layout{flex-direction:column;}
-    nav.side{width:100%;display:flex;overflow-x:auto;padding:8px 10px;gap:4px;border-right:none;border-bottom:1px solid var(--linha);}
-    nav.side .navlbl{display:none;}
-    .navbtn{width:auto;white-space:nowrap;padding:9px 13px;}
-    main{padding:18px 14px 70px;}
-    .topbar .app-sub{display:none;}
-  }
-
-  /* COMPONENTS */
-  .panel{background:var(--branco);border:1px solid var(--linha);border-radius:var(--radius);padding:22px;margin-bottom:18px;}
-  .panel h2{font-size:16px;color:var(--verde);margin-bottom:3px;}
-  .panel .desc{color:var(--cinza);font-size:12.5px;margin-bottom:16px;}
-  .grid-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:13px;margin-bottom:20px;}
-  .kpi{background:var(--branco);border:1px solid var(--linha);border-radius:var(--radius);padding:16px;position:relative;}
-  .kpi .eyebrow{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--cinza);font-weight:700;margin-bottom:7px;}
-  .kpi .val{font-family:'Poppins',sans-serif;font-size:26px;font-weight:700;color:#1d2b1a;letter-spacing:-0.02em;}
-  .kpi .meta{font-size:11.5px;color:var(--cinza);margin-top:3px;}
-  .kpi .bar{margin-top:11px;height:6px;border-radius:4px;background:#edf0e6;overflow:hidden;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-bottom:22px;}
+  .kpi{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px;position:relative;overflow:hidden;}
+  .kpi .eyebrow{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:8px;}
+  .kpi .val{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:600;letter-spacing:-0.02em;}
+  .kpi .meta{font-size:12px;color:var(--muted);margin-top:2px;}
+  .kpi .bar{margin-top:12px;height:6px;border-radius:4px;background:#EEE9DD;overflow:hidden;}
   .kpi .bar span{display:block;height:100%;border-radius:4px;}
-  .pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;letter-spacing:.02em;display:inline-block;}
-  .pill.abs{position:absolute;top:14px;right:14px;}
-  .p-ok{background:#e5f1db;color:var(--ok);}
-  .p-bad{background:#f7e3df;color:var(--erro);}
-  .p-warn{background:#f9efd9;color:#996c14;}
-  .p-neutral{background:#eef0ea;color:var(--cinza);}
+  .status-pill{position:absolute;top:16px;right:16px;font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:99px;letter-spacing:.02em;}
+  .st-ok{background:#E4F3EA;color:var(--green);}
+  .st-warn{background:#FDF0DC;color:#A9701C;}
+  .st-bad{background:#F8E3DE;color:var(--clay);}
 
-  label{display:block;font-size:12px;font-weight:600;color:#40503b;margin-bottom:5px;}
-  input,select,textarea{width:100%;padding:10px 11px;border:1px solid var(--linha);border-radius:9px;font-family:'Inter',sans-serif;font-size:14px;background:#fbfcf9;color:#22301f;}
-  input:focus,select:focus,textarea:focus{outline:2px solid var(--folha);outline-offset:1px;border-color:var(--folha);}
-  input:disabled{background:#eef0ea;color:#5a684f;}
-  textarea{resize:vertical;min-height:60px;}
-  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:13px;}
-  .btn{font-family:'Poppins',sans-serif;font-weight:600;font-size:13.5px;border:none;border-radius:10px;padding:11px 20px;cursor:pointer;transition:transform .1s;}
-  .btn:active{transform:scale(.97);}
-  .btn:disabled{opacity:.6;cursor:wait;}
-  .btn-primary{background:var(--verde);color:#fff;}
-  .btn-primary:hover{background:var(--verde-escuro);}
-  .btn-leaf{background:var(--folha);color:#fff;}
-  .btn-leaf:hover{background:#647f2b;}
-  .btn-ghost{background:transparent;color:var(--verde);border:1px solid var(--linha);}
-  .btn-ghost:hover{background:var(--folha-suave);}
-  .btn-mini{padding:5px 10px;font-size:11px;border-radius:7px;}
-  .btn-danger{background:transparent;color:var(--erro);border:1px solid #ecd3cf;}
-  .btn-row{margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:20px;}
+  .panel h2{font-family:'Space Grotesk',sans-serif;font-size:17px;margin:0 0 4px;}
+  .panel .desc{color:var(--muted);font-size:13px;margin-bottom:16px;}
 
-  table{width:100%;border-collapse:collapse;font-size:12.5px;}
-  th{text-align:left;color:var(--cinza);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--linha);}
-  td{padding:9px 10px;border-bottom:1px solid #eef0e8;}
-  tr:last-child td{border-bottom:none;}
-  td.num{font-variant-numeric:tabular-nums;font-weight:500;}
-  .table-wrap{overflow-x:auto;margin-top:6px;}
-  .empty{color:var(--cinza);font-size:13px;padding:22px 0;text-align:center;}
-
-  .quesito{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #eef0e8;gap:14px;flex-wrap:wrap;}
-  .quesito:last-child{border-bottom:none;}
-  .quesito .q-label{font-size:13.5px;flex:1;min-width:180px;}
-  .scale{display:flex;gap:6px;}
-  .scale button{width:36px;height:36px;border-radius:10px;border:1px solid var(--linha);background:#fbfcf9;font-weight:600;font-size:13.5px;color:var(--cinza);cursor:pointer;}
-  .scale button.sel{background:var(--folha);color:#fff;border-color:var(--folha);}
-  .scale button.sel.low{background:var(--erro);border-color:var(--erro);}
-  .scale button.sel.mid{background:var(--amber);border-color:var(--amber);}
-
-  .prog{background:var(--folha-suave);border:1px solid #d5e1bd;border-radius:11px;padding:12px 15px;margin-bottom:16px;font-size:13.5px;}
-  .prog b{color:var(--verde);}
-  .prog .prog-bar{height:8px;border-radius:5px;background:#fff;overflow:hidden;margin-top:8px;}
-  .prog .prog-bar span{display:block;height:100%;background:var(--folha);border-radius:5px;transition:width .3s;}
-
-  @media(max-width:560px){
-    .quesito{flex-direction:column;align-items:stretch;gap:8px;padding:14px 0;}
-    .quesito .q-label{min-width:0;font-weight:600;}
-    .scale{width:100%;}
-    .scale button{flex:1;width:auto;height:48px;font-size:16px;border-radius:12px;}
-    #page-check-adm .btn-primary, #page-check-hig .btn-primary{width:100%;padding:15px;font-size:15px;}
-    .panel{padding:16px;}
-  }
-
-  .budget-bar{height:14px;border-radius:8px;background:#edf0e6;overflow:hidden;margin:10px 0 6px;}
-  .budget-bar span{display:block;height:100%;border-radius:8px;transition:width .4s ease;}
-  .budget-line{display:flex;justify-content:space-between;font-size:12px;color:var(--cinza);flex-wrap:wrap;gap:6px;}
-
-  .filter-bar{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;background:var(--branco);border:1px solid var(--linha);border-radius:var(--radius);padding:13px 15px;}
-  .filter-bar .fld{min-width:140px;}
+  .filter-bar{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px;}
+  .filter-bar .field{min-width:150px;margin-bottom:0;}
   .presets{display:flex;gap:6px;flex-wrap:wrap;}
   .presets .btn{padding:8px 12px;font-size:11.5px;}
 
-  .link-box{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
-  .link-box input{flex:1;min-width:200px;font-size:12px;}
-  .note{font-size:12px;color:#5a684f;background:var(--folha-suave);border-radius:9px;padding:10px 13px;margin-top:12px;line-height:1.5;}
-  .note code{background:#fff;border-radius:4px;padding:1px 5px;}
-
-  /* KIOSK */
-  #kiosk-screen{display:none;position:fixed;inset:0;background:linear-gradient(165deg,var(--verde) 0%,var(--verde-escuro) 100%);color:#fff;overflow-y:auto;z-index:60;}
-  .kiosk-inner{max-width:620px;margin:0 auto;padding:44px 20px 60px;}
-  .kiosk-head{text-align:center;margin-bottom:26px;}
-  .kiosk-head .wordmark{font-family:'Poppins',sans-serif;font-weight:700;font-size:26px;}
-  .kiosk-head h1{font-size:26px;margin-top:18px;}
-  .kiosk-head .sub{color:#bcd9a6;font-size:13.5px;margin-top:6px;}
-  .qblock{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:18px;margin-bottom:13px;}
-  .qblock .qtitle{font-family:'Poppins',sans-serif;font-weight:600;font-size:15.5px;margin-bottom:13px;}
-  .emoji-scale{display:flex;gap:8px;}
-  .emoji-scale button{flex:1;border-radius:13px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.05);color:#fff;cursor:pointer;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform .1s;}
-  .emoji-scale button:active{transform:scale(.94);}
-  .emoji-scale .em{font-size:26px;line-height:1;}
-  .emoji-scale .n{font-size:11px;color:#bcd9a6;font-weight:600;}
-  .emoji-scale button.sel{background:var(--folha);border-color:var(--folha);}
-  .emoji-scale button.sel .n{color:#fff;}
-  .kiosk-send{width:100%;background:var(--folha);color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:17px;border:none;border-radius:15px;padding:17px;margin-top:12px;cursor:pointer;}
-  .kiosk-send:hover{background:#85ad3a;}
-  .kiosk-thanks{text-align:center;padding:80px 0;font-size:22px;font-family:'Poppins',sans-serif;font-weight:600;}
-  .kiosk-off{text-align:center;padding:50px 0;color:#bcd9a6;font-size:15px;line-height:2;}
-
-  /* MODAL / TOAST */
-  #modal-bg{display:none;position:fixed;inset:0;background:rgba(15,25,12,.45);z-index:80;align-items:center;justify-content:center;padding:20px;}
-  #modal-bg.open{display:flex;}
-  .modal{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:400px;}
-  .modal h3{font-size:17px;color:var(--verde);margin-bottom:14px;}
-  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--verde);color:#fff;padding:12px 22px;border-radius:12px;font-size:13.5px;font-weight:600;z-index:90;opacity:0;transition:all .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.18);max-width:90vw;}
-  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-  #toast.err{background:var(--erro);}
-
-  /* RELATÓRIO PDF */
-  #print-area{display:none;}
-  @media print{
-    body > *{display:none !important;}
-    body #print-area{display:block !important;}
-    body{background:#fff;}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;}
+  label{display:block;font-size:12px;font-weight:600;color:var(--graphite-soft);margin-bottom:5px;}
+  input[type=text],input[type=email],input[type=date],input[type=number],select,textarea{
+    width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;background:#FCFBF8;color:var(--graphite);
   }
-  #print-area{font-family:'Inter',sans-serif;color:#22301f;padding:24px;}
-  #print-area .rp-head{display:flex;align-items:center;gap:14px;border-bottom:3px solid var(--verde);padding-bottom:14px;margin-bottom:6px;}
-  #print-area .rp-head h1{font-size:20px;color:var(--verde);}
-  #print-area .rp-head .wordmark{font-family:'Poppins',sans-serif;font-weight:700;font-size:22px;color:var(--verde);}
-  #print-area .rp-sub{color:var(--cinza);font-size:12px;margin-bottom:18px;}
-  #print-area .rp-cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
-  #print-area .rp-card{border:1px solid var(--linha);border-radius:10px;padding:10px 14px;min-width:130px;}
-  #print-area .rp-card .t{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--cinza);font-weight:700;}
-  #print-area .rp-card .v{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;margin-top:2px;}
-  #print-area table{width:100%;border-collapse:collapse;font-size:10.5px;}
-  #print-area th{background:var(--verde);color:#fff;padding:7px 8px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.04em;}
-  #print-area td{padding:6px 8px;border-bottom:1px solid #e5e8e0;}
-  #print-area tr:nth-child(even) td{background:#f6f8f3;}
-  #print-area .rp-foot{margin-top:22px;font-size:10px;color:var(--cinza);border-top:1px solid var(--linha);padding-top:10px;display:flex;justify-content:space-between;}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal);}
+  textarea{resize:vertical;min-height:64px;}
+  .field{margin-bottom:2px;}
+
+  .btn{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13.5px;border:none;border-radius:9px;padding:11px 20px;cursor:pointer;transition:transform .1s, background .15s;text-decoration:none;display:inline-block;}
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--teal);color:#fff;}
+  .btn-primary:hover{background:var(--teal-deep);}
+  .btn-ghost{background:transparent;color:var(--teal-deep);border:1px solid var(--line);}
+  .btn-row{margin-top:18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .save-msg{font-size:12.5px;color:var(--green);font-weight:600;opacity:0;transition:opacity .3s;}
+  .save-msg.show{opacity:1;}
+
+  .quesito{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);gap:14px;}
+  .quesito:last-child{border-bottom:none;}
+  .quesito .q-label{font-size:13.5px;color:var(--graphite);flex:1;}
+  .scale{display:flex;gap:5px;}
+  .scale button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:#FCFBF8;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px;color:var(--muted);cursor:pointer;}
+  .scale button.sel{background:var(--teal);color:#fff;border-color:var(--teal);}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em;padding:8px 10px;border-bottom:1px solid var(--line);}
+  td{padding:9px 10px;border-bottom:1px solid #EFEBE0;font-family:'JetBrains Mono',monospace;}
+  tr:last-child td{border-bottom:none;}
+  .table-wrap{overflow-x:auto;margin-top:16px;}
+  .empty{color:var(--muted);font-size:13px;padding:20px 0;text-align:center;}
+
+  .kiosk{background:var(--teal-deep);border-radius:20px;padding:34px 24px;color:#fff;text-align:center;}
+  .kiosk h2{font-family:'Space Grotesk',sans-serif;font-size:22px;margin:0 0 6px;}
+  .kiosk .desc-k{color:#CFE3DF;font-size:13.5px;margin-bottom:26px;}
+  .kiosk .qblock{background:rgba(255,255,255,.06);border-radius:14px;padding:20px;margin-bottom:14px;text-align:left;}
+  .kiosk .qtitle{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;margin-bottom:12px;}
+  .kiosk .scale-k{display:flex;gap:8px;justify-content:center;}
+  .kiosk .scale-k button{flex:1;max-width:70px;height:52px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.05);color:#fff;font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:600;cursor:pointer;}
+  .kiosk .scale-k button.sel{background:var(--amber);border-color:var(--amber);color:var(--graphite);}
+  .kiosk .btn-primary{background:var(--amber);color:var(--graphite);width:100%;padding:15px;font-size:15px;border-radius:12px;margin-top:8px;}
+  .kiosk .btn-primary:hover{background:#DE9528;}
+  .kiosk .thanks{font-size:16px;font-weight:600;padding:40px 0;}
+
+  .link-box{display:flex;gap:8px;margin-top:8px;}
+  .link-box input{font-family:'JetBrains Mono',monospace;font-size:12px;}
+
+  .note{font-size:12px;color:var(--muted);background:#F0EDE3;border-radius:8px;padding:10px 12px;margin-top:14px;}
+  .foot-src{font-size:11.5px;color:var(--muted);text-align:center;margin-top:30px;}
+
+  .resp-form{display:grid;grid-template-columns:1.2fr 1fr 1.4fr auto;gap:10px;align-items:end;margin-bottom:16px;}
+
+  body.kiosk-mode .hdr,
+  body.kiosk-mode .tabs,
+  body.kiosk-mode .foot-src,
+  body.kiosk-mode #satisfacao-note{display:none !important;}
+  body.kiosk-mode .app{max-width:640px;padding-top:50px;}
+  body.kiosk-mode section{display:none !important;}
+  body.kiosk-mode #tab-satisfacao{display:block !important;}
+
+  @media (max-width:520px){
+    .hdr h1{font-size:22px;}
+    .kiosk .scale-k button{height:46px;font-size:15px;}
+    .resp-form{grid-template-columns:1fr;}
+  }
 </style>
-</head>
-<body>
 
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="login-brand">
-    <div id="logo-big"></div>
-    <div class="wordmark">raguife</div>
-    <div class="tagline">Confiança que inspira</div>
-  </div>
-  <div class="login-form-wrap">
-    <div class="login-card">
-      <h2>Painel de Indicadores</h2>
-      <div class="sub">Restaurante, higienização e custos</div>
-      <label>E-mail</label>
-      <input type="email" id="lg-user" autocomplete="username" style="margin-bottom:13px">
-      <label>Senha</label>
-      <input type="password" id="lg-pass" autocomplete="current-password">
-      <div class="login-err" id="lg-err"></div>
-      <button class="btn btn-primary" id="lg-btn" style="width:100%;padding:13px" onclick="doLogin()">Entrar</button>
-      <button class="forgot" onclick="esqueciSenha()">Esqueci minha senha</button>
-
-      <div id="bootstrap-card">
-        <h2 style="font-size:17px">Primeiro acesso</h2>
-        <div class="sub" style="margin-bottom:14px">Nenhum administrador cadastrado ainda — crie a conta principal</div>
-        <label>Nome completo</label><input type="text" id="bs-nome" style="margin-bottom:11px">
-        <label>E-mail</label><input type="email" id="bs-email" style="margin-bottom:11px">
-        <label>Senha (mín. 6 caracteres)</label><input type="password" id="bs-pass">
-        <div class="login-err" id="bs-err"></div>
-        <button class="btn btn-leaf" id="bs-btn" style="width:100%;padding:12px" onclick="criarAdminInicial()">Criar administrador</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- KIOSK -->
-<div id="kiosk-screen">
-  <div class="kiosk-inner">
-    <div class="kiosk-head">
-      <div id="logo-kiosk"></div>
-      <div class="wordmark">raguife</div>
-      <div id="kiosk-body-wrap"></div>
-    </div>
-    <div id="kiosk-questions"></div>
-  </div>
-</div>
-
-<!-- APP -->
-<div id="app">
-  <div class="topbar">
-    <div class="brandline">
-      <div id="logo-small"></div>
+<div class="app">
+  <div class="hdr">
+    <div class="brand">
+      <div class="mark">IC</div>
       <div>
-        <span class="wordmark">raguife</span>
-        <span class="app-sub">Painel de Indicadores — Restaurante &amp; Higienização</span>
+        <h1>Painel de Indicadores — Facilities</h1>
+        <div class="sub">Restaurante &amp; Higienização — dados compartilhados em tempo real</div>
       </div>
-    </div>
-    <div class="userchip">
-      <div style="text-align:right">
-        <span class="uname" id="chip-nome"></span>
-        <span class="urole" id="chip-role"></span>
-      </div>
-      <button class="btn-top" onclick="openModalSenha()">Alterar senha</button>
-      <button class="btn-top" onclick="logout()">Sair</button>
     </div>
   </div>
 
-  <div class="layout">
-    <nav class="side" id="sidenav"></nav>
-    <main>
+  <div class="tabs" id="tabs"></div>
 
-      <!-- DASHBOARD -->
-      <div class="page" id="page-dashboard">
-        <h1 class="page-title">Dashboard</h1>
-        <div class="page-desc">Visão geral dos indicadores no período selecionado</div>
-        <div class="filter-bar">
-          <div class="fld"><label>De</label><input type="date" id="f-de"></div>
-          <div class="fld"><label>Até</label><input type="date" id="f-ate"></div>
-          <div class="presets">
-            <button class="btn btn-ghost" onclick="setPreset('hoje')">Hoje</button>
-            <button class="btn btn-ghost" onclick="setPreset('7d')">7 dias</button>
-            <button class="btn btn-ghost" onclick="setPreset('mes')">Este mês</button>
-            <button class="btn btn-ghost" onclick="setPreset('ano')">Este ano</button>
-          </div>
-          <button class="btn btn-leaf" onclick="applyFilter()">Aplicar</button>
-        </div>
-        <div class="grid-kpi" id="kpi-grid"></div>
-        <div class="panel">
-          <h2>Indicadores por refeição</h2>
-          <div class="desc">Dentro do período filtrado</div>
-          <div class="table-wrap" id="tbl-meal"></div>
-        </div>
-        <div class="panel" id="panel-checklist-semana" style="display:none">
-          <h2>Checklists da semana</h2>
-          <div class="desc">Status por colaborador (segunda a domingo)</div>
-          <div id="week-status"></div>
-          <div class="btn-row" style="display:none">
-            <button class="btn btn-leaf" onclick="enviarCobrancas(false)">Enviar cobranças agora (EmailJS)</button>
-            <span id="cobranca-status" style="font-size:12.5px;color:var(--ok);font-weight:600"></span>
-          </div>
-        </div>
-        <div class="panel">
-          <h2>Últimos lançamentos de desperdício</h2>
-          <div class="table-wrap" id="tbl-lanc-dash"></div>
-        </div>
+  <section id="tab-dashboard">
+    <div class="filter-bar">
+      <div class="field"><label>De</label><input type="date" id="f-de"></div>
+      <div class="field"><label>Até</label><input type="date" id="f-ate"></div>
+      <div class="presets">
+        <button class="btn btn-ghost" data-p="hoje">Hoje</button>
+        <button class="btn btn-ghost" data-p="7d">7 dias</button>
+        <button class="btn btn-ghost" data-p="mes">Este mês</button>
+        <button class="btn btn-ghost" data-p="ano">Este ano</button>
       </div>
+      <button class="btn btn-primary" onclick="applyFilter()">Aplicar filtro</button>
+    </div>
 
-      <!-- LANCAMENTO -->
-      <div class="page" id="page-lancamento">
-        <h1 class="page-title">Lançamento diário — Desperdício</h1>
-        <div class="page-desc">Sobra limpa e resto ingesto por refeição</div>
-        <div class="panel">
-          <div class="form-grid">
-            <div><label>Data</label><input type="date" id="r-data"></div>
-            <div><label>Refeição</label>
-              <select id="r-turno"><option>Café da Manhã</option><option>Almoço</option><option>Jantar</option><option>Ceia</option></select>
-            </div>
-            <div><label>Refeições realizadas</label><input type="number" id="r-refeicoes" min="0"></div>
-            <div><label>Produção (kg)</label><input type="number" step="0.01" id="r-producao" min="0"></div>
-            <div><label>Sobra limpa (kg)</label><input type="number" step="0.01" id="r-sobra" min="0"></div>
-            <div><label>Resto ingesto (kg)</label><input type="number" step="0.01" id="r-resto" min="0"></div>
-          </div>
-          <div class="btn-row"><button class="btn btn-primary" onclick="salvarLancamento()">Salvar lançamento</button></div>
+    <div class="grid" id="kpi-grid"></div>
+
+    <div class="panel">
+      <h2>Indicadores por refeição</h2>
+      <div class="desc">Geral e separado por Café da Manhã, Almoço, Jantar e Ceia — dentro do período filtrado</div>
+      <div class="table-wrap" id="tbl-meal"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Sobra Limpa &amp; Resto Ingesto — lançamentos no período</h2>
+      <div class="table-wrap" id="tbl-lanc"></div>
+    </div>
+    <div class="panel">
+      <h2>Checklists de Higienização — registros no período</h2>
+      <div class="table-wrap" id="tbl-higiene"></div>
+    </div>
+  </section>
+
+  <section id="tab-restaurante">
+    <div class="panel">
+      <h2>Lançamento diário — Sobra Limpa / Resto Ingesto</h2>
+      <div class="desc">Preenchido pela supervisão / administrativo, por refeição</div>
+      <div class="form-grid">
+        <div class="field"><label>Data</label><input type="date" id="r-data"></div>
+        <div class="field"><label>Refeição</label>
+          <select id="r-turno"><option>Café da Manhã</option><option>Almoço</option><option>Jantar</option><option>Ceia</option></select>
         </div>
-        <div class="panel">
-          <h2>Histórico recente</h2>
-          <div class="table-wrap" id="tbl-lanc-full"></div>
-        </div>
+        <div class="field"><label>Refeições realizadas</label><input type="number" id="r-refeicoes" min="0"></div>
+        <div class="field"><label>Produção (kg)</label><input type="number" step="0.01" id="r-producao" min="0"></div>
+        <div class="field"><label>Sobra limpa (kg)</label><input type="number" step="0.01" id="r-sobra" min="0"></div>
+        <div class="field"><label>Resto ingesto (kg)</label><input type="number" step="0.01" id="r-resto" min="0"></div>
       </div>
-
-      <!-- COMPRAS -->
-      <div class="page" id="page-compras">
-        <h1 class="page-title">Compras</h1>
-        <div class="page-desc">Lançamento diário de compras e acompanhamento do orçamento mensal</div>
-        <div class="panel" id="panel-orcamento"></div>
-        <div class="panel">
-          <h2>Nova compra</h2>
-          <div class="form-grid">
-            <div><label>Data</label><input type="date" id="c-data"></div>
-            <div><label>Categoria</label><select id="c-cat"></select></div>
-            <div style="grid-column:span 2"><label>Descrição</label><input type="text" id="c-desc" placeholder="ex: Compra semanal de hortifrúti — Fornecedor X"></div>
-            <div><label>Nota Fiscal</label><input type="text" id="c-nf" placeholder="nº da NF"></div>
-            <div><label>Nº Pedido Totvs</label><input type="text" id="c-pedido" placeholder="nº do pedido"></div>
-            <div><label>Valor (R$)</label><input type="number" step="0.01" id="c-valor" min="0"></div>
-          </div>
-          <div class="btn-row"><button class="btn btn-primary" onclick="salvarCompra()">Salvar compra</button></div>
-        </div>
-        <div class="panel" id="panel-categorias" style="display:none">
-          <h2>Categorias de compra</h2>
-          <div class="desc">Somente administradores podem alterar</div>
-          <div class="resp-form" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
-            <div style="flex:1;min-width:180px"><label>Nova categoria</label><input type="text" id="cat-nova" placeholder="ex: Bebidas"></div>
-            <button class="btn btn-leaf" onclick="addCategoria()">Adicionar</button>
-          </div>
-          <div class="table-wrap" id="tbl-categorias"></div>
-        </div>
-        <div class="panel">
-          <h2>Compras do mês</h2>
-          <div class="desc" id="compras-mes-label"></div>
-          <div class="table-wrap" id="tbl-compras"></div>
-        </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="salvarLancamento()">Salvar lançamento</button>
+        <span class="save-msg" id="r-msg">Salvo ✓</span>
       </div>
+    </div>
+    <div class="panel">
+      <h2>Histórico</h2>
+      <div class="table-wrap" id="tbl-lanc-full"></div>
+    </div>
+  </section>
 
-      <!-- CUSTOS -->
-      <div class="page" id="page-custos">
-        <h1 class="page-title">Custos mensais</h1>
-        <div class="page-desc">Fechamento do mês: refeições validadas, mão de obra e custo por refeição</div>
-        <div class="panel">
-          <h2>Fechamento do mês</h2>
-          <div class="desc">O custo de compras é somado automaticamente dos lançamentos da equipe</div>
-          <div class="form-grid">
-            <div><label>Mês</label><input type="month" id="m-mes"></div>
-            <div><label>Refeições validadas (total)</label><input type="number" id="m-ref" min="0"></div>
-            <div><label>— Café da manhã</label><input type="number" id="m-ref-cafe" min="0"></div>
-            <div><label>— Almoço / Jantar</label><input type="number" id="m-ref-almjan" min="0"></div>
-            <div><label>— Ceia</label><input type="number" id="m-ref-ceia" min="0"></div>
-            <div><label>Custo de mão de obra (R$)</label><input type="number" step="0.01" id="m-mo" min="0"></div>
-            <div><label>Desconto dos funcionários (R$)</label><input type="number" step="0.01" id="m-desc" min="0"></div>
-            <div><label>Ajuste de compras (R$, opcional)</label><input type="number" step="0.01" id="m-ajuste" placeholder="+ ou -"></div>
-          </div>
-          <div class="note" id="m-preview"></div>
-          <div class="btn-row"><button class="btn btn-primary" onclick="salvarCustoMes()">Salvar fechamento</button></div>
-        </div>
-        <div class="panel">
-          <h2>Histórico de custos</h2>
-          <div class="table-wrap" id="tbl-custos"></div>
-        </div>
+  <section id="tab-satisfacao">
+    <div class="note" id="satisfacao-note">
+      Link para deixar aberto no tablet do refeitório — abre direto nesta tela, sem menus, e já identifica a refeição pelo horário.
+      <div class="link-box">
+        <input type="text" id="tablet-link" readonly>
+        <button class="btn btn-ghost" onclick="copyTabletLink()">Copiar link</button>
       </div>
+    </div>
+    <div class="kiosk" id="kiosk-wrap">
+      <div id="kiosk-inner"></div>
+    </div>
+  </section>
 
-      <!-- CHECKLIST ADM -->
-      <div class="page" id="page-check-adm">
-        <h1 class="page-title">Checklist — Limpeza Administrativa</h1>
-        <div class="page-desc">Avaliação semanal por setor · notas de 1 (péssimo) a 5 (excelente)</div>
-        <div class="panel">
-          <div class="prog" id="adm-progress" style="display:none"></div>
-          <div class="form-grid" style="margin-bottom:14px">
-            <div><label>Data</label><input type="date" id="adm-data"></div>
-            <div><label>Avaliador</label><input type="text" id="adm-nome" disabled></div>
-            <div><label>Setor</label><input type="text" id="adm-setor" placeholder="ex: RH / Financeiro"></div>
-          </div>
-          <div id="adm-quesitos"></div>
-          <div style="margin-top:14px"><label>Observações adicionais</label><textarea id="adm-obs" placeholder="Ex: necessidade de aumentar dias de limpeza..."></textarea></div>
-          <div class="btn-row"><button class="btn btn-primary" onclick="salvarChecklist('adm')">Enviar checklist</button></div>
-        </div>
-        <div class="panel">
-          <h2>Últimos envios</h2>
-          <div class="table-wrap" id="tbl-adm-full"></div>
-        </div>
+  <section id="tab-adm">
+    <div class="panel">
+      <h2>Checklist — Conformidade de Limpeza Administrativa</h2>
+      <div class="desc">Avaliação semanal por setor</div>
+      <div class="form-grid" style="margin-bottom:14px">
+        <div class="field"><label>Data</label><input type="date" id="adm-data"></div>
+        <div class="field" style="grid-column:1/-1"><label>Respondente cadastrado</label><select id="adm-resp-select"></select></div>
+        <div class="field"><label>Nome</label><input type="text" id="adm-nome"></div>
+        <div class="field"><label>Setor</label><input type="text" id="adm-setor"></div>
+        <div class="field"><label>E-mail</label><input type="email" id="adm-email"></div>
       </div>
-
-      <!-- CHECKLIST HIG -->
-      <div class="page" id="page-check-hig">
-        <h1 class="page-title">Checklist — Limpeza Higiênica</h1>
-        <div class="page-desc">Barreiras sanitárias, vestiários e áreas de descanso · notas de 1 a 5</div>
-        <div class="panel">
-          <div class="prog" id="hig-progress" style="display:none"></div>
-          <div class="form-grid" style="margin-bottom:14px">
-            <div><label>Data</label><input type="date" id="hig-data"></div>
-            <div><label>Avaliador</label><input type="text" id="hig-nome" disabled></div>
-            <div><label>Área avaliada</label><input type="text" id="hig-setor" placeholder="ex: Vestiário / Sanitário / Copa"></div>
-          </div>
-          <div id="hig-quesitos"></div>
-          <div style="margin-top:14px"><label>Observações adicionais</label><textarea id="hig-obs"></textarea></div>
-          <div class="btn-row"><button class="btn btn-primary" onclick="salvarChecklist('hig')">Enviar checklist</button></div>
-        </div>
-        <div class="panel">
-          <h2>Últimos envios</h2>
-          <div class="table-wrap" id="tbl-hig-full"></div>
-        </div>
+      <div id="adm-quesitos"></div>
+      <div class="field" style="margin-top:14px">
+        <label>Observações adicionais</label>
+        <textarea id="adm-obs" placeholder="Ex: necessidade de aumentar dias de limpeza..."></textarea>
       </div>
-
-      <!-- PESQUISA -->
-      <div class="page" id="page-pesquisa">
-        <h1 class="page-title">Pesquisa de Satisfação</h1>
-        <div class="page-desc">Respondida pelos colaboradores no tablet do refeitório, sem login</div>
-        <div class="panel">
-          <h2>Link do tablet</h2>
-          <div class="desc">Deixe este link aberto no tablet — a tela mostra apenas a pesquisa e identifica a refeição pelo horário</div>
-          <div class="link-box">
-            <input type="text" id="tablet-link" readonly>
-            <button class="btn btn-ghost" onclick="copyTabletLink()">Copiar link</button>
-          </div>
-          <div class="note">Café da Manhã 04:30–07:30 · Almoço 10:00–13:00 · Jantar 17:00–19:00 · Ceia 00:00–03:00. As respostas são anônimas e só podem ser registradas por essa tela — usuários do painel não conseguem lançar notas.</div>
-        </div>
-        <div class="panel">
-          <h2>Resultados por refeição</h2>
-          <div class="desc">Médias por pergunta no período do dashboard</div>
-          <div class="table-wrap" id="tbl-sat-detalhe"></div>
-        </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="salvarChecklist('adm')">Salvar checklist</button>
+        <span class="save-msg" id="adm-msg">Salvo ✓</span>
       </div>
+    </div>
 
-      <!-- HISTORICO -->
-      <div class="page" id="page-historico">
-        <h1 class="page-title">Histórico de resultados</h1>
-        <div class="page-desc">Consolidado mês a mês de todos os indicadores</div>
-        <div class="filter-bar">
-          <div class="fld"><label>De (mês)</label><input type="month" id="h-de"></div>
-          <div class="fld"><label>Até (mês)</label><input type="month" id="h-ate"></div>
-          <button class="btn btn-leaf" onclick="renderHistorico()">Aplicar</button>
-          <button class="btn btn-primary" onclick="gerarPDF()">Gerar PDF</button>
-        </div>
-        <div class="panel">
-          <h2>Indicadores por mês</h2>
-          <div class="desc" id="h-label"></div>
-          <div class="table-wrap" id="tbl-historico"></div>
-          <div class="note">Custo/refeição usa o fechamento mensal (com mão de obra, descontado dos funcionários). Meses sem fechamento aparecem com "—". Para o PDF, clique em "Gerar PDF" e escolha "Salvar como PDF" na janela de impressão.</div>
-        </div>
+    <div class="panel">
+      <h2>Respondentes cadastrados — ADM</h2>
+      <div class="desc">Quem deve receber e preencher o checklist toda semana</div>
+      <div class="resp-form">
+        <div class="field"><label>Nome</label><input type="text" id="adm-resp-nome"></div>
+        <div class="field"><label>Setor</label><input type="text" id="adm-resp-setor"></div>
+        <div class="field"><label>E-mail</label><input type="email" id="adm-resp-email"></div>
+        <button class="btn btn-primary" onclick="addRespondente('adm')">Adicionar</button>
       </div>
+      <div class="table-wrap" id="adm-resp-table"></div>
+    </div>
 
-      <!-- USUARIOS -->
-      <div class="page" id="page-usuarios">
-        <h1 class="page-title">Usuários</h1>
-        <div class="page-desc">Controle de acesso ao painel por perfil</div>
-        <div class="panel">
-          <h2>Novo usuário</h2>
-          <div class="form-grid">
-            <div><label>Nome completo</label><input type="text" id="u-nome"></div>
-            <div><label>Setor</label><input type="text" id="u-setor"></div>
-            <div><label>E-mail (login)</label><input type="email" id="u-email"></div>
-            <div><label>Senha inicial (mín. 6)</label><input type="text" id="u-pass"></div>
-            <div><label>Perfil</label>
-              <select id="u-role" onchange="toggleChecklistSel()">
-                <option value="admin">Administrador</option>
-                <option value="nutricionista">Nutricionista</option>
-                <option value="colaborador" selected>Colaborador (checklists)</option>
-              </select>
-            </div>
-            <div id="u-check-wrap"><label>Checklists atribuídos</label>
-              <select id="u-check" onchange="toggleChecklistSel()"><option value="adm">Administrativa</option><option value="hig">Higiênica</option><option value="ambos">Ambos</option></select>
-            </div>
-            <div id="u-areas-adm-wrap" style="grid-column:1/-1"><label>Setores ADM que ele avalia (separados por vírgula)</label><input type="text" id="u-areas-adm" placeholder="ex: RH, Financeiro, Recepção"></div>
-            <div id="u-areas-hig-wrap" style="grid-column:1/-1"><label>Áreas Higiênicas que ele avalia (separadas por vírgula)</label><input type="text" id="u-areas-hig" placeholder="ex: Vestiário, Sanitário, Copa"></div>
-          </div>
-          <div class="btn-row"><button class="btn btn-primary" id="u-btn" onclick="criarUsuario()">Criar usuário</button></div>
-          <div class="note"><b>Perfis:</b> Administrador vê tudo e fecha os custos · Nutricionista lança desperdício e compras · Colaborador responde apenas os checklists atribuídos. Ninguém logado consegue lançar notas na pesquisa de satisfação.</div>
-        </div>
-        <div class="panel">
-          <h2>Usuários cadastrados</h2>
-          <div class="table-wrap" id="tbl-usuarios"></div>
-          <div class="note">"Remover" tira o acesso ao painel. Para apagar também a conta de e-mail, use o console do Firebase (Authentication).</div>
-        </div>
+    <div class="panel">
+      <h2>Envios da semana — ADM</h2>
+      <div class="desc">Status de quem já respondeu nesta semana (segunda a domingo)</div>
+      <div id="adm-pending-mailto"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="enviarCobrancas('adm')">Enviar cobranças agora (EmailJS)</button>
+        <span class="save-msg" id="adm-email-status"></span>
       </div>
+      <div class="note">Toda sexta-feira, ao abrir este painel, ele dispara automaticamente (via EmailJS) o e-mail de cobrança para quem ainda não respondeu na semana — uma vez por semana. Configure o EmailJS na aba Config / Metas antes de usar.</div>
+    </div>
 
-      <!-- CONFIG -->
-      <div class="page" id="page-config">
-        <h1 class="page-title">Metas &amp; Configurações</h1>
-        <div class="page-desc">Metas dos indicadores, orçamento e EmailJS</div>
-        <div class="panel">
-          <h2>Metas dos indicadores</h2>
-          <div class="form-grid">
-            <div><label>Meta Sobra Limpa (% da produção)</label><input type="number" step="0.1" id="cfg-sobra"></div>
-            <div><label>Meta Resto Ingesto (kg/pessoa)</label><input type="number" step="0.001" id="cfg-resto"></div>
-            <div><label>Meta Satisfação (nota mín. /5)</label><input type="number" step="0.1" id="cfg-sat"></div>
-            <div><label>Meta Conformidade Limpeza (nota mín. /5)</label><input type="number" step="0.1" id="cfg-conf"></div>
-            <div><label>Orçamento mensal de compras (R$)</label><input type="number" step="0.01" id="cfg-orc"></div>
-          </div>
-          <div class="btn-row"><button class="btn btn-primary" onclick="salvarConfig()">Salvar metas</button></div>
-        </div>
-        <div class="panel">
-          <h2>Horários da pesquisa de satisfação</h2>
-          <div class="desc">Janelas em que o tablet aceita respostas, por refeição</div>
-          <div class="form-grid">
-            <div><label>Café da Manhã — início</label><input type="time" id="hr-cafe-ini"></div>
-            <div><label>Café da Manhã — fim</label><input type="time" id="hr-cafe-fim"></div>
-            <div><label>Almoço — início</label><input type="time" id="hr-almoco-ini"></div>
-            <div><label>Almoço — fim</label><input type="time" id="hr-almoco-fim"></div>
-            <div><label>Jantar — início</label><input type="time" id="hr-jantar-ini"></div>
-            <div><label>Jantar — fim</label><input type="time" id="hr-jantar-fim"></div>
-            <div><label>Ceia — início</label><input type="time" id="hr-ceia-ini"></div>
-            <div><label>Ceia — fim</label><input type="time" id="hr-ceia-fim"></div>
-          </div>
-          <div class="btn-row"><button class="btn btn-primary" onclick="salvarHorarios()">Salvar horários</button></div>
-          <div class="note">Faixas que cruzam a meia-noite funcionam (ex: Ceia 23:00–02:00). O tablet aplica os novos horários quando a página recarrega — o Fully Kiosk já faz isso no reload diário, ou recarregue manualmente.</div>
-        </div>
-        <div class="panel">
-          <h2>EmailJS — cobrança dos checklists</h2>
-          <div class="desc">Dados da sua conta em emailjs.com, usados no disparo semanal para pendentes</div>
-          <div class="form-grid">
-            <div><label>Public Key</label><input type="text" id="ej-public"></div>
-            <div><label>Private Key (opcional)</label><input type="password" id="ej-private"></div>
-            <div><label>Service ID</label><input type="text" id="ej-service"></div>
-            <div><label>Template ID — Checklist ADM</label><input type="text" id="ej-tpl-adm"></div>
-            <div><label>Template ID — Checklist Higiênica</label><input type="text" id="ej-tpl-hig"></div>
-            <div><label>Link do painel (vai no corpo do e-mail)</label><input type="text" id="ej-link" placeholder="https://..."></div>
-          </div>
-          <div class="btn-row"><button class="btn btn-primary" onclick="salvarEmailCfg()">Salvar EmailJS</button></div>
-          <div class="note">No template do EmailJS, use as variáveis <code>{{to_email}}</code>, <code>{{to_name}}</code>, <code>{{setor}}</code>, <code>{{tipo_checklist}}</code> e <code>{{link_formulario}}</code>. O disparo automático acontece na primeira vez que um administrador abre o painel numa sexta-feira (uma vez por semana). Estes dados ficam no Firestore visíveis apenas para administradores.</div>
-        </div>
+    <div class="panel">
+      <h2>Histórico — ADM</h2>
+      <div class="table-wrap" id="tbl-adm-full"></div>
+    </div>
+  </section>
+
+  <section id="tab-higienica">
+    <div class="panel">
+      <h2>Checklist — Conformidade de Limpeza Higiênica</h2>
+      <div class="desc">Barreiras sanitárias, vestiário e áreas de descanso</div>
+      <div class="form-grid" style="margin-bottom:14px">
+        <div class="field"><label>Data</label><input type="date" id="hig-data"></div>
+        <div class="field" style="grid-column:1/-1"><label>Respondente cadastrado</label><select id="hig-resp-select"></select></div>
+        <div class="field"><label>Nome</label><input type="text" id="hig-nome"></div>
+        <div class="field"><label>Área avaliada</label><input type="text" id="hig-setor" placeholder="ex: Vestiário / Sanitário / Copa"></div>
+        <div class="field"><label>E-mail</label><input type="email" id="hig-email"></div>
       </div>
+      <div id="hig-quesitos"></div>
+      <div class="field" style="margin-top:14px">
+        <label>Observações adicionais</label>
+        <textarea id="hig-obs"></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="salvarChecklist('hig')">Salvar checklist</button>
+        <span class="save-msg" id="hig-msg">Salvo ✓</span>
+      </div>
+    </div>
 
-    </main>
-  </div>
+    <div class="panel">
+      <h2>Respondentes cadastrados — Higiênica</h2>
+      <div class="resp-form">
+        <div class="field"><label>Nome</label><input type="text" id="hig-resp-nome"></div>
+        <div class="field"><label>Setor / área</label><input type="text" id="hig-resp-setor"></div>
+        <div class="field"><label>E-mail</label><input type="email" id="hig-resp-email"></div>
+        <button class="btn btn-primary" onclick="addRespondente('hig')">Adicionar</button>
+      </div>
+      <div class="table-wrap" id="hig-resp-table"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Envios da semana — Higiênica</h2>
+      <div id="hig-pending-mailto"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="enviarCobrancas('hig')">Enviar cobranças agora (EmailJS)</button>
+        <span class="save-msg" id="hig-email-status"></span>
+      </div>
+      <div class="note">Mesmo esquema da checklist ADM: toda sexta-feira, ao abrir este painel, o envio via EmailJS dispara sozinho para os pendentes, uma vez por semana.</div>
+    </div>
+
+    <div class="panel">
+      <h2>Histórico — Higiênica</h2>
+      <div class="table-wrap" id="tbl-hig-full"></div>
+    </div>
+  </section>
+
+  <section id="tab-config">
+    <div class="panel">
+      <h2>Configuração do EmailJS</h2>
+      <div class="desc">Dados da sua conta em emailjs.com — usados para disparar as cobranças semanais dos checklists</div>
+      <div class="form-grid">
+        <div class="field"><label>Public Key</label><input type="text" id="ej-public"></div>
+        <div class="field"><label>Private Key (opcional, evita bloqueio de origem)</label><input type="text" id="ej-private"></div>
+        <div class="field"><label>Service ID</label><input type="text" id="ej-service"></div>
+        <div class="field"><label>Template ID — Checklist ADM</label><input type="text" id="ej-tpl-adm"></div>
+        <div class="field"><label>Template ID — Checklist Higiênica</label><input type="text" id="ej-tpl-hig"></div>
+        <div class="field"><label>Link do formulário/app (vai no corpo do e-mail)</label><input type="text" id="ej-link" placeholder="https://..."></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="salvarEmailCfg()">Salvar configuração</button>
+        <span class="save-msg" id="ej-msg">Salvo ✓</span>
+      </div>
+      <div class="note">No template do EmailJS, use as variáveis <code>{{to_email}}</code>, <code>{{to_name}}</code>, <code>{{setor}}</code>, <code>{{tipo_checklist}}</code> e <code>{{link_formulario}}</code>. Como os dados deste app são compartilhados, qualquer pessoa com acesso ao link também acessa essas chaves salvas aqui — prefira preencher a Private Key só se o envio pela Public Key estiver sendo bloqueado por checagem de origem.</div>
+    </div>
+
+    <div class="panel">
+      <h2>Metas dos indicadores</h2>
+      <div class="desc">Usadas para calcular o status (dentro / fora da meta) no dashboard</div>
+      <div class="form-grid">
+        <div class="field"><label>Meta Sobra Limpa (% da produção)</label><input type="number" step="0.1" id="cfg-sobra"></div>
+        <div class="field"><label>Meta Resto Ingesto (kg/pessoa)</label><input type="number" step="0.001" id="cfg-resto"></div>
+        <div class="field"><label>Meta Satisfação (nota mín. /5)</label><input type="number" step="0.1" id="cfg-sat"></div>
+        <div class="field"><label>Meta Conformidade Limpeza (nota mín. /5)</label><input type="number" step="0.1" id="cfg-conf"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="salvarConfig()">Salvar metas</button>
+        <span class="save-msg" id="cfg-msg">Salvo ✓</span>
+      </div>
+    </div>
+    <div class="note">Dados salvos neste app ficam armazenados de forma compartilhada — qualquer pessoa com acesso a este link vê e adiciona lançamentos.</div>
+  </section>
+
+  <div class="foot-src">Protótipo funcional · dados de exemplo migrados das planilhas atuais</div>
 </div>
 
-<!-- RELATÓRIO PARA IMPRESSÃO/PDF -->
-<div id="print-area"></div>
-
-<!-- MODAL / TOAST -->
-<div id="modal-bg" onclick="if(event.target===this)closeModal()">
-  <div class="modal" id="modal-box"></div>
-</div>
-<div id="toast"></div>
-
-<script type="module">
-/* ================= FIREBASE ================= */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import {
-  getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut,
-  onAuthStateChanged, sendPasswordResetEmail, updatePassword,
-  EmailAuthProvider, reauthenticateWithCredential, signInAnonymously
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import {
-  getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs,
-  deleteDoc, onSnapshot, query, where
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBVS-UnYSOPXUUSDru0y5nEstN-3prKn-c",
-  authDomain: "facilities-aef2f.firebaseapp.com",
-  projectId: "facilities-aef2f",
-  storageBucket: "facilities-aef2f.firebasestorage.app",
-  messagingSenderId: "546452013311",
-  appId: "1:546452013311:web:a1ff4a2605dcb93209ccca"
-};
-const fbApp = initializeApp(firebaseConfig);
-const auth = getAuth(fbApp);
-const db = getFirestore(fbApp);
-
-/* ================= CONSTANTES ================= */
+<script>
+const TABS = [
+  {id:'dashboard', label:'Dashboard'},
+  {id:'restaurante', label:'Lançamento Restaurante'},
+  {id:'satisfacao', label:'Pesquisa Satisfação'},
+  {id:'adm', label:'Checklist ADM'},
+  {id:'higienica', label:'Checklist Higiênica'},
+  {id:'config', label:'Config / Metas'},
+];
 const ADM_QUESITOS = ['Limpeza geral','Pisos e circulação','Bancadas, mesas e superfícies','Lixeiras','Pontos críticos – sanitização','Frequência e rotina','Condição final do ambiente'];
 const HIG_QUESITOS = ['Limpeza geral do ambiente','Vasos sanitários e mictórios','Pias, torneiras e espelhos','Abastecimento de insumos','Pisos, ralos e paredes','Vestiário — armários e bancos','Chuveiros e áreas molhadas','Drenagem e segurança','Sala de descanso','Copa — geladeira e pia'];
 const SAT_QUESTOES = [
@@ -608,290 +360,57 @@ const SAT_QUESTOES = [
   {k:'q4', t:'Atendimento da equipe'},
   {k:'q5', t:'Tempo de fila'},
 ];
-const EMOJIS = ['😠','🙁','😐','🙂','😄'];
-const DEFAULT_HORARIOS = {
-  cafe:{ini:'04:30',fim:'07:30'}, almoco:{ini:'10:00',fim:'13:00'},
-  jantar:{ini:'17:00',fim:'19:00'}, ceia:{ini:'00:00',fim:'03:00'},
-};
-const TURNO_DEFS = [
-  {key:'cafe', name:'Café da Manhã'},
-  {key:'almoco', name:'Almoço'},
-  {key:'jantar', name:'Jantar'},
-  {key:'ceia', name:'Ceia'},
+const MEALS = [
+  {name:'Café da Manhã', start:4.5, end:7.5, label:'04:30–07:30'},
+  {name:'Almoço', start:10, end:13, label:'10:00–13:00'},
+  {name:'Jantar', start:17, end:19, label:'17:00–19:00'},
+  {name:'Ceia', start:0, end:3, label:'00:00–03:00'},
 ];
-function hm2dec(hm){ const [h,m]=(hm||'0:0').split(':').map(Number); return h + (m||0)/60; }
-function getMeals(){
-  return TURNO_DEFS.map(t=>{
-    const h = (state.horarios && state.horarios[t.key]) || DEFAULT_HORARIOS[t.key];
-    return {name:t.name, start:hm2dec(h.ini), end:hm2dec(h.fim), label:h.ini+'–'+h.fim};
-  });
-}
-const ROLES = {admin:'Administrador', nutricionista:'Nutricionista', colaborador:'Colaborador'};
-const NAV_DEF = [
-  {id:'dashboard', label:'Dashboard', ic:'▦', roles:['admin','nutricionista']},
-  {id:'lancamento', label:'Desperdício', ic:'⚖', roles:['admin','nutricionista']},
-  {id:'compras', label:'Compras', ic:'🛒', roles:['admin','nutricionista']},
-  {id:'custos', label:'Custos mensais', ic:'💰', roles:['admin']},
-  {id:'check-adm', label:'Checklist ADM', ic:'✓', roles:['admin'], check:'adm'},
-  {id:'check-hig', label:'Checklist Higiênica', ic:'✓', roles:['admin'], check:'hig'},
-  {id:'pesquisa', label:'Pesquisa Satisfação', ic:'★', roles:['admin','nutricionista']},
-  {id:'historico', label:'Histórico', ic:'📈', roles:['admin','nutricionista']},
-  {id:'usuarios', label:'Usuários', ic:'👤', roles:['admin']},
-  {id:'config', label:'Metas & Config', ic:'⚙', roles:['admin']},
-];
-const DEFAULT_CFG = {metaSobra:5, metaResto:0.03, metaSat:4.5, metaConf:4.5, orcamento:60000};
-const DEFAULT_CATS = ['Hortifrúti','Proteínas','Mercearia','Laticínios / Frios','Padaria','Descartáveis / Limpeza','Gás','Outros'];
 
-let state = { users:[], lanc:[], sat:[], adm:[], hig:[], compras:[], custos:[], cfg:{...DEFAULT_CFG}, emailCfg:{}, categorias:[...DEFAULT_CATS], filterDe:'', filterAte:'' };
-let currentUser = null;   // {uid, nome, email, setor, role, check}
-let admScores = {}, higScores = {}, kioskAnswers = {}, kioskTurno = null;
-let unsubs = [];
+let DEFAULT_CFG = {metaSobra:5, metaResto:0.03, metaSat:4.5, metaConf:4.5};
+let state = { lanc:[], sat:[], adm:[], hig:[], respAdm:[], respHig:[], cfg:DEFAULT_CFG, filterDe:'', filterAte:'' };
+let kioskAnswers = {}, kioskTurno = null;
+let admScores = {}, higScores = {};
 const isKioskMode = new URLSearchParams(location.search).get('kiosk') === '1';
 
-/* ================= HELPERS ================= */
-function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-function monthISO(){ return todayISO().slice(0,7); }
-function fmtBR(d){ if(!d) return '—'; const [y,m,dd]=d.split('-'); return dd+'/'+m+'/'+y; }
-function fmtMes(m){ if(!m) return '—'; const [y,mm]=m.split('-'); const n=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']; return n[Number(mm)-1]+'/'+y; }
-function brl(v){ return (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
-function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function detectMeal(){ const d=new Date(); const h=d.getHours()+d.getMinutes()/60; for(const m of getMeals()){ const cruza = m.end < m.start; if(cruza ? (h>=m.start || h<m.end) : (h>=m.start && h<m.end)) return m; } return null; }
-function mondayOf(d){ const c=new Date(d); const day=c.getDay(); c.setDate(c.getDate()+(day===0?-6:1-day)); c.setHours(0,0,0,0); return c; }
-function weekKey(d){ const m=mondayOf(d); return m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-'+String(m.getDate()).padStart(2,'0'); }
-function toast(msg, isErr){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.toggle('err', !!isErr); t.classList.add('show');
-  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'), 2800);
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function detectMeal(d){
+  d = d || new Date();
+  const h = d.getHours() + d.getMinutes()/60;
+  for(const m of MEALS){ if(h>=m.start && h<m.end) return m.name; }
+  return null;
 }
-function tableHTML(headers, rows){
-  if(!rows.length) return '<div class="empty">Sem registros ainda</div>';
-  return '<table><thead><tr>'+headers.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+
-    rows.map(r=>'<tr>'+r.map(c=>'<td class="num">'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
+function mondayOf(d){
+  const c = new Date(d); const day = c.getDay(); const diff = (day===0? -6 : 1-day);
+  c.setDate(c.getDate()+diff); c.setHours(0,0,0,0); return c;
 }
-function mediaQuesitos(q){ const v=Object.values(q||{}).filter(x=>x!=null); return v.length? v.reduce((a,b)=>a+b,0)/v.length : 0; }
-function notaPill(n){
-  if(!n) return '<span class="pill p-neutral">—</span>';
-  const cls = n>=4.5?'p-ok':(n>=3.5?'p-warn':'p-bad');
-  return '<span class="pill '+cls+'">'+n.toFixed(1)+'</span>';
+function weekKey(d){ return mondayOf(d).toISOString().slice(0,10); }
+
+// ---------- storage helpers ----------
+async function loadList(key){
+  try{ const r = await window.storage.get(key, true); return r ? JSON.parse(r.value) : []; }catch(e){ return []; }
 }
-function authErrPT(e){
-  const c = e?.code || '';
-  if(c.includes('invalid-credential') || c.includes('wrong-password') || c.includes('user-not-found')) return 'E-mail ou senha incorretos.';
-  if(c.includes('invalid-email')) return 'E-mail inválido.';
-  if(c.includes('email-already-in-use')) return 'Este e-mail já está cadastrado.';
-  if(c.includes('weak-password')) return 'Senha muito curta — use pelo menos 6 caracteres.';
-  if(c.includes('too-many-requests')) return 'Muitas tentativas — aguarde alguns minutos.';
-  if(c.includes('network')) return 'Falha de conexão — verifique a internet.';
-  if(c.includes('requires-recent-login')) return 'Por segurança, saia e entre de novo antes de alterar a senha.';
-  return 'Erro: '+(e?.message||e);
+async function saveList(key, arr){
+  try{ await window.storage.set(key, JSON.stringify(arr), true); }catch(e){ console.error(e); }
 }
-function logoSVG(size){
-  return `<svg width="${size}" height="${size*0.78}" viewBox="0 0 100 78" xmlns="http://www.w3.org/2000/svg">
-    <rect x="4" y="4" width="92" height="70" rx="12" fill="none" stroke="#8CB43E" stroke-width="7"/>
-    <circle cx="30" cy="27" r="6.5" fill="#8CB43E"/>
-    <circle cx="50" cy="23" r="6.5" fill="#8CB43E"/>
-    <circle cx="70" cy="27" r="6.5" fill="#8CB43E"/>
-    <path d="M27 40 v9 a11.5 11.5 0 0 0 23 0 v-9" fill="none" stroke="#8CB43E" stroke-width="9" stroke-linecap="round"/>
-    <path d="M50 40 v9 a11.5 11.5 0 0 0 23 0 v-9" fill="none" stroke="#8CB43E" stroke-width="9" stroke-linecap="round"/>
-  </svg>`;
+async function loadCfg(){
+  try{ const r = await window.storage.get('config:metas', true); return r ? JSON.parse(r.value) : DEFAULT_CFG; }catch(e){ return DEFAULT_CFG; }
 }
 
-/* ================= AUTH ================= */
-async function doLogin(){
-  const email = document.getElementById('lg-user').value.trim();
-  const pass = document.getElementById('lg-pass').value;
-  const err = document.getElementById('lg-err');
-  err.textContent='';
-  if(!email || !pass){ err.textContent='Informe e-mail e senha.'; return; }
-  const btn = document.getElementById('lg-btn'); btn.disabled=true;
-  try{
-    await signInWithEmailAndPassword(auth, email, pass);
-    // onAuthStateChanged assume daqui
-  }catch(e){ err.textContent = authErrPT(e); }
-  btn.disabled=false;
+// ---------- tabs ----------
+function buildTabs(){
+  const el = document.getElementById('tabs');
+  el.innerHTML = TABS.map(t=>`<button class="tab" data-id="${t.id}">${t.label}</button>`).join('');
+  el.querySelectorAll('.tab').forEach(b=>b.addEventListener('click', ()=>showTab(b.dataset.id)));
+  showTab(isKioskMode ? 'satisfacao' : 'dashboard');
 }
-async function esqueciSenha(){
-  const email = document.getElementById('lg-user').value.trim();
-  if(!email){ document.getElementById('lg-err').textContent='Digite seu e-mail no campo acima e clique de novo.'; return; }
-  try{
-    await sendPasswordResetEmail(auth, email);
-    toast('E-mail de redefinição enviado para '+email+' ✓');
-  }catch(e){ toast(authErrPT(e), true); }
-}
-async function criarAdminInicial(){
-  const nome = document.getElementById('bs-nome').value.trim();
-  const email = document.getElementById('bs-email').value.trim();
-  const pass = document.getElementById('bs-pass').value;
-  const err = document.getElementById('bs-err'); err.textContent='';
-  if(!nome || !email || !pass){ err.textContent='Preencha todos os campos.'; return; }
-  const btn = document.getElementById('bs-btn'); btn.disabled=true;
-  try{
-    const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    await setDoc(doc(db,'usuarios',cred.user.uid), {nome, email, setor:'Gestão', role:'admin', check:''});
-    await setDoc(doc(db,'config','setup'), {done:true, em:todayISO()});
-    toast('Administrador criado ✓');
-  }catch(e){ err.textContent = authErrPT(e); btn.disabled=false; }
-}
-async function logout(){
-  await signOut(auth);
-  location.reload();
-}
-
-/* ================= BOOT / SESSÃO ================= */
-async function checkBootstrap(){
-  try{
-    const s = await getDoc(doc(db,'config','setup'));
-    document.getElementById('bootstrap-card').style.display = s.exists()? 'none':'block';
-  }catch(e){ console.error(e); }
-}
-onAuthStateChanged(auth, async (user)=>{
-  if(isKioskMode) return;
-  if(!user || user.isAnonymous) return;
-  try{
-    const prof = await getDoc(doc(db,'usuarios',user.uid));
-    if(!prof.exists()){
-      document.getElementById('lg-err').textContent = 'Sua conta não tem acesso ao painel. Fale com o administrador.';
-      await signOut(auth);
-      return;
-    }
-    currentUser = {uid:user.uid, ...prof.data()};
-    await loadConfig();
-    enterApp();
-    subscribeData();
-    if(currentUser.role!=='colaborador') await loadSat();
-    if(currentUser.role==='admin') checkAutoSend();
-  }catch(e){
-    document.getElementById('lg-err').textContent = 'Erro ao carregar perfil: '+authErrPT(e);
-  }
-});
-
-/* ================= DADOS (Firestore) ================= */
-async function loadConfig(){
-  try{
-    const m = await getDoc(doc(db,'config','metas'));
-    state.cfg = m.exists()? {...DEFAULT_CFG, ...m.data()} : {...DEFAULT_CFG};
-  }catch(e){ state.cfg = {...DEFAULT_CFG}; }
-  try{
-    const c = await getDoc(doc(db,'config','categorias'));
-    state.categorias = (c.exists() && Array.isArray(c.data().lista) && c.data().lista.length)? c.data().lista : [...DEFAULT_CATS];
-  }catch(e){ state.categorias = [...DEFAULT_CATS]; }
-  await loadHorarios();
-  if(currentUser.role==='admin'){
-    try{
-      const ej = await getDoc(doc(db,'config','emailjs'));
-      state.emailCfg = ej.exists()? ej.data() : {};
-    }catch(e){ state.emailCfg = {}; }
-  }
-}
-function sub(colName, target, after){
-  const u = onSnapshot(collection(db,colName), snap=>{
-    state[target] = snap.docs.map(d=>({id:d.id, ...d.data()}));
-    after && after();
-  }, e=>console.error(colName, e));
-  unsubs.push(u);
-}
-function subscribeData(){
-  unsubs.forEach(u=>u()); unsubs=[];
-  const role = currentUser.role;
-  if(role==='colaborador'){
-    if(currentUser.check==='adm'||currentUser.check==='ambos') sub('checklists_adm','adm', renderHigTables);
-    if(currentUser.check==='hig'||currentUser.check==='ambos') sub('checklists_hig','hig', renderHigTables);
-    return;
-  }
-  sub('lancamentos','lanc', ()=>{ renderLancTables(); renderDashboard(); if(role==='admin') previewCusto(); });
-  sub('compras','compras', ()=>{ renderCompras(); renderDashboard(); if(role==='admin'){ previewCusto(); renderCustos(); } });
-  sub('checklists_adm','adm', ()=>{ renderHigTables(); renderDashboard(); });
-  sub('checklists_hig','hig', ()=>{ renderHigTables(); renderDashboard(); });
-  sub('custos','custos', ()=>{ if(role==='admin') renderCustos(); });
-  if(role==='admin'){
-    sub('usuarios','users', ()=>{ renderUsuarios(); renderDashboard(); });
-  }
-}
-async function loadSat(){
-  // busca só o período filtrado (economiza leituras)
-  try{
-    const de = state.filterDe || todayISO().slice(0,8)+'01';
-    const ate = state.filterAte || todayISO();
-    const q1 = query(collection(db,'satisfacao'), where('data','>=',de), where('data','<=',ate));
-    const snap = await getDocs(q1);
-    state.sat = snap.docs.map(d=>({id:d.id, ...d.data()}));
-    renderDashboard(); renderSatDetalhe();
-  }catch(e){ console.error(e); }
-}
-
-/* ================= NAV / SHELL ================= */
-function allowedNav(){
-  return NAV_DEF.filter(n=>{
-    if(n.roles.includes(currentUser.role)) return true;
-    if(currentUser.role==='colaborador' && n.check) return currentUser.check==='ambos' || currentUser.check===n.check;
-    return false;
-  });
-}
-function enterApp(){
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app').style.display='block';
-  document.getElementById('chip-nome').textContent = currentUser.nome;
-  document.getElementById('chip-role').textContent = ROLES[currentUser.role] + (currentUser.setor? ' · '+currentUser.setor : '');
-  const nav = allowedNav();
-  document.getElementById('sidenav').innerHTML =
-    '<div class="navlbl">Menu</div>' +
-    nav.map(n=>`<button class="navbtn" data-id="${n.id}" onclick="showPage('${n.id}')"><span class="ic">${n.ic}</span>${n.label}</button>`).join('');
-  document.getElementById('adm-nome').value = currentUser.nome;
-  document.getElementById('hig-nome').value = currentUser.nome;
-  if(currentUser.setor) document.getElementById('adm-setor').value = currentUser.setor;
-
-  document.getElementById('r-data').value = todayISO();
-  document.getElementById('c-data').value = todayISO();
-  document.getElementById('adm-data').value = todayISO();
-  document.getElementById('hig-data').value = todayISO();
-  document.getElementById('m-mes').value = monthISO();
-  document.getElementById('f-de').value = todayISO().slice(0,8)+'01';
-  document.getElementById('f-ate').value = todayISO();
-  state.filterDe = document.getElementById('f-de').value;
-  state.filterAte = document.getElementById('f-ate').value;
-  document.getElementById('tablet-link').value = location.origin + location.pathname + '?kiosk=1';
-
-  document.getElementById('cfg-sobra').value = state.cfg.metaSobra;
-  document.getElementById('cfg-resto').value = state.cfg.metaResto;
-  document.getElementById('cfg-sat').value = state.cfg.metaSat;
-  document.getElementById('cfg-conf').value = state.cfg.metaConf;
-  document.getElementById('cfg-orc').value = state.cfg.orcamento;
-  for(const t of TURNO_DEFS){
-    const h = state.horarios[t.key] || DEFAULT_HORARIOS[t.key];
-    document.getElementById('hr-'+t.key+'-ini').value = h.ini;
-    document.getElementById('hr-'+t.key+'-fim').value = h.fim;
-  }
-  const ej = state.emailCfg||{};
-  document.getElementById('ej-public').value = ej.publicKey||'';
-  document.getElementById('ej-private').value = ej.privateKey||'';
-  document.getElementById('ej-service').value = ej.serviceId||'';
-  document.getElementById('ej-tpl-adm').value = ej.templateAdm||'';
-  document.getElementById('ej-tpl-hig').value = ej.templateHig||'';
-  document.getElementById('ej-link').value = ej.linkApp||'';
-
-  buildQuesitos('adm-quesitos', ADM_QUESITOS, admScores);
-  buildQuesitos('hig-quesitos', HIG_QUESITOS, higScores);
-  renderCategorias();
-  toggleChecklistSel();
-  showPage(nav[0].id);
-}
-function showPage(id){
-  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active', b.dataset.id===id));
-  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id==='page-'+id));
+function showTab(id){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active', b.dataset.id===id));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('active', s.id==='tab-'+id));
   if(id==='dashboard') renderDashboard();
-  if(id==='compras') renderCompras();
-  if(id==='custos'){ previewCusto(); renderCustos(); }
-  if(id==='pesquisa') renderSatDetalhe();
-  if(id==='historico'){
-    if(!document.getElementById('h-de').value){
-      document.getElementById('h-de').value = todayISO().slice(0,4)+'-01';
-      document.getElementById('h-ate').value = monthISO();
-    }
-    renderHistorico();
-  }
 }
 
-/* ================= RATING WIDGETS ================= */
+// ---------- quesito rating widgets ----------
 function buildQuesitos(containerId, list, scoreObj){
   const el = document.getElementById(containerId);
   el.innerHTML = list.map((label,i)=>`
@@ -905,753 +424,49 @@ function buildQuesitos(containerId, list, scoreObj){
     const idx = sc.dataset.idx;
     sc.querySelectorAll('button').forEach(btn=>{
       btn.addEventListener('click', ()=>{
-        const n = Number(btn.dataset.n);
-        scoreObj[idx] = n;
-        sc.querySelectorAll('button').forEach(b=>{
-          b.classList.remove('sel','low','mid');
-          if(b===btn){ b.classList.add('sel'); if(n<=2) b.classList.add('low'); else if(n===3) b.classList.add('mid'); }
-        });
+        scoreObj[idx] = Number(btn.dataset.n);
+        sc.querySelectorAll('button').forEach(b=>b.classList.toggle('sel', b===btn));
       });
     });
   });
 }
 
-/* ================= LANÇAMENTO ================= */
-async function salvarLancamento(){
-  const refeicoes = Number(document.getElementById('r-refeicoes').value)||0;
-  const producao = Number(document.getElementById('r-producao').value)||0;
-  if(!refeicoes && !producao){ toast('Informe as refeições e a produção.', true); return; }
-  try{
-    await addDoc(collection(db,'lancamentos'), {
-      data: document.getElementById('r-data').value || todayISO(),
-      turno: document.getElementById('r-turno').value,
-      refeicoes, producao,
-      sobra: Number(document.getElementById('r-sobra').value)||0,
-      resto: Number(document.getElementById('r-resto').value)||0,
-      autor: currentUser.nome, autorUid: currentUser.uid,
-    });
-    ['r-refeicoes','r-producao','r-sobra','r-resto'].forEach(id=>document.getElementById(id).value='');
-    toast('Lançamento salvo ✓');
-  }catch(e){ toast(authErrPT(e), true); }
-}
-function delLancamento(id){
-  confirmModal('Excluir este lançamento?', async ()=>{
-    try{ await deleteDoc(doc(db,'lancamentos',id)); toast('Lançamento excluído'); }
-    catch(e){ toast(authErrPT(e), true); }
-  });
-}
-function renderLancTables(){
-  const rows = [...state.lanc].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).slice(0,12)
-    .map(r=>[fmtBR(r.data), r.turno, r.refeicoes, (r.producao||0).toFixed(2), (r.sobra||0).toFixed(2), (r.resto||0).toFixed(2), esc(r.autor||'—'),
-      currentUser.role==='admin'? `<button class="btn btn-danger btn-mini" onclick="delLancamento('${r.id}')">Excluir</button>` : '']);
-  document.getElementById('tbl-lanc-full').innerHTML = tableHTML(['Data','Refeição','Refeições','Produção','Sobra','Resto','Por',''], rows);
-}
-
-/* ================= COMPRAS ================= */
-async function salvarCompra(){
-  const valor = Number(document.getElementById('c-valor').value)||0;
-  const desc = document.getElementById('c-desc').value.trim();
-  if(!valor || !desc){ toast('Informe descrição e valor.', true); return; }
-  try{
-    await addDoc(collection(db,'compras'), {
-      data: document.getElementById('c-data').value || todayISO(),
-      cat: document.getElementById('c-cat').value,
-      desc, valor,
-      nf: document.getElementById('c-nf').value.trim(),
-      pedido: document.getElementById('c-pedido').value.trim(),
-      autor: currentUser.nome, autorUid: currentUser.uid,
-    });
-    ['c-desc','c-valor','c-nf','c-pedido'].forEach(id=>document.getElementById(id).value='');
-    toast('Compra salva ✓');
-  }catch(e){ toast(authErrPT(e), true); }
-}
-function renderCategorias(){
-  const sel = document.getElementById('c-cat');
-  const atual = sel.value;
-  sel.innerHTML = state.categorias.map(c=>`<option>${esc(c)}</option>`).join('');
-  if(state.categorias.includes(atual)) sel.value = atual;
-  if(currentUser && currentUser.role==='admin'){
-    document.getElementById('panel-categorias').style.display='block';
-    const rows = state.categorias.map((c,i)=>[esc(c),
-      `<button class="btn btn-danger btn-mini" onclick="removeCategoria(${i})">Remover</button>`]);
-    document.getElementById('tbl-categorias').innerHTML = tableHTML(['Categoria',''], rows);
-  }
-}
-async function salvarCategorias(){
-  try{
-    await setDoc(doc(db,'config','categorias'), {lista: state.categorias});
-    renderCategorias();
-  }catch(e){ toast(authErrPT(e), true); }
-}
-async function addCategoria(){
-  const v = document.getElementById('cat-nova').value.trim();
-  if(!v){ toast('Digite o nome da categoria.', true); return; }
-  if(state.categorias.some(c=>c.toLowerCase()===v.toLowerCase())){ toast('Essa categoria já existe.', true); return; }
-  state.categorias.push(v);
-  document.getElementById('cat-nova').value='';
-  await salvarCategorias();
-  toast('Categoria adicionada ✓');
-}
-function removeCategoria(i){
-  const nome = state.categorias[i];
-  confirmModal(`Remover a categoria "${esc(nome)}"? Compras já lançadas não mudam.`, async ()=>{
-    state.categorias.splice(i,1);
-    await salvarCategorias();
-    toast('Categoria removida');
-  });
-}
-function delCompra(id){
-  const c = state.compras.find(x=>x.id===id);
-  if(!c) return;
-  if(currentUser.role!=='admin' && c.autorUid!==currentUser.uid){ toast('Só o autor ou o administrador pode excluir.', true); return; }
-  confirmModal('Excluir esta compra?', async ()=>{
-    try{ await deleteDoc(doc(db,'compras',id)); toast('Compra excluída'); }
-    catch(e){ toast(authErrPT(e), true); }
-  });
-}
-function comprasDoMes(mes){ return state.compras.filter(c=>c.data && c.data.slice(0,7)===mes); }
-function renderCompras(){
-  const mes = monthISO();
-  const doMes = comprasDoMes(mes);
-  const gasto = doMes.reduce((a,c)=>a+(c.valor||0),0);
-  const orc = state.cfg.orcamento||0;
-  const pct = orc? Math.min(100, gasto/orc*100) : 0;
-  const hoje = new Date();
-  const diasNoMes = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0).getDate();
-  const diasRestantes = diasNoMes - hoje.getDate();
-  const saldo = orc - gasto;
-  const cor = pct<75? 'var(--folha)' : (pct<95? 'var(--amber)' : 'var(--erro)');
-  document.getElementById('panel-orcamento').innerHTML = `
-    <h2>Orçamento de ${fmtMes(mes)}</h2>
-    <div class="desc">${brl(orc)} estipulado para o mês</div>
-    <div class="budget-bar"><span style="width:${pct}%;background:${cor}"></span></div>
-    <div class="budget-line">
-      <span><b>${brl(gasto)}</b> gasto (${pct.toFixed(0)}%)</span>
-      <span>Saldo: <b style="color:${saldo>=0?'var(--ok)':'var(--erro)'}">${brl(saldo)}</b>${diasRestantes>0 && saldo>0 ? ' · '+brl(saldo/Math.max(diasRestantes,1))+'/dia restante' : ''}</span>
-    </div>`;
-  document.getElementById('compras-mes-label').textContent = doMes.length + ' compra(s) em ' + fmtMes(mes);
-  const rows = [...doMes].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).map(c=>[
-    fmtBR(c.data), esc(c.cat), esc(c.desc), esc(c.nf||'—'), esc(c.pedido||'—'), brl(c.valor), esc(c.autor||'—'),
-    `<button class="btn btn-danger btn-mini" onclick="delCompra('${c.id}')">Excluir</button>`
-  ]);
-  document.getElementById('tbl-compras').innerHTML = tableHTML(['Data','Categoria','Descrição','NF','Pedido Totvs','Valor','Lançado por',''], rows);
-}
-
-/* ================= CUSTOS MENSAIS ================= */
-function calcCusto(m){
-  const compras = comprasDoMes(m.mes).reduce((a,c)=>a+(c.valor||0),0) + (m.ajuste||0);
-  const ref = m.ref||0;
-  return {
-    compras,
-    semMO: ref? (compras - (m.desconto||0))/ref : 0,
-    comMO: ref? (compras + (m.mo||0) - (m.desconto||0))/ref : 0,
-    semDesc: ref? (compras + (m.mo||0))/ref : 0,
-  };
-}
-function previewCusto(){
-  const mesEl = document.getElementById('m-mes');
-  const mes = mesEl.value || monthISO();
-  mesEl.value = mes;
-  const compras = comprasDoMes(mes).reduce((a,c)=>a+(c.valor||0),0);
-  const lancadas = state.lanc.filter(l=>l.data && l.data.slice(0,7)===mes).reduce((a,l)=>a+(l.refeicoes||0),0);
-  const existente = state.custos.find(c=>c.mes===mes);
-  if(existente){
-    document.getElementById('m-ref').value = existente.ref||'';
-    document.getElementById('m-ref-cafe').value = existente.refCafe||'';
-    document.getElementById('m-ref-almjan').value = existente.refAlmJan||'';
-    document.getElementById('m-ref-ceia').value = existente.refCeia||'';
-    document.getElementById('m-mo').value = existente.mo||'';
-    document.getElementById('m-desc').value = existente.desconto||'';
-    document.getElementById('m-ajuste').value = existente.ajuste||'';
-  }
-  document.getElementById('m-preview').innerHTML =
-    `Compras lançadas em <b>${fmtMes(mes)}</b>: <b>${brl(compras)}</b> · Refeições lançadas no desperdício: <b>${lancadas.toLocaleString('pt-BR')}</b>` +
-    (existente? ' · <span class="pill p-warn">Mês já fechado — salvar substitui</span>' : '');
-}
-async function salvarCustoMes(){
-  const mes = document.getElementById('m-mes').value;
-  const ref = Number(document.getElementById('m-ref').value)||0;
-  if(!mes || !ref){ toast('Informe o mês e as refeições validadas.', true); return; }
-  try{
-    await setDoc(doc(db,'custos',mes), {
-      mes, ref,
-      refCafe: Number(document.getElementById('m-ref-cafe').value)||0,
-      refAlmJan: Number(document.getElementById('m-ref-almjan').value)||0,
-      refCeia: Number(document.getElementById('m-ref-ceia').value)||0,
-      mo: Number(document.getElementById('m-mo').value)||0,
-      desconto: Number(document.getElementById('m-desc').value)||0,
-      ajuste: Number(document.getElementById('m-ajuste').value)||0,
-      autor: currentUser.nome,
-    });
-    toast('Fechamento de '+fmtMes(mes)+' salvo ✓');
-  }catch(e){ toast(authErrPT(e), true); }
-}
-function renderCustos(){
-  const rows = [...state.custos].sort((a,b)=>(b.mes||'').localeCompare(a.mes||'')).map(m=>{
-    const c = calcCusto(m);
-    const lancadas = state.lanc.filter(l=>l.data && l.data.slice(0,7)===m.mes).reduce((a,l)=>a+(l.refeicoes||0),0);
-    const dif = lancadas - m.ref;
-    return [
-      '<b>'+fmtMes(m.mes)+'</b>',
-      (m.ref||0).toLocaleString('pt-BR'),
-      (dif===0?'<span class="pill p-ok">0</span>':`<span class="pill ${Math.abs(dif)>m.ref*0.05?'p-bad':'p-warn'}">${dif>0?'+':''}${dif.toLocaleString('pt-BR')}</span>`),
-      brl(c.compras), brl(m.mo), brl(m.desconto),
-      '<b>'+brl(c.semMO)+'</b>', '<b>'+brl(c.comMO)+'</b>', '<b>'+brl(c.semDesc)+'</b>'
-    ];
-  });
-  document.getElementById('tbl-custos').innerHTML = tableHTML(
-    ['Mês','Refeições validadas','Dif. lançado','Compras','Mão de obra','Desc. funcionários','Unit. sem MO','Unit. com MO','Unit. sem desconto'], rows);
-}
-
-/* ================= CHECKLISTS ================= */
-async function salvarChecklist(tipo){
-  const isAdm = tipo==='adm';
-  const list = isAdm? ADM_QUESITOS : HIG_QUESITOS;
-  const scores = isAdm? admScores : higScores;
-  if(Object.keys(scores).length < list.length){ toast('Dê uma nota para todos os itens.', true); return; }
-  const quesitos = {};
-  list.forEach((label,i)=> quesitos[label] = scores[i]);
-  try{
-    await addDoc(collection(db, isAdm?'checklists_adm':'checklists_hig'), {
-      data: document.getElementById(tipo+'-data').value || todayISO(),
-      setor: document.getElementById(tipo+'-setor').value.trim(),
-      nome: currentUser.nome,
-      uid: currentUser.uid,
-      quesitos,
-      obs: document.getElementById(tipo+'-obs').value.trim(),
-    });
-    if(isAdm){ admScores={}; buildQuesitos('adm-quesitos', ADM_QUESITOS, admScores); }
-    else { higScores={}; buildQuesitos('hig-quesitos', HIG_QUESITOS, higScores); }
-    document.getElementById(tipo+'-obs').value='';
-    const areas = areasDoUsuario(currentUser, tipo);
-    if(areas.length){
-      toast('Checklist enviado ✓ — carregando a próxima área...');
-      window.scrollTo({top:0, behavior:'smooth'});
-    } else {
-      toast('Checklist enviado — obrigado ✓');
-    }
-  }catch(e){ toast(authErrPT(e), true); }
-}
-function renderHigTables(){
-  const mk = arr => [...arr].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).slice(0,10)
-    .map(r=>[fmtBR(r.data), esc(r.setor||'—'), esc(r.nome||'—'), notaPill(mediaQuesitos(r.quesitos)), esc((r.obs||'').slice(0,60))]);
-  document.getElementById('tbl-adm-full').innerHTML = tableHTML(['Data','Setor','Avaliador','Nota média','Observações'], mk(state.adm));
-  document.getElementById('tbl-hig-full').innerHTML = tableHTML(['Data','Área','Avaliador','Nota média','Observações'], mk(state.hig));
-  renderChecklistProgress('adm');
-  renderChecklistProgress('hig');
-}
-function areasDoUsuario(u, tipo){ return (tipo==='adm'? u.areasAdm : u.areasHig) || []; }
-function areasRespondidasSemana(uid, tipo){
-  const wk = weekKey(new Date());
-  const arr = tipo==='adm'? state.adm : state.hig;
-  return arr.filter(e=>e.uid===uid && e.data && weekKey(new Date(e.data+'T12:00:00'))===wk)
-    .map(e=>(e.setor||'').trim().toLowerCase());
-}
-function renderChecklistProgress(tipo){
-  const box = document.getElementById(tipo+'-progress');
-  const setorEl = document.getElementById(tipo+'-setor');
-  if(!currentUser || !box) return;
-  const areas = areasDoUsuario(currentUser, tipo);
-  if(!areas.length){ box.style.display='none'; setorEl.readOnly=false; return; }
-  const feitas = areasRespondidasSemana(currentUser.uid, tipo);
-  const pendentes = areas.filter(a=>!feitas.includes(a.trim().toLowerCase()));
-  const total = areas.length, done = total - pendentes.length;
-  box.style.display='block';
-  if(pendentes.length){
-    setorEl.value = pendentes[0];
-    setorEl.readOnly = true;
-    box.innerHTML = `Avaliando agora: <b>${esc(pendentes[0])}</b> · ${done} de ${total} áreas respondidas nesta semana
-      ${pendentes.length>1? ' · próximas: '+esc(pendentes.slice(1).join(', ')) : ''}
-      <div class="prog-bar"><span style="width:${(done/total*100).toFixed(0)}%"></span></div>`;
-  } else {
-    setorEl.value=''; setorEl.readOnly=false;
-    box.innerHTML = `✅ <b>Todas as ${total} áreas desta semana foram respondidas.</b> Obrigado!
-      <div class="prog-bar"><span style="width:100%"></span></div>`;
-  }
-}
-
-/* ================= USUÁRIOS ================= */
-function toggleChecklistSel(){
-  const role = document.getElementById('u-role').value;
-  const isColab = role==='colaborador';
-  document.getElementById('u-check-wrap').style.display = isColab? 'block':'none';
-  const check = document.getElementById('u-check').value;
-  document.getElementById('u-areas-adm-wrap').style.display = (isColab && (check==='adm'||check==='ambos'))? 'block':'none';
-  document.getElementById('u-areas-hig-wrap').style.display = (isColab && (check==='hig'||check==='ambos'))? 'block':'none';
-}
-function parseAreas(txt){ return (txt||'').split(',').map(s=>s.trim()).filter(Boolean); }
-async function criarUsuario(){
-  const nome = document.getElementById('u-nome').value.trim();
-  const email = document.getElementById('u-email').value.trim();
-  const pass = document.getElementById('u-pass').value;
-  const role = document.getElementById('u-role').value;
-  if(!nome || !email || !pass){ toast('Informe nome, e-mail e senha inicial.', true); return; }
-  const btn = document.getElementById('u-btn'); btn.disabled=true;
-  try{
-    // app secundário: cria a conta sem derrubar a sessão do admin
-    const secApp = initializeApp(firebaseConfig, 'sec-'+Date.now());
-    const secAuth = getAuth(secApp);
-    const cred = await createUserWithEmailAndPassword(secAuth, email, pass);
-    await setDoc(doc(db,'usuarios',cred.user.uid), {
-      nome, email,
-      setor: document.getElementById('u-setor').value.trim(),
-      role,
-      check: role==='colaborador' ? document.getElementById('u-check').value : '',
-      areasAdm: role==='colaborador' ? parseAreas(document.getElementById('u-areas-adm').value) : [],
-      areasHig: role==='colaborador' ? parseAreas(document.getElementById('u-areas-hig').value) : [],
-    });
-    await signOut(secAuth);
-    ['u-nome','u-setor','u-email','u-pass','u-areas-adm','u-areas-hig'].forEach(id=>document.getElementById(id).value='');
-    toast('Usuário criado ✓ — informe a senha inicial a ele');
-  }catch(e){ toast(authErrPT(e), true); }
-  btn.disabled=false;
-}
-function modalAreas(uid){
-  const u = state.users.find(x=>x.id===uid); if(!u) return;
-  openModal(`<h3>Áreas de ${esc(u.nome)}</h3>
-    <label>Setores ADM (separados por vírgula)</label>
-    <input type="text" id="ma-adm" value="${esc((u.areasAdm||[]).join(', '))}" style="margin-bottom:12px">
-    <label>Áreas Higiênicas (separadas por vírgula)</label>
-    <input type="text" id="ma-hig" value="${esc((u.areasHig||[]).join(', '))}">
-    <div class="btn-row"><button class="btn btn-primary" onclick="salvarAreas('${uid}')">Salvar</button>
-    <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button></div>`);
-}
-async function salvarAreas(uid){
-  try{
-    await setDoc(doc(db,'usuarios',uid), {
-      areasAdm: parseAreas(document.getElementById('ma-adm').value),
-      areasHig: parseAreas(document.getElementById('ma-hig').value),
-    }, {merge:true});
-    closeModal(); toast('Áreas salvas ✓');
-  }catch(e){ toast(authErrPT(e), true); }
-}
-function removerUsuario(uid){
-  if(uid===currentUser.uid){ toast('Você não pode remover o próprio usuário.', true); return; }
-  confirmModal('Remover o acesso deste usuário ao painel?', async ()=>{
-    try{ await deleteDoc(doc(db,'usuarios',uid)); toast('Acesso removido'); }
-    catch(e){ toast(authErrPT(e), true); }
-  });
-}
-async function resetSenhaUsuario(email){
-  try{
-    await sendPasswordResetEmail(auth, email);
-    toast('E-mail de redefinição enviado para '+email+' ✓');
-  }catch(e){ toast(authErrPT(e), true); }
-}
-function checkLabel(c){ return c==='ambos'?'ADM + Higiênica':(c==='adm'?'Administrativa':(c==='hig'?'Higiênica':'—')); }
-function renderUsuarios(){
-  const rows = state.users.map(u=>{
-    const areas = [...(u.areasAdm||[]), ...(u.areasHig||[])];
-    return [
-    '<b>'+esc(u.nome)+'</b>', esc(u.email), ROLES[u.role]||u.role,
-    u.role==='colaborador'? checkLabel(u.check) : '—',
-    u.role==='colaborador'? (areas.length? esc(areas.join(', ')) : '<span style="color:var(--cinza)">livre</span>') : '—',
-    `${u.role==='colaborador'? `<button class="btn btn-ghost btn-mini" onclick="modalAreas('${u.id}')">Áreas</button> `:''}<button class="btn btn-ghost btn-mini" onclick="resetSenhaUsuario('${esc(u.email)}')">Redefinir senha</button>
-     <button class="btn btn-danger btn-mini" onclick="removerUsuario('${u.id}')">Remover</button>`
-  ];});
-  document.getElementById('tbl-usuarios').innerHTML = tableHTML(['Nome','E-mail','Perfil','Checklists','Áreas/Setores',''], rows);
-}
-
-/* ================= CONFIG / EMAILJS ================= */
-async function loadHorarios(){
-  try{
-    const h = await getDoc(doc(db,'config','horarios'));
-    state.horarios = h.exists()? {...DEFAULT_HORARIOS, ...h.data()} : {...DEFAULT_HORARIOS};
-  }catch(e){ state.horarios = {...DEFAULT_HORARIOS}; }
-}
-async function salvarHorarios(){
-  const novo = {};
-  for(const t of TURNO_DEFS){
-    const ini = document.getElementById('hr-'+t.key+'-ini').value;
-    const fim = document.getElementById('hr-'+t.key+'-fim').value;
-    if(!ini || !fim){ toast('Preencha início e fim de todas as refeições.', true); return; }
-    novo[t.key] = {ini, fim};
-  }
-  try{
-    await setDoc(doc(db,'config','horarios'), novo);
-    state.horarios = novo;
-    toast('Horários salvos ✓ — o tablet aplica ao recarregar');
-    renderDashboard();
-  }catch(e){ toast(authErrPT(e), true); }
-}
-async function salvarConfig(){
-  state.cfg = {
-    metaSobra: Number(document.getElementById('cfg-sobra').value)||DEFAULT_CFG.metaSobra,
-    metaResto: Number(document.getElementById('cfg-resto').value)||DEFAULT_CFG.metaResto,
-    metaSat: Number(document.getElementById('cfg-sat').value)||DEFAULT_CFG.metaSat,
-    metaConf: Number(document.getElementById('cfg-conf').value)||DEFAULT_CFG.metaConf,
-    orcamento: Number(document.getElementById('cfg-orc').value)||DEFAULT_CFG.orcamento,
-  };
-  try{
-    await setDoc(doc(db,'config','metas'), state.cfg);
-    toast('Metas salvas ✓');
-    renderDashboard(); renderCompras();
-  }catch(e){ toast(authErrPT(e), true); }
-}
-async function salvarEmailCfg(){
-  state.emailCfg = {
-    publicKey: document.getElementById('ej-public').value.trim(),
-    privateKey: document.getElementById('ej-private').value.trim(),
-    serviceId: document.getElementById('ej-service').value.trim(),
-    templateAdm: document.getElementById('ej-tpl-adm').value.trim(),
-    templateHig: document.getElementById('ej-tpl-hig').value.trim(),
-    linkApp: document.getElementById('ej-link').value.trim() || (location.origin+location.pathname),
-  };
-  try{
-    await setDoc(doc(db,'config','emailjs'), state.emailCfg);
-    toast('Configuração do EmailJS salva ✓');
-  }catch(e){ toast(authErrPT(e), true); }
-}
-function sendEmailJS(templateId, params){
-  const cfg = state.emailCfg;
-  const body = { service_id: cfg.serviceId, template_id: templateId, user_id: cfg.publicKey, template_params: params };
-  if(cfg.privateKey) body.accessToken = cfg.privateKey;
-  return fetch('https://api.emailjs.com/api/v1.0/email/send', {
-    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
-  });
-}
-function pendentesSemana(){
-  const out = [];
-  state.users.filter(u=>u.role==='colaborador').forEach(u=>{
-    const tipos = u.check==='ambos'? ['adm','hig'] : [u.check];
-    const temPendencia = tipos.some(t=> t && !statusColab(u, t).done);
-    if(temPendencia) out.push(u); // 1 entrada por pessoa = 1 e-mail só
-  });
-  return out;
-}
-async function enviarCobrancas(silent){
-  const cfg = state.emailCfg||{};
-  const st = document.getElementById('cobranca-status');
-  if(!cfg.serviceId || !cfg.publicKey || !cfg.templateAdm || !cfg.templateHig){
-    if(!silent) toast('Configure o EmailJS em Metas & Config antes de enviar.', true);
-    return;
-  }
-  const pend = pendentesSemana().filter(p=>p.email);
-  if(!pend.length){ if(st) st.textContent='Nenhum pendente esta semana ✓'; return; }
-  let ok=0, fail=0;
-  for(const p of pend){
-    try{
-      const tipos = (p.check==='ambos'? ['adm','hig'] : [p.check]).filter(t=>t && !statusColab(p,t).done);
-      const r = await sendEmailJS(cfg.templateAdm, {
-        to_email: p.email, to_name: p.nome, setor: p.setor||'',
-        tipo_checklist: tipos.map(t=>t==='adm'?'Administrativa':'Higiênica').join(' e '),
-        link_formulario: cfg.linkApp || (location.origin+location.pathname),
-      });
-      if(r.ok) ok++; else fail++;
-    }catch(e){ fail++; }
-  }
-  try{ await setDoc(doc(db,'config','flags'), {ultimoEnvio: weekKey(new Date())}, {merge:true}); }catch(e){}
-  if(st) st.textContent = `Enviado: ${ok} · Falhas: ${fail}`;
-  if(!silent) toast(`Cobranças enviadas: ${ok} ✓${fail? ' · '+fail+' falha(s)':''}`, fail>0);
-}
-async function checkAutoSend(){
-  if(new Date().getDay() !== 5) return; // sexta-feira
-  try{
-    const f = await getDoc(doc(db,'config','flags'));
-    const last = f.exists()? f.data().ultimoEnvio : null;
-    if(last === weekKey(new Date())) return;
-    setTimeout(()=>enviarCobrancas(true), 4000); // espera os dados carregarem
-  }catch(e){ console.error(e); }
-}
-
-/* ================= DASHBOARD ================= */
-function applyFilter(){
-  state.filterDe = document.getElementById('f-de').value;
-  state.filterAte = document.getElementById('f-ate').value;
-  loadSat(); // refaz a busca de satisfação no novo período
-  renderDashboard();
-}
-function setPreset(p){
-  let de, ate = todayISO();
-  if(p==='hoje') de = todayISO();
-  else if(p==='7d'){ const d=new Date(); d.setDate(d.getDate()-6); de=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-  else if(p==='mes') de = todayISO().slice(0,8)+'01';
-  else de = todayISO().slice(0,4)+'-01-01';
-  document.getElementById('f-de').value = de;
-  document.getElementById('f-ate').value = ate;
-  applyFilter();
-}
-function inRange(d){
-  if(!d) return false;
-  if(state.filterDe && d<state.filterDe) return false;
-  if(state.filterAte && d>state.filterAte) return false;
-  return true;
-}
-function mediaSat(rows){
-  let sum=0,n=0;
-  rows.forEach(r=>SAT_QUESTOES.forEach(q=>{ if(r[q.k]!=null){ sum+=r[q.k]; n++; } }));
-  return n? sum/n : 0;
-}
-function mediaLista(rows){
-  const m = rows.map(r=>mediaQuesitos(r.quesitos)).filter(v=>v>0);
-  return m.length? m.reduce((a,b)=>a+b,0)/m.length : 0;
-}
-function kpiCard(title, value, metaText, ok, val, max, hasData){
-  const pct = Math.max(0, Math.min(100, max? (val/max)*100 : 0));
-  const pill = !hasData? '<span class="pill p-neutral abs">Sem dados</span>' :
-    (ok? '<span class="pill p-ok abs">Dentro da meta</span>' : '<span class="pill p-bad abs">Fora da meta</span>');
-  const cor = !hasData? '#cdd4c4' : (ok? 'var(--folha)' : 'var(--erro)');
-  return `<div class="kpi">${pill}
-    <div class="eyebrow">${title}</div>
-    <div class="val">${value}</div>
-    <div class="meta">${metaText}</div>
-    <div class="bar"><span style="width:${pct}%;background:${cor}"></span></div>
-  </div>`;
-}
-function renderDashboard(){
-  if(!currentUser || currentUser.role==='colaborador') return;
-  const lancF = state.lanc.filter(r=>inRange(r.data));
-  const satF = state.sat.filter(r=>inRange(r.data));
-  const admF = state.adm.filter(r=>inRange(r.data));
-  const higF = state.hig.filter(r=>inRange(r.data));
-  const cfg = state.cfg;
-
-  const producao = lancF.reduce((a,r)=>a+(r.producao||0),0);
-  const sobra = lancF.reduce((a,r)=>a+(r.sobra||0),0);
-  const resto = lancF.reduce((a,r)=>a+(r.resto||0),0);
-  const refeicoes = lancF.reduce((a,r)=>a+(r.refeicoes||0),0);
-  const pctSobra = producao? sobra/producao*100 : 0;
-  const kgResto = refeicoes? resto/refeicoes : 0;
-  const satM = mediaSat(satF);
-  const admM = mediaLista(admF);
-  const higM = mediaLista(higF);
-
-  const mes = monthISO();
-  const gastoMes = comprasDoMes(mes).reduce((a,c)=>a+(c.valor||0),0);
-
-  document.getElementById('kpi-grid').innerHTML = [
-    kpiCard('Sobra Limpa', pctSobra.toFixed(1)+'%', 'Meta: até '+cfg.metaSobra+'%', pctSobra<=cfg.metaSobra, pctSobra, cfg.metaSobra*1.6, producao>0),
-    kpiCard('Resto Ingesto', kgResto.toFixed(3)+' kg/pessoa', 'Meta: até '+cfg.metaResto+' kg', kgResto<=cfg.metaResto, kgResto, cfg.metaResto*1.6, refeicoes>0),
-    kpiCard('Satisfação', satM? satM.toFixed(2)+' / 5':'—', 'Meta: ≥ '+cfg.metaSat+' · '+satF.length+' respostas', satM>=cfg.metaSat, satM, 5, satF.length>0),
-    kpiCard('Conformidade ADM', admM? admM.toFixed(2)+' / 5':'—', 'Meta: ≥ '+cfg.metaConf+' · '+admF.length+' checklists', admM>=cfg.metaConf, admM, 5, admF.length>0),
-    kpiCard('Conformidade Higiênica', higM? higM.toFixed(2)+' / 5':'—', 'Meta: ≥ '+cfg.metaConf+' · '+higF.length+' checklists', higM>=cfg.metaConf, higM, 5, higF.length>0),
-    kpiCard('Compras · '+fmtMes(mes), brl(gastoMes), 'Orçamento: '+brl(cfg.orcamento), gastoMes<=cfg.orcamento, gastoMes, cfg.orcamento, true),
-  ].join('');
-
-  const mealRows = getMeals().map(m=>{
-    const l = lancF.filter(r=>r.turno===m.name);
-    const s = satF.filter(r=>r.turno===m.name);
-    const prod = l.reduce((a,r)=>a+(r.producao||0),0);
-    const sob = l.reduce((a,r)=>a+(r.sobra||0),0);
-    const res = l.reduce((a,r)=>a+(r.resto||0),0);
-    const ref = l.reduce((a,r)=>a+(r.refeicoes||0),0);
-    const sM = mediaSat(s);
-    return [m.name, prod? (sob/prod*100).toFixed(1)+'%':'—', ref? (res/ref).toFixed(3):'—', sM? sM.toFixed(2)+' ('+s.length+')':'—'];
-  });
-  mealRows.push(['<b>Geral</b>', producao? pctSobra.toFixed(1)+'%':'—', refeicoes? kgResto.toFixed(3):'—', satM? satM.toFixed(2)+' ('+satF.length+')':'—']);
-  document.getElementById('tbl-meal').innerHTML = tableHTML(['Refeição','Sobra Limpa','Resto Ingesto (kg/pessoa)','Satisfação'], mealRows);
-
-  const rowsL = [...lancF].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).slice(0,8)
-    .map(r=>[fmtBR(r.data), r.turno, r.refeicoes, (r.producao||0).toFixed(2), (r.sobra||0).toFixed(2), (r.resto||0).toFixed(2)]);
-  document.getElementById('tbl-lanc-dash').innerHTML = tableHTML(['Data','Refeição','Refeições','Produção (kg)','Sobra (kg)','Resto (kg)'], rowsL);
-
-  const panel = document.getElementById('panel-checklist-semana');
-  if(currentUser.role==='admin'){ panel.style.display='block'; renderWeekStatus(); }
-  else panel.style.display='none';
-}
-function statusColab(u, tipo){
-  const areas = areasDoUsuario(u, tipo);
-  const feitas = areasRespondidasSemana(u.id, tipo);
-  if(!areas.length){
-    // sem áreas atribuídas: basta 1 envio na semana
-    return {done: feitas.length>0, label: feitas.length? 'Respondido' : 'Pendente', total:1, count: feitas.length?1:0};
-  }
-  const count = areas.filter(a=>feitas.includes(a.trim().toLowerCase())).length;
-  return {done: count>=areas.length, label: count+'/'+areas.length+' áreas', total:areas.length, count};
-}
-function renderWeekStatus(){
-  const colabs = state.users.filter(u=>u.role==='colaborador');
-  if(!colabs.length){ document.getElementById('week-status').innerHTML='<div class="empty">Nenhum colaborador cadastrado — crie usuários com perfil Colaborador</div>'; return; }
-  const rows = [];
-  colabs.forEach(u=>{
-    const tipos = u.check==='ambos'? ['adm','hig'] : [u.check];
-    tipos.forEach(t=>{
-      if(!t) return;
-      const st = statusColab(u, t);
-      rows.push([esc(u.nome), t==='adm'?'Administrativa':'Higiênica', esc(u.setor||'—'),
-        st.done? '<span class="pill p-ok">'+st.label+'</span>' : '<span class="pill '+(st.count>0?'p-warn':'p-bad')+'">'+st.label+'</span>']);
-    });
-  });
-  let html = tableHTML(['Colaborador','Checklist','Setor','Status'], rows);
-  const pend = pendentesSemana().filter(p=>p.email);
-  if(pend.length){
-    const emails = [...new Set(pend.map(p=>p.email))].join(';');
-    const subject = encodeURIComponent('Checklist de limpeza — preencher até sexta-feira');
-    const body = encodeURIComponent('Olá!\n\nAinda não recebemos o seu checklist de conformidade de limpeza desta semana.\n\nPedimos que preencha até sexta-feira pelo painel:\nhttps://raguiferh.github.io/facilities/\n\nObrigado!\nRaguife — Confiança que Inspira');
-    const owa = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(emails)}&subject=${subject}&body=${body}`;
-    html += `<div class="btn-row"><a class="btn btn-primary" style="text-decoration:none" href="${owa}" target="_blank" rel="noopener">✉ Cobrar pendentes (Outlook Web)</a><span style="font-size:12px;color:var(--cinza)">${pend.length} cobrança(s) pendente(s)</span></div>`;
-  }
-  document.getElementById('week-status').innerHTML = html;
-}
-
-/* ================= PESQUISA ================= */
-function renderSatDetalhe(){
-  const satF = state.sat.filter(r=>inRange(r.data));
-  const turnos = ['Café da Manhã','Almoço','Jantar','Ceia'];
-  const rows = turnos.map(t=>{
-    const s = satF.filter(r=>r.turno===t);
-    if(!s.length) return [t,'—','—','—','—','—','—','0'];
-    const med = k => { const v=s.map(r=>r[k]).filter(x=>x!=null); return v.length? (v.reduce((a,b)=>a+b,0)/v.length).toFixed(2) : '—'; };
-    return [t, med('q1'), med('q2'), med('q3'), med('q4'), med('q5'), mediaSat(s).toFixed(2), String(s.length)];
-  });
-  document.getElementById('tbl-sat-detalhe').innerHTML = tableHTML(
-    ['Refeição','Qualidade','Variedade','Limpeza','Atendimento','Fila','<b>Geral</b>','Respostas'], rows);
-}
-/* ================= HISTÓRICO / PDF ================= */
-let satHist = [];   // satisfação carregada para o período do histórico
-let histRows = [];  // linhas calculadas (para o PDF)
-let histPeriodo = '';
-
-function monthsBetween(de, ate){
-  const out = [];
-  let [y,m] = de.split('-').map(Number);
-  const [y2,m2] = ate.split('-').map(Number);
-  while(y<y2 || (y===y2 && m<=m2)){
-    out.push(y+'-'+String(m).padStart(2,'0'));
-    m++; if(m>12){ m=1; y++; }
-  }
-  return out.slice(0,24); // no máx. 2 anos por vez
-}
-async function loadSatHist(de, ate){
-  try{
-    const q1 = query(collection(db,'satisfacao'), where('data','>=',de+'-01'), where('data','<=',ate+'-31'));
-    const snap = await getDocs(q1);
-    satHist = snap.docs.map(d=>d.data());
-  }catch(e){ console.error(e); satHist=[]; }
-}
-function aggMes(mes){
-  const inMes = d => d && d.slice(0,7)===mes;
-  const l = state.lanc.filter(r=>inMes(r.data));
-  const s = satHist.filter(r=>inMes(r.data));
-  const a = state.adm.filter(r=>inMes(r.data));
-  const h = state.hig.filter(r=>inMes(r.data));
-  const compras = comprasDoMes(mes).reduce((x,c)=>x+(c.valor||0),0);
-  const prod = l.reduce((x,r)=>x+(r.producao||0),0);
-  const sob = l.reduce((x,r)=>x+(r.sobra||0),0);
-  const res = l.reduce((x,r)=>x+(r.resto||0),0);
-  const ref = l.reduce((x,r)=>x+(r.refeicoes||0),0);
-  const cst = state.custos.find(c=>c.mes===mes);
-  const custoUnit = cst? calcCusto(cst).comMO : 0;
-  const comprasTotal = compras + (cst? (cst.ajuste||0) : 0);
-  return {
-    mes,
-    ref: ref || (cst? cst.ref : 0),
-    sobra: prod? sob/prod*100 : null,
-    resto: ref? res/ref : null,
-    sat: s.length? mediaSat(s) : null,
-    nSat: s.length,
-    adm: a.length? mediaLista(a) : null,
-    hig: h.length? mediaLista(h) : null,
-    compras: comprasTotal,
-    custoUnit: custoUnit||null,
-    temDados: !!(l.length || s.length || a.length || h.length || compras || cst),
-  };
-}
-function fmtInd(v, fn){ return v==null? '—' : fn(v); }
-function metaCls(v, meta, menorMelhor){
-  if(v==null) return '';
-  const ok = menorMelhor? v<=meta : v>=meta;
-  return ok? 'p-ok' : 'p-bad';
-}
-async function renderHistorico(){
-  const de = document.getElementById('h-de').value || (todayISO().slice(0,4)+'-01');
-  const ate = document.getElementById('h-ate').value || monthISO();
-  document.getElementById('h-de').value = de;
-  document.getElementById('h-ate').value = ate;
-  await loadSatHist(de, ate);
-  const cfg = state.cfg;
-  const meses = monthsBetween(de, ate);
-  histRows = meses.map(aggMes).filter(r=>r.temDados);
-  histPeriodo = fmtMes(de)+' a '+fmtMes(ate);
-  document.getElementById('h-label').textContent = histRows.length+' mês(es) com dados · '+histPeriodo;
-  const rows = histRows.map(r=>[
-    '<b>'+fmtMes(r.mes)+'</b>',
-    r.ref? r.ref.toLocaleString('pt-BR') : '—',
-    `<span class="pill ${metaCls(r.sobra, cfg.metaSobra, true)}">${fmtInd(r.sobra, v=>v.toFixed(1)+'%')}</span>`,
-    `<span class="pill ${metaCls(r.resto, cfg.metaResto, true)}">${fmtInd(r.resto, v=>v.toFixed(3))}</span>`,
-    `<span class="pill ${metaCls(r.sat, cfg.metaSat, false)}">${fmtInd(r.sat, v=>v.toFixed(2))}</span>`+(r.nSat? ' <span style="color:var(--cinza);font-size:10px">('+r.nSat+')</span>':''),
-    `<span class="pill ${metaCls(r.adm, cfg.metaConf, false)}">${fmtInd(r.adm, v=>v.toFixed(2))}</span>`,
-    `<span class="pill ${metaCls(r.hig, cfg.metaConf, false)}">${fmtInd(r.hig, v=>v.toFixed(2))}</span>`,
-    r.compras? brl(r.compras) : '—',
-    r.custoUnit? '<b>'+brl(r.custoUnit)+'</b>' : '—',
-  ]);
-  document.getElementById('tbl-historico').innerHTML = tableHTML(
-    ['Mês','Refeições','Sobra Limpa','Resto (kg/p)','Satisfação','Conf. ADM','Conf. Hig.','Compras','Custo/refeição'], rows);
-}
-function gerarPDF(){
-  if(!histRows.length){ toast('Aplique um período com dados antes de gerar o PDF.', true); return; }
-  const cfg = state.cfg;
-  const media = (k)=>{ const v=histRows.map(r=>r[k]).filter(x=>x!=null); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null; };
-  const totCompras = histRows.reduce((a,r)=>a+(r.compras||0),0);
-  const totRef = histRows.reduce((a,r)=>a+(r.ref||0),0);
-  const cards = [
-    ['Refeições no período', totRef? totRef.toLocaleString('pt-BR'):'—'],
-    ['Sobra Limpa (média)', fmtInd(media('sobra'), v=>v.toFixed(1)+'%')],
-    ['Resto Ingesto (média)', fmtInd(media('resto'), v=>v.toFixed(3)+' kg/p')],
-    ['Satisfação (média)', fmtInd(media('sat'), v=>v.toFixed(2)+' / 5')],
-    ['Conf. ADM (média)', fmtInd(media('adm'), v=>v.toFixed(2)+' / 5')],
-    ['Conf. Higiênica (média)', fmtInd(media('hig'), v=>v.toFixed(2)+' / 5')],
-    ['Compras no período', brl(totCompras)],
-    ['Custo/refeição (média)', fmtInd(media('custoUnit'), v=>brl(v))],
-  ];
-  const linhas = histRows.map(r=>`<tr>
-    <td><b>${fmtMes(r.mes)}</b></td>
-    <td>${r.ref? r.ref.toLocaleString('pt-BR'):'—'}</td>
-    <td>${fmtInd(r.sobra, v=>v.toFixed(1)+'%')}</td>
-    <td>${fmtInd(r.resto, v=>v.toFixed(3))}</td>
-    <td>${fmtInd(r.sat, v=>v.toFixed(2))}${r.nSat? ' ('+r.nSat+')':''}</td>
-    <td>${fmtInd(r.adm, v=>v.toFixed(2))}</td>
-    <td>${fmtInd(r.hig, v=>v.toFixed(2))}</td>
-    <td>${r.compras? brl(r.compras):'—'}</td>
-    <td>${r.custoUnit? brl(r.custoUnit):'—'}</td>
-  </tr>`).join('');
-  document.getElementById('print-area').innerHTML = `
-    <div class="rp-head">${logoSVG(48)}<div>
-      <span class="wordmark">raguife</span>
-      <h1>Relatório de Indicadores — Restaurante &amp; Higienização</h1>
-    </div></div>
-    <div class="rp-sub">Período: <b>${histPeriodo}</b> · Emitido em ${fmtBR(todayISO())} por ${esc(currentUser.nome)} ·
-      Metas: Sobra ≤ ${cfg.metaSobra}% · Resto ≤ ${cfg.metaResto} kg/p · Satisfação ≥ ${cfg.metaSat} · Conformidade ≥ ${cfg.metaConf}</div>
-    <div class="rp-cards">${cards.map(c=>`<div class="rp-card"><div class="t">${c[0]}</div><div class="v">${c[1]}</div></div>`).join('')}</div>
-    <table><thead><tr><th>Mês</th><th>Refeições</th><th>Sobra Limpa</th><th>Resto (kg/p)</th><th>Satisfação</th><th>Conf. ADM</th><th>Conf. Hig.</th><th>Compras</th><th>Custo/refeição</th></tr></thead>
-    <tbody>${linhas}</tbody></table>
-    <div class="rp-foot"><span>Raguife — Confiança que Inspira</span><span>raguiferh.github.io/facilities</span></div>`;
-  window.print();
-}
-
-function copyTabletLink(){
-  const url = location.origin + location.pathname + '?kiosk=1';
-  const inp = document.getElementById('tablet-link');
-  inp.value = url; inp.select();
-  try{ navigator.clipboard && navigator.clipboard.writeText(url); }catch(e){}
-  try{ document.execCommand('copy'); }catch(e){}
-  toast('Link copiado ✓');
-}
-
-/* ================= KIOSK ================= */
-function renderKiosk(){
-  const wrap = document.getElementById('kiosk-body-wrap');
-  const qs = document.getElementById('kiosk-questions');
+// ---------- kiosk (auto meal detection) ----------
+function renderKioskShell(){
   const meal = detectMeal();
+  const inner = document.getElementById('kiosk-inner');
   if(!meal){
     kioskTurno = null;
-    wrap.innerHTML = '<h1>Pesquisa de Satisfação</h1><div class="sub">Fora do horário de refeição no momento</div>';
-    qs.innerHTML = '<div class="kiosk-off">' + getMeals().map(m=>m.name+' '+m.label).join('<br>') + '</div>';
+    inner.innerHTML = `
+      <h2>Pesquisa de Satisfação</h2>
+      <div class="desc-k">Fora do horário de refeição no momento.</div>
+      <div class="thanks" style="font-size:14px;padding:20px 0">
+        Café da Manhã 04:30–07:30 · Almoço 10:00–13:00 · Jantar 17:00–19:00 · Ceia 00:00–03:00
+      </div>`;
     return;
   }
-  if(meal.name === kioskTurno) return;
-  kioskTurno = meal.name; kioskAnswers = {};
-  wrap.innerHTML = `<h1>Como foi ${meal.name==='Café da Manhã'?'o café da manhã':(meal.name==='Ceia'?'a ceia':'o '+meal.name.toLowerCase())} hoje?</h1>
-    <div class="sub">Toque uma carinha para cada item · ${meal.label}</div>`;
-  qs.innerHTML = SAT_QUESTOES.map(q=>`
+  if(meal === kioskTurno) return; // já renderizado para essa refeição
+  kioskTurno = meal;
+  kioskAnswers = {};
+  const mealInfo = MEALS.find(m=>m.name===meal);
+  inner.innerHTML = `
+    <h2>Como foi ${meal==='Café da Manhã' ? 'o' : 'o(a)'} ${meal.toLowerCase()}?</h2>
+    <div class="desc-k">Refeição detectada automaticamente pelo horário (${mealInfo.label}) · toque uma nota de 1 a 5</div>
+    <div id="kiosk-body"></div>
+    <button class="btn btn-primary" onclick="enviarSatisfacao()">Enviar avaliação</button>`;
+  buildKiosk();
+}
+function buildKiosk(){
+  const el = document.getElementById('kiosk-body');
+  if(!el) return;
+  el.innerHTML = SAT_QUESTOES.map(q=>`
     <div class="qblock">
       <div class="qtitle">${q.t}</div>
-      <div class="emoji-scale" data-k="${q.k}">
-        ${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}"><span class="em">${EMOJIS[n-1]}</span><span class="n">${n}</span></button>`).join('')}
+      <div class="scale-k" data-k="${q.k}">
+        ${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}">${n}</button>`).join('')}
       </div>
-    </div>`).join('') +
-    '<button class="kiosk-send" onclick="enviarSatisfacao()">Enviar avaliação</button>';
-  qs.querySelectorAll('.emoji-scale').forEach(sc=>{
+    </div>`).join('');
+  el.querySelectorAll('.scale-k').forEach(sc=>{
     const k = sc.dataset.k;
     sc.querySelectorAll('button').forEach(btn=>{
       btn.addEventListener('click', ()=>{
@@ -1661,98 +476,420 @@ function renderKiosk(){
     });
   });
 }
+
+// ---------- save actions ----------
+async function salvarLancamento(){
+  const entry = {
+    id: Date.now(),
+    data: document.getElementById('r-data').value || todayISO(),
+    turno: document.getElementById('r-turno').value,
+    refeicoes: Number(document.getElementById('r-refeicoes').value)||0,
+    producao: Number(document.getElementById('r-producao').value)||0,
+    sobra: Number(document.getElementById('r-sobra').value)||0,
+    resto: Number(document.getElementById('r-resto').value)||0,
+  };
+  state.lanc.push(entry);
+  await saveList('restaurante:lancamentos', state.lanc);
+  flashMsg('r-msg');
+  ['r-refeicoes','r-producao','r-sobra','r-resto'].forEach(id=>document.getElementById(id).value='');
+  renderLancTables();
+}
+
 async function enviarSatisfacao(){
-  if(!kioskTurno) return;
+  if(!kioskTurno){ alert('Fora do horário de refeição.'); return; }
   if(Object.keys(kioskAnswers).length < SAT_QUESTOES.length){
-    toast('Toque uma carinha em todos os itens 🙂', true); return;
-  }
-  const now = new Date();
-  try{
-    await addDoc(collection(db,'satisfacao'), {
-      data: todayISO(),
-      hora: String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'),
-      turno: kioskTurno, ...kioskAnswers
-    });
-    document.getElementById('kiosk-questions').innerHTML = '<div class="kiosk-thanks">Obrigado pela avaliação! 🙌</div>';
-    document.getElementById('kiosk-body-wrap').innerHTML = '';
-    kioskTurno = null; kioskAnswers = {};
-    setTimeout(renderKiosk, 2400);
-  }catch(e){ toast('Falha ao enviar — verifique a internet.', true); }
-}
-
-/* ================= MODAL ================= */
-function openModal(html){ document.getElementById('modal-box').innerHTML = html; document.getElementById('modal-bg').classList.add('open'); }
-function closeModal(){ document.getElementById('modal-bg').classList.remove('open'); }
-let _confirmFn = null;
-function confirmModal(msg, fn){
-  _confirmFn = fn;
-  openModal(`<h3>Confirmar</h3><p style="font-size:14px;color:#40503b;margin:0 0 16px">${msg}</p>
-    <div class="btn-row" style="margin-top:0">
-      <button class="btn btn-primary" onclick="_runConfirm()">Confirmar</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-    </div>`);
-}
-function _runConfirm(){ const f=_confirmFn; closeModal(); f && f(); }
-function openModalSenha(){
-  openModal(`<h3>Alterar minha senha</h3>
-    <label>Senha atual</label><input type="password" id="cs-old" style="margin-bottom:12px">
-    <label>Nova senha (mín. 6)</label><input type="password" id="cs-new">
-    <div class="btn-row"><button class="btn btn-primary" onclick="salvarNovaSenha()">Salvar</button>
-    <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button></div>`);
-}
-async function salvarNovaSenha(){
-  const oldP = document.getElementById('cs-old').value;
-  const newP = document.getElementById('cs-new').value;
-  if(!oldP || !newP){ toast('Preencha as duas senhas.', true); return; }
-  try{
-    const cred = EmailAuthProvider.credential(currentUser.email, oldP);
-    await reauthenticateWithCredential(auth.currentUser, cred);
-    await updatePassword(auth.currentUser, newP);
-    closeModal(); toast('Senha alterada ✓');
-  }catch(e){ toast(authErrPT(e), true); }
-}
-
-/* ================= INIT ================= */
-async function init(){
-  document.getElementById('logo-big').innerHTML = logoSVG(96);
-  document.getElementById('logo-small').innerHTML = logoSVG(34);
-  document.getElementById('logo-kiosk').innerHTML = logoSVG(64);
-
-  if(isKioskMode){
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('kiosk-screen').style.display='block';
-    try{ await signInAnonymously(auth); }
-    catch(e){
-      document.getElementById('kiosk-questions').innerHTML =
-        '<div class="kiosk-off">Não foi possível conectar.<br>Habilite o login "Anônimo" no Firebase Authentication.</div>';
-      return;
-    }
-    await loadHorarios();
-    setInterval(loadHorarios, 30*60*1000); // reaplica horários a cada 30 min
-    renderKiosk();
-    setInterval(renderKiosk, 20000);
+    alert('Toque uma nota para todos os itens antes de enviar.');
     return;
   }
-  checkBootstrap();
-  document.getElementById('lg-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
-  const mMes = document.getElementById('m-mes');
-  if(mMes) mMes.addEventListener('change', previewCusto);
+  const entry = { id:Date.now(), data:todayISO(), turno:kioskTurno, ...kioskAnswers };
+  state.sat.push(entry);
+  await saveList('restaurante:satisfacao', state.sat);
+  const savedTurno = kioskTurno;
+  document.getElementById('kiosk-inner').innerHTML = '<div class="thanks">Obrigado pela avaliação! 🙌</div>';
+  kioskTurno = null; kioskAnswers = {};
+  setTimeout(()=>{ renderKioskShell(); }, 2200);
 }
 
-/* expõe handlers usados nos onclick do HTML */
-Object.assign(window, {
-  doLogin, esqueciSenha, criarAdminInicial, logout, showPage,
-  salvarLancamento, delLancamento, salvarCompra, delCompra,
-  addCategoria, removeCategoria,
-  previewCusto, salvarCustoMes, salvarChecklist,
-  criarUsuario, removerUsuario, resetSenhaUsuario, toggleChecklistSel,
-  salvarConfig, salvarEmailCfg, enviarCobrancas, salvarHorarios,
-  modalAreas, salvarAreas,
-  applyFilter, setPreset, copyTabletLink, enviarSatisfacao,
-  renderHistorico, gerarPDF,
-  openModal, closeModal, confirmModal, _runConfirm, openModalSenha, salvarNovaSenha,
-});
+async function salvarChecklist(tipo){
+  if(tipo==='adm'){
+    const quesitos = {};
+    ADM_QUESITOS.forEach((label,i)=> quesitos[label] = admScores[i] ?? null);
+    const entry = {
+      id:Date.now(),
+      data: document.getElementById('adm-data').value || todayISO(),
+      setor: document.getElementById('adm-setor').value,
+      nome: document.getElementById('adm-nome').value,
+      email: document.getElementById('adm-email').value.trim(),
+      quesitos, obs: document.getElementById('adm-obs').value,
+    };
+    state.adm.push(entry);
+    await saveList('higiene:adm', state.adm);
+    admScores = {};
+    buildQuesitos('adm-quesitos', ADM_QUESITOS, admScores);
+    ['adm-setor','adm-nome','adm-email','adm-obs'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('adm-resp-select').value = '';
+    flashMsg('adm-msg');
+    renderHigTables();
+    renderRespondentes('adm');
+  } else {
+    const quesitos = {};
+    HIG_QUESITOS.forEach((label,i)=> quesitos[label] = higScores[i] ?? null);
+    const entry = {
+      id:Date.now(),
+      data: document.getElementById('hig-data').value || todayISO(),
+      setor: document.getElementById('hig-setor').value,
+      nome: document.getElementById('hig-nome').value,
+      email: document.getElementById('hig-email').value.trim(),
+      quesitos, obs: document.getElementById('hig-obs').value,
+    };
+    state.hig.push(entry);
+    await saveList('higiene:higienica', state.hig);
+    higScores = {};
+    buildQuesitos('hig-quesitos', HIG_QUESITOS, higScores);
+    ['hig-setor','hig-nome','hig-email','hig-obs'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('hig-resp-select').value = '';
+    flashMsg('hig-msg');
+    renderHigTables();
+    renderRespondentes('hig');
+  }
+}
+
+async function addRespondente(tipo){
+  const nome = document.getElementById(tipo+'-resp-nome').value.trim();
+  const setor = document.getElementById(tipo+'-resp-setor').value.trim();
+  const email = document.getElementById(tipo+'-resp-email').value.trim();
+  if(!nome || !email){ alert('Informe nome e e-mail.'); return; }
+  const list = tipo==='adm' ? state.respAdm : state.respHig;
+  list.push({id:Date.now(), nome, setor, email});
+  await saveList(tipo==='adm' ? 'higiene:respondentes-adm' : 'higiene:respondentes-hig', list);
+  ['nome','setor','email'].forEach(f=>document.getElementById(tipo+'-resp-'+f).value='');
+  renderRespondentes(tipo);
+}
+async function removeRespondente(tipo, id){
+  if(tipo==='adm'){ state.respAdm = state.respAdm.filter(r=>r.id!==id); await saveList('higiene:respondentes-adm', state.respAdm); }
+  else { state.respHig = state.respHig.filter(r=>r.id!==id); await saveList('higiene:respondentes-hig', state.respHig); }
+  renderRespondentes(tipo);
+}
+
+async function salvarConfig(){
+  state.cfg = {
+    metaSobra: Number(document.getElementById('cfg-sobra').value)||DEFAULT_CFG.metaSobra,
+    metaResto: Number(document.getElementById('cfg-resto').value)||DEFAULT_CFG.metaResto,
+    metaSat: Number(document.getElementById('cfg-sat').value)||DEFAULT_CFG.metaSat,
+    metaConf: Number(document.getElementById('cfg-conf').value)||DEFAULT_CFG.metaConf,
+  };
+  await window.storage.set('config:metas', JSON.stringify(state.cfg), true);
+  flashMsg('cfg-msg');
+  renderDashboard();
+}
+
+function flashMsg(id){
+  const el = document.getElementById(id);
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 1600);
+}
+function copyTabletLink(){
+  const url = location.origin + location.pathname + '?kiosk=1';
+  const inp = document.getElementById('tablet-link');
+  inp.value = url; inp.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  try{ navigator.clipboard && navigator.clipboard.writeText(url); }catch(e){}
+}
+
+// ---------- filter ----------
+function applyFilter(){
+  state.filterDe = document.getElementById('f-de').value;
+  state.filterAte = document.getElementById('f-ate').value;
+  renderDashboard();
+}
+function setPreset(p){
+  const now = new Date();
+  let de, ate = todayISO();
+  if(p==='hoje') de = todayISO();
+  else if(p==='7d'){ const d=new Date(); d.setDate(d.getDate()-6); de=d.toISOString().slice(0,10); }
+  else if(p==='mes'){ de = todayISO().slice(0,8)+'01'; }
+  else if(p==='ano'){ de = todayISO().slice(0,4)+'-01-01'; }
+  document.getElementById('f-de').value = de;
+  document.getElementById('f-ate').value = ate;
+  applyFilter();
+}
+
+// ---------- rendering ----------
+function renderLancTables(){
+  const rows = [...state.lanc].sort((a,b)=> b.data.localeCompare(a.data)).slice(0,8);
+  document.getElementById('tbl-lanc-full').innerHTML = tableHTML(
+    ['Data','Refeição','Refeições','Produção (kg)','Sobra (kg)','Resto (kg)'],
+    rows.map(r=>[r.data,r.turno,r.refeicoes,r.producao,r.sobra,r.resto])
+  );
+}
+function renderHigTables(){
+  const rowsAdm = [...state.adm].sort((a,b)=>b.data.localeCompare(a.data)).slice(0,8)
+    .map(r=>[r.data, r.setor||'—', r.nome||'—', mediaQuesitos(r.quesitos).toFixed(1)]);
+  document.getElementById('tbl-adm-full').innerHTML = tableHTML(['Data','Setor','Avaliador','Nota média'], rowsAdm);
+
+  const rowsHig = [...state.hig].sort((a,b)=>b.data.localeCompare(a.data)).slice(0,8)
+    .map(r=>[r.data, r.setor||'—', r.nome||'—', mediaQuesitos(r.quesitos).toFixed(1)]);
+  document.getElementById('tbl-hig-full').innerHTML = tableHTML(['Data','Área','Avaliador','Nota média'], rowsHig);
+}
+function mediaQuesitos(q){
+  const vals = Object.values(q).filter(v=>v!=null);
+  if(!vals.length) return 0;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+function tableHTML(headers, rows){
+  if(!rows.length) return '<div class="empty">Sem registros ainda</div>';
+  return `<table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+
+function inRange(dateStr){
+  if(!dateStr) return false;
+  if(state.filterDe && dateStr < state.filterDe) return false;
+  if(state.filterAte && dateStr > state.filterAte) return false;
+  return true;
+}
+
+function renderDashboard(){
+  const lancF = state.lanc.filter(r=>inRange(r.data));
+  const satF = state.sat.filter(r=>inRange(r.data));
+  const admF = state.adm.filter(r=>inRange(r.data));
+  const higF = state.hig.filter(r=>inRange(r.data));
+
+  const producaoTot = lancF.reduce((a,r)=>a+r.producao,0);
+  const sobraTot = lancF.reduce((a,r)=>a+r.sobra,0);
+  const restoTot = lancF.reduce((a,r)=>a+r.resto,0);
+  const refeicoesTot = lancF.reduce((a,r)=>a+r.refeicoes,0);
+
+  const pctSobra = producaoTot ? (sobraTot/producaoTot*100) : 0;
+  const kgPessoaResto = refeicoesTot ? (restoTot/refeicoesTot) : 0;
+
+  const satMedia = mediaSat(satF);
+  const admMedia = mediaLista(admF);
+  const higMedia = mediaLista(higF);
+
+  const cfg = state.cfg;
+  const cards = [
+    kpiCard('Sobra Limpa', pctSobra.toFixed(1)+'%', `Meta: até ${cfg.metaSobra}%`, pctSobra<=cfg.metaSobra, pctSobra, cfg.metaSobra*1.6),
+    kpiCard('Resto Ingesto', kgPessoaResto.toFixed(3)+' kg/pessoa', `Meta: até ${cfg.metaResto} kg`, kgPessoaResto<=cfg.metaResto, kgPessoaResto, cfg.metaResto*1.6),
+    kpiCard('Índice de Satisfação', satMedia? satMedia.toFixed(2)+' / 5':'—', `Meta: ≥ ${cfg.metaSat} · ${satF.length} respostas`, satMedia>=cfg.metaSat, satMedia, 5),
+    kpiCard('Conformidade ADM', admMedia? admMedia.toFixed(2)+' / 5':'—', `Meta: ≥ ${cfg.metaConf} · ${admF.length} checklists`, admMedia>=cfg.metaConf, admMedia, 5),
+    kpiCard('Conformidade Higiênica', higMedia? higMedia.toFixed(2)+' / 5':'—', `Meta: ≥ ${cfg.metaConf} · ${higF.length} checklists`, higMedia>=cfg.metaConf, higMedia, 5),
+  ];
+  document.getElementById('kpi-grid').innerHTML = cards.join('');
+
+  const mealRows = MEALS.map(m=>{
+    const l = lancF.filter(r=>r.turno===m.name);
+    const s = satF.filter(r=>r.turno===m.name);
+    const prod = l.reduce((a,r)=>a+r.producao,0);
+    const sob = l.reduce((a,r)=>a+r.sobra,0);
+    const res = l.reduce((a,r)=>a+r.resto,0);
+    const ref = l.reduce((a,r)=>a+r.refeicoes,0);
+    const pS = prod? (sob/prod*100):0;
+    const kR = ref? (res/ref):0;
+    const satM = mediaSat(s);
+    return [m.name, prod? pS.toFixed(1)+'%':'—', ref? kR.toFixed(3):'—', satM? satM.toFixed(2)+' / 5 ('+s.length+')':'—'];
+  });
+  mealRows.push(['Geral', producaoTot? pctSobra.toFixed(1)+'%':'—', refeicoesTot? kgPessoaResto.toFixed(3):'—', satMedia? satMedia.toFixed(2)+' / 5 ('+satF.length+')':'—']);
+  document.getElementById('tbl-meal').innerHTML = tableHTML(['Refeição','Sobra Limpa','Resto Ingesto (kg/pessoa)','Satisfação'], mealRows);
+
+  const rowsL = [...lancF].sort((a,b)=>b.data.localeCompare(a.data)).slice(0,8)
+    .map(r=>[r.data,r.turno,r.refeicoes,r.producao,r.sobra,r.resto]);
+  document.getElementById('tbl-lanc').innerHTML = tableHTML(['Data','Refeição','Refeições','Produção','Sobra','Resto'], rowsL);
+
+  const rowsH = [...admF.map(r=>({...r,tipo:'ADM'})), ...higF.map(r=>({...r,tipo:'Higiênica'}))]
+    .sort((a,b)=>b.data.localeCompare(a.data)).slice(0,8)
+    .map(r=>[r.data, r.tipo, r.setor||'—', mediaQuesitos(r.quesitos).toFixed(1)]);
+  document.getElementById('tbl-higiene').innerHTML = tableHTML(['Data','Checklist','Setor','Nota média'], rowsH);
+}
+function mediaSat(rows){
+  if(!rows.length) return 0;
+  let sum=0,n=0;
+  rows.forEach(r=>SAT_QUESTOES.forEach(q=>{ if(r[q.k]!=null){ sum+=r[q.k]; n++; } }));
+  return n? sum/n : 0;
+}
+function mediaLista(rows){
+  if(!rows.length) return 0;
+  const meds = rows.map(r=>mediaQuesitos(r.quesitos)).filter(v=>v>0);
+  return meds.length? meds.reduce((a,b)=>a+b,0)/meds.length : 0;
+}
+function kpiCard(title, value, metaText, ok, val, max){
+  const pct = Math.max(0, Math.min(100, (val/max)*100));
+  const color = ok? 'var(--green)' : 'var(--clay)';
+  const pill = ok? '<span class="status-pill st-ok">Dentro da meta</span>' : '<span class="status-pill st-bad">Fora da meta</span>';
+  return `<div class="kpi">
+    ${pill}
+    <div class="eyebrow">${title}</div>
+    <div class="val">${value}</div>
+    <div class="meta">${metaText}</div>
+    <div class="bar"><span style="width:${pct}%;background:${color}"></span></div>
+  </div>`;
+}
+
+function renderRespondentes(tipo){
+  const list = tipo==='adm' ? state.respAdm : state.respHig;
+  const entries = tipo==='adm' ? state.adm : state.hig;
+  const wk = weekKey(new Date());
+  const rows = list.map(r=>{
+    const responded = entries.some(e => (e.email||'').toLowerCase()===r.email.toLowerCase() && e.data && weekKey(new Date(e.data))===wk);
+    return {...r, responded};
+  });
+  const tbody = rows.map(r=>`<tr>
+    <td style="font-family:'Inter',sans-serif">${r.nome}</td>
+    <td style="font-family:'Inter',sans-serif">${r.setor||'—'}</td>
+    <td style="font-family:'Inter',sans-serif">${r.email}</td>
+    <td>${r.responded? '<span class="status-pill st-ok" style="position:static">Respondido</span>' : '<span class="status-pill st-bad" style="position:static">Pendente</span>'}</td>
+    <td><button class="btn btn-ghost" style="padding:5px 9px;font-size:11px" onclick="removeRespondente('${tipo}',${r.id})">Remover</button></td>
+  </tr>`).join('');
+  document.getElementById(tipo+'-resp-table').innerHTML = rows.length
+    ? `<table><thead><tr><th>Nome</th><th>Setor</th><th>E-mail</th><th>Status (semana atual)</th><th></th></tr></thead><tbody>${tbody}</tbody></table>`
+    : '<div class="empty">Nenhum respondente cadastrado</div>';
+
+  const pendentes = rows.filter(r=>!r.responded);
+  const mailEl = document.getElementById(tipo+'-pending-mailto');
+  if(!rows.length){
+    mailEl.innerHTML = '<div class="empty">Cadastre respondentes acima para acompanhar os envios</div>';
+  } else if(pendentes.length){
+    const emails = pendentes.map(r=>r.email).join(',');
+    const subject = encodeURIComponent('Checklist de Limpeza ' + (tipo==='adm'?'Administrativa':'Higiênica') + ' — preencher até sexta-feira');
+    const body = encodeURIComponent('Olá! Pedimos que preencha o checklist de conformidade de limpeza desta semana até sexta-feira. Obrigado.');
+    mailEl.innerHTML = `<div style="margin-bottom:10px;font-size:13px;color:var(--muted)">${pendentes.length} de ${rows.length} pendente(s) esta semana</div>
+      <a class="btn btn-primary" href="mailto:${emails}?subject=${subject}&body=${body}">Abrir e-mail para pendentes</a>`;
+  } else {
+    mailEl.innerHTML = '<span class="save-msg show">Todos responderam esta semana ✓</span>';
+  }
+
+  const sel = document.getElementById(tipo+'-resp-select');
+  sel.innerHTML = '<option value="">— selecionar respondente cadastrado —</option>' +
+    list.map(r=>`<option value="${r.id}">${r.nome} (${r.setor||'—'})</option>`).join('');
+}
+
+async function loadEmailCfg(){
+  try{ const r = await window.storage.get('config:emailjs', true); return r ? JSON.parse(r.value) : {}; }catch(e){ return {}; }
+}
+async function salvarEmailCfg(){
+  state.emailCfg = {
+    publicKey: document.getElementById('ej-public').value.trim(),
+    privateKey: document.getElementById('ej-private').value.trim(),
+    serviceId: document.getElementById('ej-service').value.trim(),
+    templateAdm: document.getElementById('ej-tpl-adm').value.trim(),
+    templateHig: document.getElementById('ej-tpl-hig').value.trim(),
+    linkApp: document.getElementById('ej-link').value.trim(),
+  };
+  await window.storage.set('config:emailjs', JSON.stringify(state.emailCfg), true);
+  flashMsg('ej-msg');
+}
+async function getFlag(key){
+  try{ const r = await window.storage.get(key, true); return r ? r.value : null; }catch(e){ return null; }
+}
+async function setFlag(key, val){
+  try{ await window.storage.set(key, val, true); }catch(e){}
+}
+function sendEmailJS(templateId, params){
+  const cfg = state.emailCfg;
+  const body = { service_id: cfg.serviceId, template_id: templateId, user_id: cfg.publicKey, template_params: params };
+  if(cfg.privateKey) body.accessToken = cfg.privateKey;
+  return fetch('https://api.emailjs.com/api/v1.0/email/send', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+  });
+}
+function pendentesDoTipo(tipo){
+  const list = tipo==='adm' ? state.respAdm : state.respHig;
+  const entries = tipo==='adm' ? state.adm : state.hig;
+  const wk = weekKey(new Date());
+  return list.filter(r => !entries.some(e => (e.email||'').toLowerCase()===r.email.toLowerCase() && e.data && weekKey(new Date(e.data))===wk));
+}
+async function enviarCobrancas(tipo, silent){
+  const cfg = state.emailCfg || {};
+  const templateId = tipo==='adm' ? cfg.templateAdm : cfg.templateHig;
+  const statusEl = document.getElementById(tipo+'-email-status');
+  if(!cfg.serviceId || !cfg.publicKey || !templateId){
+    if(!silent) alert('Configure o EmailJS na aba Config / Metas antes de enviar.');
+    return;
+  }
+  const pendentes = pendentesDoTipo(tipo);
+  if(!pendentes.length){
+    if(statusEl){ statusEl.textContent = 'Nenhum pendente esta semana.'; statusEl.classList.add('show'); }
+    return;
+  }
+  let ok=0, fail=0;
+  for(const r of pendentes){
+    try{
+      const resp = await sendEmailJS(templateId, {
+        to_email: r.email, to_name: r.nome, setor: r.setor||'',
+        tipo_checklist: tipo==='adm' ? 'Administrativa' : 'Higiênica',
+        link_formulario: cfg.linkApp || (location.origin+location.pathname),
+      });
+      if(resp.ok) ok++; else fail++;
+    }catch(e){ fail++; }
+  }
+  await setFlag(tipo==='adm' ? 'higiene:ultimo-envio-adm' : 'higiene:ultimo-envio-hig', weekKey(new Date()));
+  if(statusEl){ statusEl.textContent = `Enviado: ${ok} · Falhas: ${fail}`; statusEl.classList.add('show'); }
+  renderRespondentes(tipo);
+}
+async function checkAutoSend(tipo){
+  if(new Date().getDay() !== 5) return; // só dispara sozinho às sextas
+  const flagKey = tipo==='adm' ? 'higiene:ultimo-envio-adm' : 'higiene:ultimo-envio-hig';
+  const wk = weekKey(new Date());
+  const last = await getFlag(flagKey);
+  if(last === wk) return;
+  await enviarCobrancas(tipo, true);
+}
+
+// ---------- init ----------
+async function init(){
+  if(isKioskMode) document.body.classList.add('kiosk-mode');
+
+  document.getElementById('r-data').value = todayISO();
+  document.getElementById('adm-data').value = todayISO();
+  document.getElementById('hig-data').value = todayISO();
+  document.getElementById('f-de').value = todayISO().slice(0,8)+'01';
+  document.getElementById('f-ate').value = todayISO();
+  state.filterDe = document.getElementById('f-de').value;
+  state.filterAte = document.getElementById('f-ate').value;
+  document.querySelectorAll('.presets [data-p]').forEach(b=>b.addEventListener('click', ()=>setPreset(b.dataset.p)));
+  document.getElementById('tablet-link').value = location.origin + location.pathname + '?kiosk=1';
+
+  buildQuesitos('adm-quesitos', ADM_QUESITOS, admScores);
+  buildQuesitos('hig-quesitos', HIG_QUESITOS, higScores);
+
+  document.getElementById('adm-resp-select').addEventListener('change', e=>{
+    const r = state.respAdm.find(x=>String(x.id)===e.target.value);
+    if(r){ document.getElementById('adm-nome').value=r.nome; document.getElementById('adm-setor').value=r.setor; document.getElementById('adm-email').value=r.email; }
+  });
+  document.getElementById('hig-resp-select').addEventListener('change', e=>{
+    const r = state.respHig.find(x=>String(x.id)===e.target.value);
+    if(r){ document.getElementById('hig-nome').value=r.nome; document.getElementById('hig-setor').value=r.setor; document.getElementById('hig-email').value=r.email; }
+  });
+
+  state.cfg = await loadCfg();
+  document.getElementById('cfg-sobra').value = state.cfg.metaSobra;
+  document.getElementById('cfg-resto').value = state.cfg.metaResto;
+  document.getElementById('cfg-sat').value = state.cfg.metaSat;
+  document.getElementById('cfg-conf').value = state.cfg.metaConf;
+
+  state.emailCfg = await loadEmailCfg();
+  document.getElementById('ej-public').value = state.emailCfg.publicKey || '';
+  document.getElementById('ej-private').value = state.emailCfg.privateKey || '';
+  document.getElementById('ej-service').value = state.emailCfg.serviceId || '';
+  document.getElementById('ej-tpl-adm').value = state.emailCfg.templateAdm || '';
+  document.getElementById('ej-tpl-hig').value = state.emailCfg.templateHig || '';
+  document.getElementById('ej-link').value = state.emailCfg.linkApp || '';
+
+  state.lanc = await loadList('restaurante:lancamentos');
+  state.sat = await loadList('restaurante:satisfacao');
+  state.adm = await loadList('higiene:adm');
+  state.hig = await loadList('higiene:higienica');
+  state.respAdm = await loadList('higiene:respondentes-adm');
+  state.respHig = await loadList('higiene:respondentes-hig');
+
+  buildTabs();
+  renderLancTables();
+  renderHigTables();
+  renderRespondentes('adm');
+  renderRespondentes('hig');
+  renderKioskShell();
+  setInterval(renderKioskShell, 20000);
+  if(!isKioskMode){ checkAutoSend('adm'); checkAutoSend('hig'); }
+}
 init();
 </script>
-</body>
-</html>
