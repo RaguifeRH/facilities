@@ -317,7 +317,7 @@
           <h2>Checklists da semana</h2>
           <div class="desc">Status por colaborador (segunda a domingo)</div>
           <div id="week-status"></div>
-          <div class="btn-row" style="display:none">
+          <div class="btn-row">
             <button class="btn btn-leaf" onclick="enviarCobrancas(false)">Enviar cobranças agora (EmailJS)</button>
             <span id="cobranca-status" style="font-size:12.5px;color:var(--ok);font-weight:600"></span>
           </div>
@@ -774,7 +774,8 @@ onAuthStateChanged(auth, async (user)=>{
     enterApp();
     subscribeData();
     if(currentUser.role!=='colaborador') await loadSat();
-    if(currentUser.role==='admin') checkAutoSend();
+    // envio automático de sexta desativado — cobrança agora é só pelo botão manual
+    // if(currentUser.role==='admin') checkAutoSend();
   }catch(e){
     document.getElementById('lg-err').textContent = 'Erro ao carregar perfil: '+authErrPT(e);
   }
