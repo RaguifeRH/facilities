@@ -390,7 +390,7 @@
         <div class="page-desc">Fechamento do mês: refeições validadas, mão de obra e custo por refeição</div>
         <div class="panel">
           <h2>Fechamento do mês</h2>
-          <div class="desc">O custo de compras é somado automaticamente dos lançamentos da equipe</div>
+          <div class="desc">O custo de compras é somado dos lançamentos da equipe. Se preencher "Total da contabilidade", esse valor substitui a soma para o cálculo do custo/refeição.</div>
           <div class="form-grid">
             <div><label>Mês</label><input type="month" id="m-mes"></div>
             <div><label>Refeições validadas (total)</label><input type="number" id="m-ref" min="0"></div>
@@ -400,6 +400,7 @@
             <div><label>Custo de mão de obra (R$)</label><input type="number" step="0.01" id="m-mo" min="0"></div>
             <div><label>Desconto dos funcionários (R$)</label><input type="number" step="0.01" id="m-desc" min="0"></div>
             <div><label>Ajuste de compras (R$, opcional)</label><input type="number" step="0.01" id="m-ajuste" placeholder="+ ou -"></div>
+            <div><label>Total da contabilidade (R$, opcional)</label><input type="number" step="0.01" id="m-contabil" min="0" placeholder="substitui as compras lançadas"></div>
           </div>
           <div class="note" id="m-preview"></div>
           <div class="btn-row"><button class="btn btn-primary" onclick="salvarCustoMes()">Salvar fechamento</button></div>
@@ -1055,10 +1056,12 @@ function renderCompras(){
 
 /* ================= CUSTOS MENSAIS ================= */
 function calcCusto(m){
-  const compras = comprasDoMes(m.mes).reduce((a,c)=>a+(c.valor||0),0) + (m.ajuste||0);
+  const comprasLanc = comprasDoMes(m.mes).reduce((a,c)=>a+(c.valor||0),0) + (m.ajuste||0);
+  const usaContabil = m.contabil && m.contabil>0;
+  const compras = usaContabil ? m.contabil : comprasLanc;
   const ref = m.ref||0;
   return {
-    compras,
+    compras, comprasLanc, usaContabil,
     semMO: ref? (compras - (m.desconto||0))/ref : 0,
     comMO: ref? (compras + (m.mo||0) - (m.desconto||0))/ref : 0,
     semDesc: ref? (compras + (m.mo||0))/ref : 0,
@@ -1079,9 +1082,12 @@ function previewCusto(){
     document.getElementById('m-mo').value = existente.mo||'';
     document.getElementById('m-desc').value = existente.desconto||'';
     document.getElementById('m-ajuste').value = existente.ajuste||'';
+    document.getElementById('m-contabil').value = existente.contabil||'';
   }
+  const contabilVal = Number(document.getElementById('m-contabil').value)||0;
   document.getElementById('m-preview').innerHTML =
     `Compras lançadas em <b>${fmtMes(mes)}</b>: <b>${brl(compras)}</b> · Refeições lançadas no desperdício: <b>${lancadas.toLocaleString('pt-BR')}</b>` +
+    (contabilVal>0? ` · <span class="pill p-warn">Usando total da contabilidade: ${brl(contabilVal)}</span>` : '') +
     (existente? ' · <span class="pill p-warn">Mês já fechado — salvar substitui</span>' : '');
 }
 async function salvarCustoMes(){
@@ -1097,6 +1103,7 @@ async function salvarCustoMes(){
       mo: Number(document.getElementById('m-mo').value)||0,
       desconto: Number(document.getElementById('m-desc').value)||0,
       ajuste: Number(document.getElementById('m-ajuste').value)||0,
+      contabil: Number(document.getElementById('m-contabil').value)||0,
       autor: currentUser.nome,
     });
     toast('Fechamento de '+fmtMes(mes)+' salvo ✓');
@@ -1111,7 +1118,8 @@ function renderCustos(){
       '<b>'+fmtMes(m.mes)+'</b>',
       (m.ref||0).toLocaleString('pt-BR'),
       (dif===0?'<span class="pill p-ok">0</span>':`<span class="pill ${Math.abs(dif)>m.ref*0.05?'p-bad':'p-warn'}">${dif>0?'+':''}${dif.toLocaleString('pt-BR')}</span>`),
-      brl(c.compras), brl(m.mo), brl(m.desconto),
+      brl(c.compras) + (c.usaContabil? ' <span class="pill p-warn">contab.</span>' : ''),
+      brl(m.mo), brl(m.desconto),
       '<b>'+brl(c.semMO)+'</b>', '<b>'+brl(c.comMO)+'</b>', '<b>'+brl(c.semDesc)+'</b>'
     ];
   });
@@ -1437,6 +1445,17 @@ function renderDashboard(){
 
   const mes = monthISO();
   const gastoMes = comprasDoMes(mes).reduce((a,c)=>a+(c.valor||0),0);
+  const custoMesRec = state.custos.find(c=>c.mes===mes);
+  const custoCalc = custoMesRec? calcCusto(custoMesRec) : null;
+  const custoPill = !custoMesRec
+    ? '<span class="pill p-neutral abs">Sem fechamento</span>'
+    : (custoCalc.usaContabil? '<span class="pill p-warn abs">Contabilidade</span>' : '<span class="pill p-neutral abs">Lançamentos</span>');
+  const custoCard = `<div class="kpi">${custoPill}
+    <div class="eyebrow">Custo/refeição · ${fmtMes(mes)}</div>
+    <div class="val">${custoMesRec? brl(custoCalc.comMO) : '—'}</div>
+    <div class="meta">${custoMesRec? 'Com mão de obra, menos desconto' : 'Feche o mês em Custos mensais'}</div>
+    <div class="bar"><span style="width:0%;background:#cdd4c4"></span></div>
+  </div>`;
 
   document.getElementById('kpi-grid').innerHTML = [
     kpiCard('Sobra Limpa', pctSobra.toFixed(1)+'%', 'Meta: até '+cfg.metaSobra+'%', pctSobra<=cfg.metaSobra, pctSobra, cfg.metaSobra*1.6, producao>0),
@@ -1445,6 +1464,7 @@ function renderDashboard(){
     kpiCard('Conformidade ADM', admM? admM.toFixed(2)+' / 5':'—', 'Meta: ≥ '+cfg.metaConf+' · '+admF.length+' checklists', admM>=cfg.metaConf, admM, 5, admF.length>0),
     kpiCard('Conformidade Higiênica', higM? higM.toFixed(2)+' / 5':'—', 'Meta: ≥ '+cfg.metaConf+' · '+higF.length+' checklists', higM>=cfg.metaConf, higM, 5, higF.length>0),
     kpiCard('Compras · '+fmtMes(mes), brl(gastoMes), 'Orçamento: '+brl(cfg.orcamento), gastoMes<=cfg.orcamento, gastoMes, cfg.orcamento, true),
+    custoCard,
   ].join('');
 
   const mealRows = getMeals().map(m=>{
@@ -1837,6 +1857,8 @@ async function init(){
   document.getElementById('lg-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
   const mMes = document.getElementById('m-mes');
   if(mMes) mMes.addEventListener('change', previewCusto);
+  const mContabil = document.getElementById('m-contabil');
+  if(mContabil) mContabil.addEventListener('input', previewCusto);
 }
 
 /* expõe handlers usados nos onclick do HTML */
