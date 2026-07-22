@@ -1773,7 +1773,7 @@ function renderFillForm(tipo){
   const body = document.getElementById('fill-body');
   const setorField = areas.length
     ? `<select id="fill-setor" style="color:#22301f">${areas.map(a=>`<option value="${esc(a.trim())}">${esc(a.trim())}</option>`).join('')}</select>`
-    : `<input type="text" id="fill-setor" style="color:#22301f" value="${esc(fillUser.setor||'')}" placeholder="${isAdm?'ex: RH / Financeiro':'ex: Vestiário / Sanitário / Copa'}">`;
+    : `<input type="text" id="fill-setor" readonly value="${esc(fillUser.setor||'')}" style="color:#5a6b52;background:#eef0e8;cursor:not-allowed">`;
   body.innerHTML = `
     <div style="text-align:center;margin-bottom:6px;font-family:'Poppins',sans-serif;font-size:20px;font-weight:600">Olá, ${esc(fillUser.nome||'')}!</div>
     <div style="text-align:center;color:#bcd9a6;font-size:14px;margin-bottom:22px">Checklist de Limpeza ${isAdm?'Administrativa':'Higiênica'} · notas de 1 (péssimo) a 5 (excelente)</div>
