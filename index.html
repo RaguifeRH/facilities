@@ -257,6 +257,17 @@
   </div>
 </div>
 
+<!-- FILL (checklist por link aberto) -->
+<div id="fill-screen" style="display:none;position:fixed;inset:0;background:linear-gradient(165deg,var(--verde) 0%,var(--verde-escuro) 100%);color:#fff;overflow-y:auto;z-index:60;">
+  <div style="max-width:640px;margin:0 auto;padding:38px 18px 60px;">
+    <div style="text-align:center;margin-bottom:22px;">
+      <div id="logo-fill"></div>
+      <div class="wordmark" style="font-family:'Poppins',sans-serif;font-weight:700;font-size:24px;">raguife</div>
+    </div>
+    <div id="fill-body"></div>
+  </div>
+</div>
+
 <!-- APP -->
 <div id="app">
   <div class="topbar">
@@ -306,7 +317,7 @@
           <h2>Checklists da semana</h2>
           <div class="desc">Status por colaborador (segunda a domingo)</div>
           <div id="week-status"></div>
-          <div class="btn-row">
+          <div class="btn-row" style="display:none">
             <button class="btn btn-leaf" onclick="enviarCobrancas(false)">Enviar cobranças agora (EmailJS)</button>
             <span id="cobranca-status" style="font-size:12.5px;color:var(--ok);font-weight:600"></span>
           </div>
@@ -647,6 +658,10 @@ let currentUser = null;   // {uid, nome, email, setor, role, check}
 let admScores = {}, higScores = {}, kioskAnswers = {}, kioskTurno = null;
 let unsubs = [];
 const isKioskMode = new URLSearchParams(location.search).get('kiosk') === '1';
+const fillUid = new URLSearchParams(location.search).get('fill');
+const fillTipoParam = (new URLSearchParams(location.search).get('tipo')||'').toLowerCase();
+const isFillMode = !!fillUid;
+let fillUser = null, fillScores = {};
 
 /* ================= HELPERS ================= */
 function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -1332,10 +1347,13 @@ async function enviarCobrancas(silent){
   for(const p of pend){
     try{
       const tipos = (p.check==='ambos'? ['adm','hig'] : [p.check]).filter(t=>t && !statusColab(p,t).done);
+      const base = cfg.linkApp || (location.origin+location.pathname);
+      const sep = base.includes('?') ? '&' : '?';
+      const tipoParam = tipos.length===1 ? tipos[0] : 'ambos';
       const r = await sendEmailJS(cfg.templateAdm, {
         to_email: p.email, to_name: p.nome, setor: p.setor||'',
         tipo_checklist: tipos.map(t=>t==='adm'?'Administrativa':'Higiênica').join(' e '),
-        link_formulario: cfg.linkApp || (location.origin+location.pathname),
+        link_formulario: base + sep + 'fill=' + encodeURIComponent(p.id) + '&tipo=' + tipoParam,
       });
       if(r.ok) ok++; else fail++;
     }catch(e){ fail++; }
@@ -1712,11 +1730,92 @@ async function salvarNovaSenha(){
   }catch(e){ toast(authErrPT(e), true); }
 }
 
+/* ================= FILL (link aberto) ================= */
+async function bootFillMode(){
+  const body = document.getElementById('fill-body');
+  try{ await signInAnonymously(auth); }
+  catch(e){
+    body.innerHTML = '<div style="text-align:center;padding:40px 0;color:#bcd9a6;line-height:1.9">Não foi possível conectar.<br>Habilite o login "Anônimo" no Firebase Authentication.</div>';
+    return;
+  }
+  try{
+    const snap = await getDoc(doc(db,'usuarios',fillUid));
+    if(!snap.exists()){ body.innerHTML = '<div style="text-align:center;padding:40px 0;color:#bcd9a6">Link inválido ou usuário não encontrado.</div>'; return; }
+    fillUser = {id:fillUid, ...snap.data()};
+  }catch(e){
+    body.innerHTML = '<div style="text-align:center;padding:40px 0;color:#bcd9a6;line-height:1.9">Não foi possível carregar seus dados.<br>Verifique as regras do Firestore.</div>';
+    return;
+  }
+  // quais checklists mostrar
+  let tipos;
+  if(fillTipoParam==='adm'||fillTipoParam==='hig') tipos=[fillTipoParam];
+  else { // ambos / vazio: usa o cadastro da pessoa
+    tipos = fillUser.check==='ambos'? ['adm','hig'] : [fillUser.check].filter(Boolean);
+  }
+  if(!tipos.length) tipos=['adm'];
+  if(tipos.length>1){ renderFillChooser(tipos); }
+  else renderFillForm(tipos[0]);
+}
+function renderFillChooser(tipos){
+  const body = document.getElementById('fill-body');
+  body.innerHTML = `
+    <div style="text-align:center;margin-bottom:8px;font-family:'Poppins',sans-serif;font-size:20px;font-weight:600">Olá, ${esc(fillUser.nome||'')}!</div>
+    <div style="text-align:center;color:#bcd9a6;font-size:14px;margin-bottom:24px">Qual checklist você vai preencher?</div>
+    <button class="kiosk-send" onclick="renderFillForm('adm')">Limpeza Administrativa</button>
+    <button class="kiosk-send" style="margin-top:12px" onclick="renderFillForm('hig')">Limpeza Higiênica</button>`;
+}
+function renderFillForm(tipo){
+  fillScores = {};
+  const isAdm = tipo==='adm';
+  const list = isAdm? ADM_QUESITOS : HIG_QUESITOS;
+  const areas = areasDoUsuario(fillUser, tipo);
+  const body = document.getElementById('fill-body');
+  const setorField = areas.length
+    ? `<select id="fill-setor" style="color:#22301f">${areas.map(a=>`<option value="${esc(a.trim())}">${esc(a.trim())}</option>`).join('')}</select>`
+    : `<input type="text" id="fill-setor" style="color:#22301f" value="${esc(fillUser.setor||'')}" placeholder="${isAdm?'ex: RH / Financeiro':'ex: Vestiário / Sanitário / Copa'}">`;
+  body.innerHTML = `
+    <div style="text-align:center;margin-bottom:6px;font-family:'Poppins',sans-serif;font-size:20px;font-weight:600">Olá, ${esc(fillUser.nome||'')}!</div>
+    <div style="text-align:center;color:#bcd9a6;font-size:14px;margin-bottom:22px">Checklist de Limpeza ${isAdm?'Administrativa':'Higiênica'} · notas de 1 (péssimo) a 5 (excelente)</div>
+    <div style="background:#fff;color:#22301f;border-radius:16px;padding:20px 18px;">
+      <label style="font-size:13px;font-weight:600;color:var(--verde)">${isAdm?'Setor':'Área avaliada'}</label>
+      ${setorField}
+      <div id="fill-quesitos" style="margin-top:16px"></div>
+      <div style="margin-top:14px"><label style="font-size:13px;font-weight:600;color:var(--verde)">Observações adicionais</label><textarea id="fill-obs" placeholder="Opcional"></textarea></div>
+    </div>
+    <button class="kiosk-send" id="fill-send" onclick="submitFill('${tipo}')">Enviar checklist</button>`;
+  buildQuesitos('fill-quesitos', list, fillScores);
+}
+async function submitFill(tipo){
+  const isAdm = tipo==='adm';
+  const list = isAdm? ADM_QUESITOS : HIG_QUESITOS;
+  if(Object.keys(fillScores).length < list.length){ toast('Dê uma nota para todos os itens.', true); return; }
+  const setor = (document.getElementById('fill-setor').value||'').trim();
+  if(!setor){ toast(isAdm?'Informe o setor.':'Informe a área avaliada.', true); return; }
+  const quesitos = {}; list.forEach((label,i)=> quesitos[label]=fillScores[i]);
+  const btn = document.getElementById('fill-send'); if(btn) btn.disabled=true;
+  try{
+    await addDoc(collection(db, isAdm?'checklists_adm':'checklists_hig'), {
+      data: todayISO(), setor, nome: fillUser.nome||'', uid: fillUser.id,
+      quesitos, obs: (document.getElementById('fill-obs').value||'').trim(),
+    });
+    document.getElementById('fill-body').innerHTML =
+      `<div style="text-align:center;padding:70px 0;font-family:'Poppins',sans-serif;font-weight:600;font-size:22px">Checklist enviado ✓<br><span style="font-size:15px;color:#bcd9a6;font-weight:400;display:block;margin-top:12px">Obrigado, ${esc(fillUser.nome||'')}!</span></div>`;
+  }catch(e){ if(btn) btn.disabled=false; toast(authErrPT(e), true); }
+}
+
 /* ================= INIT ================= */
 async function init(){
   document.getElementById('logo-big').innerHTML = logoSVG(96);
   document.getElementById('logo-small').innerHTML = logoSVG(34);
   document.getElementById('logo-kiosk').innerHTML = logoSVG(64);
+  const logoFill = document.getElementById('logo-fill'); if(logoFill) logoFill.innerHTML = logoSVG(60);
+
+  if(isFillMode){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('fill-screen').style.display='block';
+    await bootFillMode();
+    return;
+  }
 
   if(isKioskMode){
     document.getElementById('login-screen').style.display='none';
@@ -1748,6 +1847,7 @@ Object.assign(window, {
   criarUsuario, removerUsuario, resetSenhaUsuario, toggleChecklistSel,
   salvarConfig, salvarEmailCfg, enviarCobrancas, salvarHorarios,
   modalAreas, salvarAreas,
+  renderFillForm, submitFill,
   applyFilter, setPreset, copyTabletLink, enviarSatisfacao,
   renderHistorico, gerarPDF,
   openModal, closeModal, confirmModal, _runConfirm, openModalSenha, salvarNovaSenha,
